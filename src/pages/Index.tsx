@@ -100,7 +100,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-5xl mx-auto">
             <div className="animate-fade-in">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-[1.1] tracking-tight text-clip-fix">
                 Learn and Teach
                 <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent pb-2">
                   Anything
@@ -150,8 +150,8 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="relative">
-          <div className="flex animate-[slide_30s_linear_infinite] space-x-8">
+        <div className="slides-container">
+          <div className="flex animate-slide space-x-8">
             {[...features, ...features, ...features].map((feature, index) => {
               const IconComponent = feature.icon;
               return (
@@ -185,8 +185,8 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="relative">
-          <div className="flex animate-[slide_40s_linear_infinite_reverse] space-x-8">
+        <div className="slides-container">
+          <div className="flex animate-slide-reverse space-x-8">
             {[...domains, ...domains, ...domains].map((domain, index) => {
               const IconComponent = domain.icon;
               return (
@@ -367,21 +367,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-
-      <style jsx>{`
-        @keyframes slide {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(-100%);
-          }
-        }
-        
-        .animate-slide {
-          animation: slide 30s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };
