@@ -70,9 +70,9 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -81,13 +81,13 @@ const Index = () => {
                 alt="Classpace Logo" 
                 className="w-8 h-8 md:w-10 md:h-10"
               />
-              <span className="text-xl md:text-2xl font-bold bg-gradient-main bg-clip-text text-transparent">
+              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Classpace
               </span>
             </div>
             <Button 
               onClick={() => navigate("/login")}
-              className="bg-gradient-main hover:opacity-90 text-white px-4 md:px-6 py-2 text-sm md:text-base"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 md:px-6 py-2 text-sm md:text-base border-0"
             >
               Get Started
             </Button>
@@ -96,40 +96,39 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-12 md:py-24 lg:py-32">
+      <section className="relative py-16 md:py-32 lg:py-40 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-4xl mx-auto">
+          <div className="text-center max-w-5xl mx-auto">
             <div className="animate-fade-in">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-[1.1] tracking-tight">
                 Learn and Teach
-                <span className="block bg-gradient-main bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent pb-2">
                   Anything
                 </span>
-                <span className="block">Together.</span>
               </h1>
             </div>
             
             <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-300 mb-12 md:mb-16 max-w-4xl mx-auto leading-relaxed">
                 AI-powered shared workspaces where teachers and learners collaborate, 
-                share knowledge, and grow together through intelligent conversations.
+                share knowledge, and grow through intelligent conversations.
               </p>
             </div>
             
-            <div className="animate-fade-in flex flex-col sm:flex-row gap-4 justify-center mb-12 md:mb-20" style={{ animationDelay: '0.4s' }}>
+            <div className="animate-fade-in flex flex-col sm:flex-row gap-6 justify-center mb-16 md:mb-24" style={{ animationDelay: '0.4s' }}>
               <Button 
                 size="lg" 
                 onClick={() => navigate("/login")}
-                className="bg-gradient-main hover:opacity-90 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-10 py-5 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 border-0"
               >
                 Start Teaching
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-6 h-6 ml-3" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
                 onClick={() => navigate("/login")}
-                className="border-2 border-gray-200 text-gray-700 hover:bg-gray-50 px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-300 hover:-translate-y-1"
+                className="border-2 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-10 py-5 text-xl font-semibold rounded-2xl transition-all duration-300 hover:-translate-y-2 bg-transparent"
               >
                 Start Learning
               </Button>
@@ -138,23 +137,33 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-12 md:py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => {
+      {/* Features Section with Sliding Animation */}
+      <section className="py-20 md:py-32 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 overflow-hidden">
+        <div className="container mx-auto px-4 mb-16">
+          <div className="text-center">
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Powered by <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Intelligence</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Revolutionary AI features that transform how you teach and learn
+            </p>
+          </div>
+        </div>
+        
+        <div className="relative">
+          <div className="flex animate-[slide_30s_linear_infinite] space-x-8">
+            {[...features, ...features, ...features].map((feature, index) => {
               const IconComponent = feature.icon;
               return (
                 <div 
                   key={index}
-                  className="animate-fade-in bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
-                  style={{ animationDelay: `${0.6 + index * 0.1}s` }}
+                  className="flex-shrink-0 w-80 md:w-96 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl border border-gray-700 hover:border-purple-500 transition-all duration-500 hover:-translate-y-2"
                 >
-                  <div className="w-12 h-12 bg-gradient-main rounded-xl flex items-center justify-center mb-4">
-                    <IconComponent className="w-6 h-6 text-white" />
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6">
+                    <IconComponent className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="font-bold text-lg mb-2 text-gray-900">{feature.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="font-bold text-2xl mb-4 text-white">{feature.title}</h3>
+                  <p className="text-gray-300 text-base leading-relaxed">{feature.description}</p>
                 </div>
               );
             })}
@@ -162,33 +171,34 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Domains Section */}
-      <section className="py-12 md:py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-              Perfect for <span className="bg-gradient-main bg-clip-text text-transparent">Every Domain</span>
+      {/* Domains Section with Sliding Animation */}
+      <section className="py-20 md:py-32 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+        <div className="container mx-auto px-4 mb-16">
+          <div className="text-center">
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Perfect for <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Every Domain</span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-4xl mx-auto">
               Whether you're teaching online or in-person, Classpace adapts to any subject, 
-              skill, or learning environment.
+              skill, or learning environment with seamless precision.
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {domains.map((domain, index) => {
+        </div>
+        
+        <div className="relative">
+          <div className="flex animate-[slide_40s_linear_infinite_reverse] space-x-8">
+            {[...domains, ...domains, ...domains].map((domain, index) => {
               const IconComponent = domain.icon;
               return (
                 <div 
                   key={index}
-                  className="animate-fade-in bg-white rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 group"
-                  style={{ animationDelay: `${1.2 + index * 0.1}s` }}
+                  className="flex-shrink-0 w-80 md:w-96 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 shadow-2xl border border-gray-700 hover:border-pink-500 transition-all duration-500 hover:-translate-y-2"
                 >
-                  <div className={`w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r ${domain.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-7 h-7 md:w-8 md:h-8 text-white" />
+                  <div className={`w-20 h-20 bg-gradient-to-r ${domain.color} rounded-3xl flex items-center justify-center mb-8 shadow-xl`}>
+                    <IconComponent className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="font-bold text-xl mb-3 text-gray-900">{domain.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{domain.description}</p>
+                  <h3 className="font-bold text-2xl mb-4 text-white">{domain.title}</h3>
+                  <p className="text-gray-300 leading-relaxed text-base">{domain.description}</p>
                 </div>
               );
             })}
@@ -196,23 +206,23 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-12 md:py-16 bg-gradient-main">
+      {/* CTA Section */}
+      <section className="py-20 md:py-32 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto text-white">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
+          <div className="max-w-4xl mx-auto text-white">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8">
               Ready to Transform Learning?
             </h2>
-            <p className="text-lg md:text-xl mb-8 opacity-90">
+            <p className="text-xl md:text-2xl mb-12 opacity-90">
               Join thousands of educators and learners already using Classpace
             </p>
             <Button 
               size="lg"
               onClick={() => navigate("/login")}
-              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+              className="bg-white text-purple-600 hover:bg-gray-100 px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2"
             >
               Start Your Journey
-              <ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-6 h-6 ml-3" />
             </Button>
           </div>
         </div>
@@ -236,7 +246,7 @@ const Index = () => {
               </div>
               <p className="text-gray-300 leading-relaxed mb-6">
                 Empowering educators and learners with AI-powered shared workspaces. 
-                Learn and teach anything, together.
+                Learn and teach anything.
               </p>
               <div className="flex space-x-4">
                 <a 
@@ -357,6 +367,21 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <style jsx>{`
+        @keyframes slide {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-100%);
+          }
+        }
+        
+        .animate-slide {
+          animation: slide 30s linear infinite;
+        }
+      `}</style>
     </div>
   );
 };
