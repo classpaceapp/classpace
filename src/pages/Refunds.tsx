@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,58 +28,63 @@ const Refunds = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-              alt="Classpace Logo" 
-              className="w-10 h-10"
-            />
-            <span className="text-2xl font-bold text-gray-900">
-              Classpace
-            </span>
-          </div>
-          <Button 
-            onClick={() => navigate("/")}
-            variant="outline"
-            className="border-purple-200 text-purple-700 hover:bg-purple-50"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-        </nav>
+      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
+        <div className="container mx-auto px-4 py-4">
+          <nav className="flex items-center justify-between">
+            <button 
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
+              <img 
+                src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
+                alt="Classpace Logo" 
+                className="w-8 h-8 md:w-10 md:h-10"
+              />
+              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Classpace
+              </span>
+            </button>
+            <Button 
+              onClick={() => navigate("/")}
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </nav>
+        </div>
       </header>
 
-      <main className="container mx-auto px-4 py-16 max-w-4xl">
-        <div className="text-center mb-16">
-          <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+      <main className="container mx-auto px-4 py-8 md:py-16 max-w-4xl">
+        <div className="text-center mb-12 md:mb-16">
+          <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
             <CreditCard className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Refund Policy
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             We stand behind our product. If you're not satisfied, we'll make it right.
           </p>
         </div>
 
         {/* Refund Process */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-8 mb-12 md:mb-16">
           {refundSteps.map((step, index) => {
             const IconComponent = step.icon;
             return (
-              <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <Card key={index} className="border-2 border-gray-700 hover:border-purple-500 transition-all duration-300 bg-gray-800/90 backdrop-blur-md shadow-2xl">
                 <CardHeader className="text-center pb-4">
                   <div className={`w-16 h-16 bg-gradient-to-r ${step.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
                     <IconComponent className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl">{step.title}</CardTitle>
+                  <CardTitle className="text-xl text-white">{step.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <p className="text-gray-600">{step.description}</p>
+                  <p className="text-gray-300">{step.description}</p>
                 </CardContent>
               </Card>
             );
@@ -88,63 +92,63 @@ const Refunds = () => {
         </div>
 
         {/* Refund Policy Details */}
-        <div className="bg-white rounded-3xl shadow-2xl p-12">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-700">
+          <h2 className="text-3xl font-bold text-center text-white mb-8 md:mb-12">
             Our Promise to You
           </h2>
           
-          <div className="space-y-8">
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+          <div className="space-y-6 md:space-y-8">
+            <div className="border-b border-gray-600 pb-6 md:pb-8">
+              <h3 className="text-2xl font-semibold mb-4 text-white">
                 30-Day Money-Back Guarantee
               </h3>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-300 leading-relaxed text-lg">
                 We offer a full refund within 30 days of your initial purchase. No questions asked. 
                 We want you to be completely satisfied with Classpace.
               </p>
             </div>
 
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+            <div className="border-b border-gray-600 pb-6 md:pb-8">
+              <h3 className="text-2xl font-semibold mb-4 text-white">
                 How to Request a Refund
               </h3>
-              <p className="text-gray-700 leading-relaxed text-lg mb-4">
+              <p className="text-gray-300 leading-relaxed text-lg mb-4">
                 To request a refund, simply contact our support team at{" "}
-                <a href="mailto:support@classpace.com" className="text-purple-600 hover:text-purple-800 font-semibold">
-                  support@classpace.com
+                <a href="mailto:social@classpace.co" className="text-purple-400 hover:text-purple-300 font-semibold">
+                  social@classpace.co
                 </a>{" "}
                 with your account details and reason for the refund request.
               </p>
             </div>
 
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+            <div className="border-b border-gray-600 pb-6 md:pb-8">
+              <h3 className="text-2xl font-semibold mb-4 text-white">
                 Processing Time
               </h3>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-300 leading-relaxed text-lg">
                 Once approved, refunds are processed within 5-7 business days. 
                 The refund will appear on your original payment method.
               </p>
             </div>
 
-            <div className="border-b border-gray-200 pb-8">
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+            <div className="border-b border-gray-600 pb-6 md:pb-8">
+              <h3 className="text-2xl font-semibold mb-4 text-white">
                 Partial Refunds
               </h3>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-300 leading-relaxed text-lg">
                 For annual subscriptions, we may offer prorated refunds based on unused time. 
                 Each case is reviewed individually to ensure fairness.
               </p>
             </div>
 
             <div>
-              <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+              <h3 className="text-2xl font-semibold mb-4 text-white">
                 Contact Us
               </h3>
-              <p className="text-gray-700 leading-relaxed text-lg">
+              <p className="text-gray-300 leading-relaxed text-lg">
                 Have questions about our refund policy? We're here to help. Contact us at{" "}
-                <a href="mailto:support@classpace.com" className="text-purple-600 hover:text-purple-800 font-semibold">
-                  support@classpace.com
+                <a href="mailto:social@classpace.co" className="text-purple-400 hover:text-purple-300 font-semibold">
+                  social@classpace.co
                 </a>
                 {" "}or through our support chat.
               </p>
@@ -154,10 +158,9 @@ const Refunds = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
+      <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white mt-16">
         <div className="container mx-auto px-4 py-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-            {/* Brand Section */}
             <div className="lg:col-span-1">
               <div className="flex items-center space-x-3 mb-6">
                 <img 
@@ -193,7 +196,6 @@ const Refunds = () => {
               </div>
             </div>
 
-            {/* Product Links */}
             <div>
               <h3 className="text-lg font-semibold mb-6 text-purple-300">Product</h3>
               <ul className="space-y-4">
@@ -224,7 +226,6 @@ const Refunds = () => {
               </ul>
             </div>
 
-            {/* Support Links */}
             <div>
               <h3 className="text-lg font-semibold mb-6 text-purple-300">Support</h3>
               <ul className="space-y-4">
@@ -255,7 +256,6 @@ const Refunds = () => {
               </ul>
             </div>
 
-            {/* Legal Links */}
             <div>
               <h3 className="text-lg font-semibold mb-6 text-purple-300">Legal</h3>
               <ul className="space-y-4">
@@ -279,7 +279,6 @@ const Refunds = () => {
             </div>
           </div>
 
-          {/* Bottom Section */}
           <div className="border-t border-gray-700 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-gray-400 mb-4 md:mb-0">

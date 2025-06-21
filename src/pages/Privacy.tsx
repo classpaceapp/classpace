@@ -11,16 +11,19 @@ const Privacy = () => {
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
               <img 
                 src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
                 alt="Classpace Logo" 
                 className="w-8 h-8 md:w-10 md:h-10"
               />
-              <span className="text-xl md:text-2xl font-bold text-white">
+              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Classpace
               </span>
-            </div>
+            </button>
             <Button 
               onClick={() => navigate("/")}
               variant="outline"

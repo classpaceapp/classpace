@@ -57,16 +57,19 @@ const Login = () => {
 
       <Card className="w-full max-w-md shadow-2xl border-gray-700 bg-gray-800/90 backdrop-blur-md">
         <CardHeader className="text-center space-y-4">
-          <div className="flex items-center justify-center space-x-3">
+          <button 
+            onClick={() => navigate("/")}
+            className="flex items-center justify-center space-x-3 hover:opacity-80 transition-opacity mx-auto"
+          >
             <img 
               src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
               alt="Classpace Logo" 
               className="w-8 h-8"
             />
-            <span className="text-2xl font-bold text-white">
+            <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Classpace
             </span>
-          </div>
+          </button>
           <CardTitle className="text-2xl text-white">
             {isSignUp ? "Join" : "Welcome back to"} Classpace
           </CardTitle>
