@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Users, Brain, MessageSquare, Music, Palette, Calculator, Globe, Video, Clock, ArrowRight, CheckCircle, Instagram, Linkedin } from "lucide-react";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import MobileCardReveal from "@/components/MobileCardReveal";
 import { useLoadingAnimation } from "@/hooks/useLoadingAnimation";
 
 const Index = () => {
@@ -102,12 +103,12 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative py-16 md:py-32 lg:py-40 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Hero Section - Enhanced prominence for desktop */}
+      <section className="relative py-16 md:py-40 lg:py-48 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="container mx-auto px-4">
-          <div className="text-center max-w-5xl mx-auto">
+          <div className="text-center max-w-6xl mx-auto">
             <div className="animate-fade-in">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-[1.1] tracking-tight text-clip-fix">
+              <h1 className="text-5xl md:text-8xl lg:text-9xl font-bold text-white mb-8 md:mb-12 leading-[1.1] tracking-tight text-clip-fix">
                 Learn and Teach
                 <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent pb-2">
                   Anything
@@ -116,26 +117,26 @@ const Index = () => {
             </div>
             
             <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <p className="text-xl md:text-2xl text-gray-300 mb-12 md:mb-16 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-3xl lg:text-4xl text-gray-300 mb-12 md:mb-20 max-w-5xl mx-auto leading-relaxed font-medium">
                 AI-powered shared workspaces where teachers and learners collaborate, 
                 share knowledge, and grow through intelligent conversations.
               </p>
             </div>
             
-            <div className="animate-fade-in flex flex-col sm:flex-row gap-6 justify-center mb-16 md:mb-24" style={{ animationDelay: '0.4s' }}>
+            <div className="animate-fade-in flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-16 md:mb-24" style={{ animationDelay: '0.4s' }}>
               <Button 
                 size="lg" 
                 onClick={() => navigate("/login")}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-10 py-5 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 border-0"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 border-0"
               >
                 Start Teaching
-                <ArrowRight className="w-6 h-6 ml-3" />
+                <ArrowRight className="w-6 h-6 md:w-8 md:h-8 ml-3" />
               </Button>
               <Button 
                 size="lg" 
                 variant="outline" 
                 onClick={() => navigate("/login")}
-                className="border-2 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-10 py-5 text-xl font-semibold rounded-2xl transition-all duration-300 hover:-translate-y-2 bg-transparent"
+                className="border-2 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl transition-all duration-300 hover:-translate-y-2 bg-transparent"
               >
                 Start Learning
               </Button>
@@ -144,7 +145,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section with Sliding Animation */}
+      {/* Features Section */}
       <section className="py-20 md:py-32 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 overflow-hidden">
         <div className="container mx-auto px-4 mb-16">
           <div className="text-center">
@@ -157,13 +158,13 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="slides-container">
+        {/* Mobile Card Reveal */}
+        <MobileCardReveal cards={features} />
+        
+        {/* Desktop Sliding Cards */}
+        <div className="slides-container hidden md:block">
           <div className="flex animate-slide space-x-8">
-            {/* Desktop: show 3 copies, Mobile: show 6 copies for smooth infinite scroll */}
-            {[
-              ...features, ...features, ...features,
-              ...(window.innerWidth < 768 ? [...features, ...features, ...features] : [])
-            ].map((feature, index) => {
+            {[...features, ...features, ...features].map((feature, index) => {
               const IconComponent = feature.icon;
               return (
                 <div 
@@ -182,7 +183,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Domains Section with Sliding Animation */}
+      {/* Domains Section */}
       <section className="py-20 md:py-32 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
         <div className="container mx-auto px-4 mb-16">
           <div className="text-center">
@@ -196,7 +197,11 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="slides-container">
+        {/* Mobile Card Reveal */}
+        <MobileCardReveal cards={domains} />
+        
+        {/* Desktop Sliding Cards */}
+        <div className="slides-container hidden md:block">
           <div className="flex animate-slide-reverse space-x-8">
             {[...domains, ...domains, ...domains].map((domain, index) => {
               const IconComponent = domain.icon;
@@ -269,7 +274,7 @@ const Index = () => {
                   <Instagram className="w-5 h-5 text-white" />
                 </a>
                 <a 
-                  href="https://www.linkedin.com/company/105928104/admin/dashboard/" 
+                  href="https://www.linkedin.com/company/classpace-app/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
@@ -281,12 +286,12 @@ const Index = () => {
 
             {/* Product Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Product</h3>
+              <h3 className="text-xl font-bold mb-6 text-purple-300">Product</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/pricing")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Pricing
                   </button>
@@ -294,7 +299,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/our-journey")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Our Journey
                   </button>
@@ -302,7 +307,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/login")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Sign In
                   </button>
@@ -312,12 +317,12 @@ const Index = () => {
 
             {/* Support Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Support</h3>
+              <h3 className="text-xl font-bold mb-6 text-purple-300">Support</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/support")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Help Center
                   </button>
@@ -325,7 +330,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/refunds")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Refunds
                   </button>
@@ -333,7 +338,7 @@ const Index = () => {
                 <li>
                   <a 
                     href="mailto:social@classpace.co"
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Contact Us
                   </a>
@@ -343,12 +348,12 @@ const Index = () => {
 
             {/* Legal Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Legal</h3>
+              <h3 className="text-xl font-bold mb-6 text-purple-300">Legal</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/terms")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Terms & Conditions
                   </button>
@@ -356,7 +361,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/privacy")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Privacy Policy
                   </button>
