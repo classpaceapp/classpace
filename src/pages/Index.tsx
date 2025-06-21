@@ -1,15 +1,16 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Users, Brain, MessageSquare, Music, Palette, Calculator, Globe, Video, Clock, ArrowRight, CheckCircle, Instagram, Linkedin } from "lucide-react";
+import { BookOpen, Users, Brain, MessageSquare, Music, Palette, Calculator, Globe, Video, Clock, ArrowRight, CheckCircle, Instagram, Linkedin, LogOut } from "lucide-react";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import MobileCardReveal from "@/components/MobileCardReveal";
 import { useLoadingAnimation } from "@/hooks/useLoadingAnimation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
   const isLoading = useLoadingAnimation();
+  const { user, profile, signOut } = useAuth();
 
   const domains = [
     {
@@ -73,6 +74,10 @@ const Index = () => {
     }
   ];
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   if (isLoading) {
     return <LoadingAnimation />;
   }
@@ -93,12 +98,35 @@ const Index = () => {
                 Classpace
               </span>
             </div>
-            <Button 
-              onClick={() => navigate("/login")}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 md:px-6 py-2 text-sm md:text-base border-0"
-            >
-              Get Started
-            </Button>
+            
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="hidden md:block text-sm text-gray-300">
+                  Welcome, {profile?.first_name || user.email}
+                </span>
+                <Button 
+                  onClick={() => navigate("/dashboard")}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 md:px-6 py-2 text-sm md:text-base border-0"
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  onClick={handleSignOut}
+                  variant="outline"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700 px-4 py-2 text-sm md:text-base"
+                >
+                  <LogOut className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Sign Out</span>
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                onClick={() => navigate("/login")}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 md:px-6 py-2 text-sm md:text-base border-0"
+              >
+                Get Started
+              </Button>
+            )}
           </nav>
         </div>
       </header>
@@ -123,24 +151,26 @@ const Index = () => {
               </p>
             </div>
             
-            <div className="animate-fade-in flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-16 md:mb-24" style={{ animationDelay: '0.4s' }}>
-              <Button 
-                size="lg" 
-                onClick={() => navigate("/login")}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 border-0"
-              >
-                Start Teaching
-                <ArrowRight className="w-6 h-6 md:w-8 md:h-8 ml-3" />
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                onClick={() => navigate("/login")}
-                className="border-2 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl transition-all duration-300 hover:-translate-y-2 bg-transparent"
-              >
-                Start Learning
-              </Button>
-            </div>
+            {!user && (
+              <div className="animate-fade-in flex flex-col sm:flex-row gap-6 md:gap-8 justify-center mb-16 md:mb-24" style={{ animationDelay: '0.4s' }}>
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate("/login")}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 border-0"
+                >
+                  Start Teaching
+                  <ArrowRight className="w-6 h-6 md:w-8 md:h-8 ml-3" />
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  onClick={() => navigate("/login")}
+                  className="border-2 border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl transition-all duration-300 hover:-translate-y-2 bg-transparent"
+                >
+                  Start Learning
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -223,26 +253,28 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-4xl mx-auto text-white">
-            <h2 className="text-4xl md:text-6xl font-bold mb-8">
-              Ready to Transform Learning?
-            </h2>
-            <p className="text-xl md:text-2xl mb-12 opacity-90">
-              Join thousands of educators and learners already using Classpace
-            </p>
-            <Button 
-              size="lg"
-              onClick={() => navigate("/login")}
-              className="bg-white text-purple-600 hover:bg-gray-100 px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2"
-            >
-              Start Your Journey
-              <ArrowRight className="w-6 h-6 ml-3" />
-            </Button>
+      {!user && (
+        <section className="py-20 md:py-32 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto text-white">
+              <h2 className="text-4xl md:text-6xl font-bold mb-8">
+                Ready to Transform Learning?
+              </h2>
+              <p className="text-xl md:text-2xl mb-12 opacity-90">
+                Join thousands of educators and learners already using Classpace
+              </p>
+              <Button 
+                size="lg"
+                onClick={() => navigate("/login")}
+                className="bg-white text-purple-600 hover:bg-gray-100 px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2"
+              >
+                Start Your Journey
+                <ArrowRight className="w-6 h-6 ml-3" />
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
