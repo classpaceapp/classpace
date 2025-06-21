@@ -70,12 +70,9 @@ const Login = () => {
               Classpace
             </span>
           </button>
-          <CardTitle className="text-2xl text-white">
-            {isSignUp ? "Join" : "Welcome back to"} Classpace
-          </CardTitle>
-          <CardDescription className="text-gray-300">
+          <CardTitle className="text-3xl text-white font-bold">
             {isSignUp ? "Create your account and start collaborating" : "Sign in to continue your learning journey"}
-          </CardDescription>
+          </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-6">

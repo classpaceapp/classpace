@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Mail, Instagram, Linkedin } from "lucide-react";
@@ -11,7 +12,10 @@ const OurJourney = () => {
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate("/")}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
               <img 
                 src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
                 alt="Classpace Logo" 
@@ -20,7 +24,7 @@ const OurJourney = () => {
               <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Classpace
               </span>
-            </div>
+            </button>
             <Button 
               onClick={() => navigate("/")}
               variant="outline"
@@ -41,9 +45,9 @@ const OurJourney = () => {
             </div>
             
             <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-8 leading-tight">
-              Revolutionizing Education for the 
+              Revolutionizing Education for
               <span className="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                AI & Internet Era
+                the AI & Internet Era
               </span>
             </h1>
             
@@ -102,7 +106,7 @@ const OurJourney = () => {
                   <Instagram className="w-5 h-5 text-white" />
                 </a>
                 <a 
-                  href="https://www.linkedin.com/company/105928104/admin/dashboard/" 
+                  href="https://linkedin.com/company/classpace-app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
@@ -114,12 +118,12 @@ const OurJourney = () => {
 
             {/* Product Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Product</h3>
+              <h3 className="text-xl font-semibold mb-6 text-purple-300">Product</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/pricing")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Pricing
                   </button>
@@ -127,7 +131,7 @@ const OurJourney = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/our-journey")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Our Journey
                   </button>
@@ -135,7 +139,7 @@ const OurJourney = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/login")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Sign In
                   </button>
@@ -145,12 +149,12 @@ const OurJourney = () => {
 
             {/* Support Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Support</h3>
+              <h3 className="text-xl font-semibold mb-6 text-purple-300">Support</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/support")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Help Center
                   </button>
@@ -158,7 +162,7 @@ const OurJourney = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/refunds")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Refunds
                   </button>
@@ -166,7 +170,7 @@ const OurJourney = () => {
                 <li>
                   <a 
                     href="mailto:social@classpace.co"
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Contact Us
                   </a>
@@ -176,12 +180,12 @@ const OurJourney = () => {
 
             {/* Legal Links */}
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Legal</h3>
+              <h3 className="text-xl font-semibold mb-6 text-purple-300">Legal</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/terms")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Terms & Conditions
                   </button>
@@ -189,7 +193,7 @@ const OurJourney = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/privacy")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Privacy Policy
                   </button>

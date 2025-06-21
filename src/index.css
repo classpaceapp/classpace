@@ -153,7 +153,7 @@ body {
   opacity: 0;
 }
 
-/* Custom animations - faster on mobile */
+/* Custom animations - even faster on mobile */
 .animate-slide {
   animation: slide 30s linear infinite;
 }
@@ -162,13 +162,13 @@ body {
   animation: slide-reverse 40s linear infinite;
 }
 
-/* Mobile optimizations - much faster animations */
+/* Mobile optimizations - ultra fast animations */
 @media (max-width: 768px) {
   .animate-slide {
-    animation: slide 7s linear infinite;
+    animation: slide 4s linear infinite;
   }
 
   .animate-slide-reverse {
-    animation: slide-reverse 10s linear infinite;
+    animation: slide-reverse 4s linear infinite;
   }
 }

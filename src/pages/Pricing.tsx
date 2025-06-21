@@ -43,7 +43,7 @@ const Pricing = () => {
         "Weekly recap emails"
       ],
       buttonText: "Start Free Trial",
-      popular: true
+      popular: false
     }
   ];
 
@@ -113,23 +113,11 @@ const Pricing = () => {
             return (
               <Card 
                 key={index} 
-                className={`relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 ${
-                  plan.popular ? 'ring-4 ring-purple-500 scale-105' : ''
-                }`}
+                className="relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900"
               >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full text-sm font-bold shadow-lg">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                
                 <CardHeader className="text-center pb-8 pt-12 bg-gradient-to-br from-gray-800 to-gray-900">
-                  <div className={`w-24 h-24 mx-auto mb-8 rounded-3xl flex items-center justify-center shadow-xl ${
-                    plan.popular ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gray-700'
-                  }`}>
-                    <IconComponent className={`w-12 h-12 ${plan.popular ? 'text-white' : 'text-gray-300'}`} />
+                  <div className="w-24 h-24 mx-auto mb-8 rounded-3xl flex items-center justify-center shadow-xl bg-gradient-to-r from-purple-600 to-pink-600">
+                    <IconComponent className="w-12 h-12 text-white" />
                   </div>
                   <CardTitle className="text-4xl font-bold mb-6 text-white">{plan.name}</CardTitle>
                   <p className="text-gray-300 mb-8 text-lg">{plan.description}</p>
@@ -150,11 +138,7 @@ const Pricing = () => {
                   </ul>
                   
                   <Button 
-                    className={`w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      plan.popular 
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0' 
-                        : 'bg-gray-700 hover:bg-gray-600 text-white border-0'
-                    }`}
+                    className="w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
                     onClick={() => navigate("/login")}
                   >
                     {plan.buttonText}
@@ -234,7 +218,7 @@ const Pricing = () => {
                   <Instagram className="w-5 h-5 text-white" />
                 </a>
                 <a 
-                  href="https://www.linkedin.com/company/105928104/admin/dashboard/" 
+                  href="https://linkedin.com/company/classpace-app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
@@ -245,12 +229,12 @@ const Pricing = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Product</h3>
+              <h3 className="text-xl font-semibold mb-6 text-purple-300">Product</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/pricing")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Pricing
                   </button>
@@ -258,7 +242,7 @@ const Pricing = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/our-journey")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Our Journey
                   </button>
@@ -266,7 +250,7 @@ const Pricing = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/login")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Sign In
                   </button>
@@ -275,12 +259,12 @@ const Pricing = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Support</h3>
+              <h3 className="text-xl font-semibold mb-6 text-purple-300">Support</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/support")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Help Center
                   </button>
@@ -288,7 +272,7 @@ const Pricing = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/refunds")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Refunds
                   </button>
@@ -296,7 +280,7 @@ const Pricing = () => {
                 <li>
                   <a 
                     href="mailto:social@classpace.co"
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Contact Us
                   </a>
@@ -305,12 +289,12 @@ const Pricing = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-6 text-purple-300">Legal</h3>
+              <h3 className="text-xl font-semibold mb-6 text-purple-300">Legal</h3>
               <ul className="space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/terms")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Terms & Conditions
                   </button>
@@ -318,7 +302,7 @@ const Pricing = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/privacy")}
-                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Privacy Policy
                   </button>
