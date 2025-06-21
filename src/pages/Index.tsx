@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -158,7 +159,11 @@ const Index = () => {
         
         <div className="slides-container">
           <div className="flex animate-slide space-x-8">
-            {[...features, ...features, ...features, ...features].map((feature, index) => {
+            {/* Desktop: show 3 copies, Mobile: show 6 copies for smooth infinite scroll */}
+            {[
+              ...features, ...features, ...features,
+              ...(window.innerWidth < 768 ? [...features, ...features, ...features] : [])
+            ].map((feature, index) => {
               const IconComponent = feature.icon;
               return (
                 <div 

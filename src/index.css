@@ -171,26 +171,54 @@ body {
   .animate-slide-reverse {
     animation: slide-reverse 4s linear infinite;
   }
-  
-  /* Ensure smooth infinite loop for mobile */
-  .slides-container {
-    overflow: hidden;
-    position: relative;
-    mask-image: linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, black 100px, black calc(100% - 100px), transparent);
-  }
 }
 
-/* Loading animation enhancements */
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(0) scale(1);
+/* Logo reveal animation */
+@keyframes logo-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-180deg);
+    filter: blur(10px);
   }
   50% {
-    transform: translateY(-10px) scale(1.1);
+    opacity: 0.7;
+    transform: scale(1.1) rotate(0deg);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: blur(0px);
   }
 }
 
-.animate-bounce {
-  animation: bounce-slow 1.5s ease-in-out infinite;
+@keyframes logo-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 40px rgba(168, 85, 247, 0.8));
+  }
+}
+
+.logo-reveal-container {
+  position: relative;
+}
+
+.logo-reveal-container::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  right: -10%;
+  bottom: -10%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: logo-glow 2s ease-in-out infinite;
+}
+
+.logo-reveal {
+  animation: logo-reveal 1.5s ease-out forwards;
+  position: relative;
+  z-index: 1;
 }
