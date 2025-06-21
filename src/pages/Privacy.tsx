@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Shield, Lock, Eye, Database, Instagram, Linkedin } from "lucide-react";
@@ -18,7 +17,7 @@ const Privacy = () => {
                 alt="Classpace Logo" 
                 className="w-8 h-8 md:w-10 md:h-10"
               />
-              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-xl md:text-2xl font-bold text-white">
                 Classpace
               </span>
             </div>
@@ -40,7 +39,7 @@ const Privacy = () => {
           <div className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
             <Shield className="w-10 h-10 md:w-14 md:h-14 text-white" />
           </div>
-          <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-8">
+          <h1 className="text-4xl md:text-7xl font-bold text-white mb-8 text-clip-fix">
             Privacy Policy
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
@@ -160,7 +159,6 @@ const Privacy = () => {
       <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white mt-16">
         <div className="container mx-auto px-4 py-12 md:py-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-            {/* Brand Section */}
             <div className="lg:col-span-1">
               <div className="flex items-center space-x-3 mb-6">
                 <img 
@@ -168,7 +166,7 @@ const Privacy = () => {
                   alt="Classpace Logo" 
                   className="w-10 h-10"
                 />
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold text-white">
                   Classpace
                 </span>
               </div>
@@ -196,7 +194,6 @@ const Privacy = () => {
               </div>
             </div>
 
-            {/* ... keep existing code (other footer sections) */}
             <div>
               <h3 className="text-lg font-semibold mb-6 text-purple-300">Product</h3>
               <ul className="space-y-4">

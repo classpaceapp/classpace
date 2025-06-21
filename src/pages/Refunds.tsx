@@ -39,7 +39,7 @@ const Refunds = () => {
               alt="Classpace Logo" 
               className="w-10 h-10"
             />
-            <span className="text-2xl font-bold bg-gradient-main bg-clip-text text-transparent">
+            <span className="text-2xl font-bold text-gray-900">
               Classpace
             </span>
           </div>
@@ -56,10 +56,10 @@ const Refunds = () => {
 
       <main className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="text-center mb-16">
-          <div className="w-20 h-20 bg-gradient-main rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <CreditCard className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-main bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Refund Policy
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -165,7 +165,7 @@ const Refunds = () => {
                   alt="Classpace Logo" 
                   className="w-10 h-10"
                 />
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold text-white">
                   Classpace
                 </span>
               </div>

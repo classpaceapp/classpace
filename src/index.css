@@ -77,6 +77,20 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+/* Fix text clipping for y characters */
+.text-clip-fix {
+  padding-bottom: 0.3em;
+  line-height: 1.3;
+}
+
+/* Remove purple gradient interference on text */
+.text-safe {
+  background: none !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: inherit !important;
+}
+
 /* Sliding animations for Y Combinator style */
 @keyframes slide {
   from {
@@ -139,11 +153,6 @@ body {
   opacity: 0;
 }
 
-/* Ensure text doesn't get cut off */
-.text-clip-fix {
-  padding-bottom: 0.2em;
-}
-
 /* Custom animations - faster on mobile */
 .animate-slide {
   animation: slide 30s linear infinite;
@@ -153,13 +162,13 @@ body {
   animation: slide-reverse 40s linear infinite;
 }
 
-/* Mobile optimizations - faster animations */
+/* Mobile optimizations - much faster animations */
 @media (max-width: 768px) {
   .animate-slide {
-    animation: slide 15s linear infinite;
+    animation: slide 7s linear infinite;
   }
 
   .animate-slide-reverse {
-    animation: slide-reverse 20s linear infinite;
+    animation: slide-reverse 10s linear infinite;
   }
 }

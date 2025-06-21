@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Users } from "lucide-react";
+import { BookOpen, Users, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -45,8 +44,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-none">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      {/* Back Button */}
+      <Button 
+        onClick={() => navigate("/")}
+        variant="ghost"
+        className="fixed top-4 left-4 z-50 text-white hover:bg-white/10"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Home
+      </Button>
+
+      <Card className="w-full max-w-md shadow-2xl border-gray-700 bg-gray-800/90 backdrop-blur-md">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center space-x-3">
             <img 
@@ -54,14 +63,14 @@ const Login = () => {
               alt="Classpace Logo" 
               className="w-8 h-8"
             />
-            <span className="text-2xl font-bold bg-gradient-main bg-clip-text text-transparent">
+            <span className="text-2xl font-bold text-white">
               Classpace
             </span>
           </div>
-          <CardTitle className="text-2xl">
+          <CardTitle className="text-2xl text-white">
             {isSignUp ? "Join" : "Welcome back to"} Classpace
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-gray-300">
             {isSignUp ? "Create your account and start collaborating" : "Sign in to continue your learning journey"}
           </CardDescription>
         </CardHeader>
@@ -69,7 +78,7 @@ const Login = () => {
         <CardContent className="space-y-6">
           {/* Role Selection */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">I am a:</Label>
+            <Label className="text-sm font-medium text-gray-200">I am a:</Label>
             <div className="grid grid-cols-2 gap-3">
               <Button
                 type="button"
@@ -77,8 +86,8 @@ const Login = () => {
                 onClick={() => setRole("teacher")}
                 className={`flex items-center space-x-2 h-12 ${
                   role === "teacher" 
-                    ? "bg-gradient-main text-white" 
-                    : "border-purple-200 text-purple-700 hover:bg-purple-50"
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700" 
+                    : "border-gray-600 text-gray-300 hover:bg-gray-700"
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
@@ -90,8 +99,8 @@ const Login = () => {
                 onClick={() => setRole("learner")}
                 className={`flex items-center space-x-2 h-12 ${
                   role === "learner" 
-                    ? "bg-gradient-main text-white" 
-                    : "border-purple-200 text-purple-700 hover:bg-purple-50"
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700" 
+                    : "border-gray-600 text-gray-300 hover:bg-gray-700"
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -100,14 +109,14 @@ const Login = () => {
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-gray-600" />
 
           {/* Google Sign In */}
           <Button
             type="button"
             variant="outline"
             onClick={handleGoogleAuth}
-            className="w-full border-gray-300 hover:bg-gray-50"
+            className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
           >
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -120,10 +129,10 @@ const Login = () => {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+              <span className="w-full border-t border-gray-600" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-gray-800 px-2 text-gray-400">
                 Or continue with email
               </span>
             </div>
@@ -132,7 +141,7 @@ const Login = () => {
           {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-gray-200">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -140,11 +149,12 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-gray-200">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -152,12 +162,13 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
             </div>
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-main hover:opacity-90 text-white"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
@@ -167,7 +178,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-purple-600 hover:text-purple-800 underline"
+              className="text-sm text-purple-400 hover:text-purple-300 underline"
             >
               {isSignUp 
                 ? "Already have an account? Sign in" 
