@@ -1,11 +1,13 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Users, Brain, MessageSquare, Music, Palette, Calculator, Globe, Video, Clock, ArrowRight, CheckCircle, Instagram, Linkedin } from "lucide-react";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import { useLoadingAnimation } from "@/hooks/useLoadingAnimation";
 
 const Index = () => {
   const navigate = useNavigate();
+  const isLoading = useLoadingAnimation();
 
   const domains = [
     {
@@ -68,6 +70,10 @@ const Index = () => {
       description: "Monitor learning with personalized insights"
     }
   ];
+
+  if (isLoading) {
+    return <LoadingAnimation />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
@@ -152,7 +158,7 @@ const Index = () => {
         
         <div className="slides-container">
           <div className="flex animate-slide space-x-8">
-            {[...features, ...features, ...features].map((feature, index) => {
+            {[...features, ...features, ...features, ...features].map((feature, index) => {
               const IconComponent = feature.icon;
               return (
                 <div 
