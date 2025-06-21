@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,7 +11,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Quicksand', sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
 }
@@ -69,6 +69,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Quicksand', sans-serif;
   }
 }
 
@@ -143,11 +144,22 @@ body {
   padding-bottom: 0.2em;
 }
 
-/* Custom animations */
+/* Custom animations - faster on mobile */
 .animate-slide {
   animation: slide 30s linear infinite;
 }
 
 .animate-slide-reverse {
   animation: slide-reverse 40s linear infinite;
+}
+
+/* Mobile optimizations - faster animations */
+@media (max-width: 768px) {
+  .animate-slide {
+    animation: slide 15s linear infinite;
+  }
+
+  .animate-slide-reverse {
+    animation: slide-reverse 20s linear infinite;
+  }
 }
