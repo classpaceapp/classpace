@@ -39,13 +39,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const teacherNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-    { icon: Users, label: 'My Pods', href: '/dashboard' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', key: 'teacher-dashboard' },
+    { icon: Users, label: 'My Pods', href: '/dashboard', key: 'teacher-pods' },
   ];
 
   const studentNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/student-dashboard' },
-    { icon: Users, label: 'My Pods', href: '/student-dashboard' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/student-dashboard', key: 'student-dashboard' },
+    { icon: Users, label: 'My Pods', href: '/student-dashboard', key: 'student-pods' },
   ];
 
   const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
@@ -96,7 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             const isActive = location.pathname === item.href;
             return (
               <Link
-                key={item.href}
+                key={item.key}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
