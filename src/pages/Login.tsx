@@ -109,10 +109,10 @@ const Login = () => {
                   type="button"
                   variant={role === "teacher" ? "default" : "outline"}
                   onClick={() => setRole("teacher")}
-                  className={`flex items-center space-x-2 h-12 ${
+                  className={`flex items-center space-x-2 h-12 transition-all ${
                     role === "teacher" 
-                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700" 
-                      : "border-gray-600 text-gray-300 hover:bg-gray-700"
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
+                      : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
                   }`}
                 >
                   <BookOpen className="w-4 h-4" />
@@ -122,10 +122,10 @@ const Login = () => {
                   type="button"
                   variant={role === "learner" ? "default" : "outline"}
                   onClick={() => setRole("learner")}
-                  className={`flex items-center space-x-2 h-12 ${
+                  className={`flex items-center space-x-2 h-12 transition-all ${
                     role === "learner" 
-                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700" 
-                      : "border-gray-600 text-gray-300 hover:bg-gray-700"
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
+                      : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
                   }`}
                 >
                   <Users className="w-4 h-4" />
@@ -171,32 +171,40 @@ const Login = () => {
             {isSignUp && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-gray-200">First Name</Label>
+                  <Label htmlFor="firstName" className="text-gray-200">
+                    First Name {isSignUp && <span className="text-red-400">*</span>}
+                  </Label>
                   <Input
                     id="firstName"
                     type="text"
                     placeholder="John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    required={isSignUp}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-gray-200">Last Name</Label>
+                  <Label htmlFor="lastName" className="text-gray-200">
+                    Last Name {isSignUp && <span className="text-red-400">*</span>}
+                  </Label>
                   <Input
                     id="lastName"
                     type="text"
                     placeholder="Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    required={isSignUp}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
                   />
                 </div>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-200">Email</Label>
+              <Label htmlFor="email" className="text-gray-200">
+                Email <span className="text-red-400">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -204,12 +212,15 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-200">Password</Label>
+              <Label htmlFor="password" className="text-gray-200">
+                Password <span className="text-red-400">*</span>
+                {isSignUp && <span className="text-xs text-gray-400 ml-2">(min. 6 characters)</span>}
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -218,7 +229,7 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
               />
             </div>
 

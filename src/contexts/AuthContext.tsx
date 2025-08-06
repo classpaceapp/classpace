@@ -169,6 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast({
           title: "Check your email",
           description: "We've sent you a confirmation link to complete your registration.",
+          duration: 6000,
         });
       } else {
         toast({
