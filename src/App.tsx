@@ -10,7 +10,10 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import StudentDashboard from "./pages/StudentDashboard";
+import TeacherDashboard from "./pages/TeacherDashboard";
 import PodView from "./pages/PodView";
+import StudentPodView from "./pages/StudentPodView";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Pricing from "./pages/Pricing";
@@ -46,16 +49,32 @@ const App = () => (
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
-                  <Dashboard />
+                <ProtectedRoute requireRole="teacher">
+                  <TeacherDashboard />
                 </ProtectedRoute>
               } 
             />
             <Route 
-              path="/pod/:id" 
+              path="/student-dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireRole="learner">
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard/pods/:id" 
+              element={
+                <ProtectedRoute requireRole="teacher">
                   <PodView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student-dashboard/pods/:id" 
+              element={
+                <ProtectedRoute requireRole="learner">
+                  <StudentPodView />
                 </ProtectedRoute>
               } 
             />

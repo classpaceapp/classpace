@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,11 +12,10 @@ import {
   Users, 
   MessageSquare, 
   FileText, 
-  Upload, 
+  Download, 
   Palette, 
   Bot, 
-  Clock,
-  Settings
+  Clock
 } from 'lucide-react';
 
 interface Pod {
@@ -29,9 +27,10 @@ interface Pod {
   created_at: string;
   updated_at: string;
   created_by: string;
+  teacher_name?: string;
 }
 
-const PodView: React.FC = () => {
+const StudentPodView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -54,26 +53,36 @@ const PodView: React.FC = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (memberError || !membership) {
+      if (memberError || !membership || membership.role !== 'student') {
         toast({
           title: "Access denied",
           description: "You don't have permission to view this pod.",
           variant: "destructive",
         });
-        navigate('/dashboard');
+        navigate('/student-dashboard');
         return;
       }
 
-      // Fetch pod details
+      // Fetch pod details with teacher info
       const { data: podData, error: podError } = await supabase
         .from('pods')
-        .select('*')
+        .select(`
+          *,
+          profiles!pods_created_by_fkey (
+            first_name,
+            last_name
+          )
+        `)
         .eq('id', id)
         .single();
 
       if (podError) throw podError;
 
-      setPod(podData);
+      const teacher = podData.profiles;
+      setPod({
+        ...podData,
+        teacher_name: teacher ? `${teacher.first_name} ${teacher.last_name}` : 'Unknown Teacher'
+      });
     } catch (error: any) {
       console.error('Error fetching pod:', error);
       toast({
@@ -81,7 +90,7 @@ const PodView: React.FC = () => {
         description: error.message || "Please try again later.",
         variant: "destructive",
       });
-      navigate('/dashboard');
+      navigate('/student-dashboard');
     } finally {
       setLoading(false);
     }
@@ -93,7 +102,7 @@ const PodView: React.FC = () => {
 
   if (loading) {
     return (
-      <DashboardLayout userRole="teacher">
+      <DashboardLayout userRole="learner">
         <div className="space-y-6">
           <div className="animate-pulse">
             <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
@@ -107,7 +116,7 @@ const PodView: React.FC = () => {
 
   if (!pod) {
     return (
-      <DashboardLayout userRole="teacher">
+      <DashboardLayout userRole="learner">
         <div className="text-center py-12">
           <h2 className="text-xl font-semibold text-muted-foreground">Pod not found</h2>
         </div>
@@ -116,28 +125,29 @@ const PodView: React.FC = () => {
   }
 
   return (
-    <DashboardLayout userRole="teacher">
+    <DashboardLayout userRole="learner">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
             variant="outline" 
             size="icon"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/student-dashboard')}
             className="shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.name}</h1>
+            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+              <span>Teacher: {pod.teacher_name}</span>
+              {pod.subject && <span>• {pod.subject}</span>}
+              {pod.grade_level && <span>• {pod.grade_level}</span>}
+            </div>
             {pod.description && (
-              <p className="text-muted-foreground mt-1">{pod.description}</p>
+              <p className="text-muted-foreground mt-2">{pod.description}</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Button>
         </div>
 
         {/* Pod Navigation Tabs */}
@@ -156,7 +166,7 @@ const PodView: React.FC = () => {
               <span className="hidden sm:inline">Notes</span>
             </TabsTrigger>
             <TabsTrigger value="materials" className="gap-2">
-              <Upload className="h-4 w-4" />
+              <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Materials</span>
             </TabsTrigger>
             <TabsTrigger value="whiteboard" className="gap-2">
@@ -176,16 +186,20 @@ const PodView: React.FC = () => {
           <TabsContent value="overview" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Pod Overview</CardTitle>
+                <CardTitle>Class Overview</CardTitle>
                 <CardDescription>
-                  Manage students and pod settings
+                  View class information and classmates
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold mb-2">Pod Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 className="font-semibold mb-2">Class Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-sm text-muted-foreground">Teacher</label>
+                        <p className="font-medium">{pod.teacher_name}</p>
+                      </div>
                       <div>
                         <label className="text-sm text-muted-foreground">Subject</label>
                         <p className="font-medium">{pod.subject || 'Not specified'}</p>
@@ -198,8 +212,8 @@ const PodView: React.FC = () => {
                   </div>
                   
                   <div>
-                    <h3 className="font-semibold mb-2">Students</h3>
-                    <p className="text-muted-foreground">Student management features coming soon!</p>
+                    <h3 className="font-semibold mb-2">Classmates</h3>
+                    <p className="text-muted-foreground">Classmate list coming soon!</p>
                   </div>
                 </div>
               </CardContent>
@@ -209,9 +223,9 @@ const PodView: React.FC = () => {
           <TabsContent value="chat" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Pod Chat</CardTitle>
+                <CardTitle>Class Discussion</CardTitle>
                 <CardDescription>
-                  Real-time messaging with your students
+                  Chat with your teacher and classmates
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -225,11 +239,11 @@ const PodView: React.FC = () => {
               <CardHeader>
                 <CardTitle>Class Notes</CardTitle>
                 <CardDescription>
-                  Create and manage notes for your students
+                  Read notes shared by your teacher
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Notes functionality coming soon!</p>
+                <p className="text-muted-foreground">Notes will appear here when your teacher shares them!</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -239,11 +253,11 @@ const PodView: React.FC = () => {
               <CardHeader>
                 <CardTitle>Learning Materials</CardTitle>
                 <CardDescription>
-                  Upload and share files with your students
+                  Download and view materials shared by your teacher
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Materials upload coming soon!</p>
+                <p className="text-muted-foreground">Materials will appear here when your teacher uploads them!</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -253,7 +267,7 @@ const PodView: React.FC = () => {
               <CardHeader>
                 <CardTitle>Collaborative Whiteboard</CardTitle>
                 <CardDescription>
-                  Interactive whiteboard for visual learning
+                  View and interact with the class whiteboard
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -265,13 +279,13 @@ const PodView: React.FC = () => {
           <TabsContent value="ai" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>AI Teaching Assistant</CardTitle>
+                <CardTitle>AI Study Assistant</CardTitle>
                 <CardDescription>
-                  Get help with lesson planning and content creation
+                  Get help understanding concepts and preparing for tests
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">AI assistant coming soon!</p>
+                <p className="text-muted-foreground">AI study assistant coming soon!</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -279,13 +293,13 @@ const PodView: React.FC = () => {
           <TabsContent value="timeline" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Activity Timeline</CardTitle>
+                <CardTitle>Class Activity</CardTitle>
                 <CardDescription>
-                  Track all pod activity and engagement
+                  See what's been happening in your class
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Timeline functionality coming soon!</p>
+                <p className="text-muted-foreground">Activity timeline coming soon!</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -295,4 +309,4 @@ const PodView: React.FC = () => {
   );
 };
 
-export default PodView;
+export default StudentPodView;
