@@ -313,25 +313,31 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
+          phone_number: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
+          phone_number?: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
           created_at?: string
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -342,6 +348,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_pod_role: {
+        Args: { user_id: string; pod_id: string }
+        Returns: Database["public"]["Enums"]["pod_member_role"]
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]

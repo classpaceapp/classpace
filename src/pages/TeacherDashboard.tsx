@@ -120,58 +120,70 @@ const TeacherDashboard: React.FC = () => {
     <DashboardLayout userRole="teacher">
       <div className="space-y-8">
         {/* Welcome Section */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Welcome back, {profile?.first_name || 'Teacher'}! 
-            <Sparkles className="inline-block w-8 h-8 ml-2 text-primary" />
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Ready to inspire and engage your students today?
-          </p>
+        <div className="text-center space-y-6 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-secondary/20 rounded-3xl blur-3xl -z-10" />
+          <div className="relative bg-card/30 backdrop-blur-sm border border-border/50 rounded-2xl p-8">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent animate-gradient-shift">
+              Welcome back, {profile?.first_name || 'Teacher'}! 
+              <Sparkles className="inline-block w-10 h-10 ml-3 text-primary animate-pulse" />
+            </h1>
+            <p className="text-xl text-muted-foreground mt-4 max-w-2xl mx-auto">
+              Ready to inspire and engage your students today? Let's create amazing learning experiences together.
+            </p>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Pods</CardTitle>
-              <BookOpen className="h-4 w-4 text-primary" />
+          <Card className="relative overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 border-primary/30 shadow-lg shadow-primary/10 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-transparent opacity-50" />
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-primary-foreground">Total Pods</CardTitle>
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <BookOpen className="h-6 w-6 text-primary animate-pulse" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{pods.length}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-primary mb-1">{pods.length}</div>
+              <p className="text-sm text-primary/80">
                 Active learning spaces
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-              <Users className="h-4 w-4 text-secondary" />
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500/20 via-purple-500/10 to-purple-500/5 border-purple-500/30 shadow-lg shadow-purple-500/10 hover:shadow-xl hover:shadow-purple-500/20 transition-all duration-300 hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 via-transparent to-transparent opacity-50" />
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">Total Students</CardTitle>
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <Users className="h-6 w-6 text-purple-500 animate-bounce" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-secondary">{totalStudents}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-1">{totalStudents}</div>
+              <p className="text-sm text-purple-600/80 dark:text-purple-400/80">
                 Across all your pods
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
-              <TrendingUp className="h-4 w-4 text-accent" />
+          <Card className="relative overflow-hidden bg-gradient-to-br from-secondary/20 via-secondary/10 to-secondary/5 border-secondary/30 shadow-lg shadow-secondary/10 hover:shadow-xl hover:shadow-secondary/20 transition-all duration-300 hover:scale-105">
+            <div className="absolute inset-0 bg-gradient-to-br from-secondary/30 via-transparent to-transparent opacity-50" />
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-secondary-foreground">This Week</CardTitle>
+              <div className="p-2 bg-secondary/20 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-secondary animate-pulse" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-accent">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold text-secondary mb-1">
                 {pods.filter(pod => {
                   const weekAgo = new Date();
                   weekAgo.setDate(weekAgo.getDate() - 7);
                   return new Date(pod.updated_at) > weekAgo;
                 }).length}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-secondary/80">
                 Active pods
               </p>
             </CardContent>
@@ -194,19 +206,26 @@ const TeacherDashboard: React.FC = () => {
           </div>
 
           {pods.length === 0 ? (
-            <Card className="border-dashed border-2 border-border/50">
-              <CardHeader className="text-center space-y-4 py-12">
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <BookOpen className="w-8 h-8 text-primary" />
+            <Card className="relative overflow-hidden border-dashed border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-purple-500/5 to-secondary/5">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-50" />
+              <CardHeader className="relative text-center space-y-6 py-16">
+                <div className="mx-auto w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-lg shadow-primary/25 animate-pulse">
+                  <BookOpen className="w-10 h-10 text-white" />
                 </div>
-                <div className="space-y-2">
-                  <CardTitle className="text-xl">Create Your First Pod</CardTitle>
-                  <CardDescription className="text-base max-w-md mx-auto">
+                <div className="space-y-3">
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Create Your First Pod
+                  </CardTitle>
+                  <CardDescription className="text-lg max-w-md mx-auto text-muted-foreground">
                     Get started by creating a learning space where you can share materials, 
                     chat with students, and track progress.
                   </CardDescription>
                 </div>
-                <Button onClick={() => setCreateModalOpen(true)} size="lg" className="gap-2">
+                <Button 
+                  onClick={() => setCreateModalOpen(true)} 
+                  size="lg" 
+                  className="gap-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+                >
                   <Plus className="h-5 w-5" />
                   Create Your First Pod
                 </Button>

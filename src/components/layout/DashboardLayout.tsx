@@ -14,8 +14,17 @@ import {
   Clock, 
   LogOut, 
   Menu,
-  X
+  X,
+  Settings,
+  ChevronDown
 } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
@@ -76,7 +85,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             alt="Classpace Logo" 
             className="w-8 h-8"
           />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent animate-gradient-shift">
             Classpace
           </span>
         </div>
@@ -144,22 +153,40 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             <div className="md:hidden" /> {/* Spacer for mobile menu button */}
             
             <div className="flex items-center gap-4 ml-auto">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium text-foreground">
-                    {profile?.first_name} {profile?.last_name}
-                  </p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {userRole === 'teacher' ? 'Teacher' : 'Student'}
-                  </p>
-                </div>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-secondary/20">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:block text-left">
+                      <p className="text-sm font-medium text-foreground">
+                        {profile?.first_name} {profile?.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {userRole === 'teacher' ? 'Teacher' : 'Student'}
+                      </p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-md border-border/50">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <Settings className="h-4 w-4" />
+                      Profile Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>

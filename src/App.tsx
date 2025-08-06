@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
+import Profile from "./pages/Profile";
 import PodView from "./pages/PodView";
 import StudentPodView from "./pages/StudentPodView";
 import Terms from "./pages/Terms";
@@ -75,6 +76,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireRole="learner">
                   <StudentPodView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               } 
             />

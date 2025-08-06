@@ -76,6 +76,11 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
 /* Fix text clipping for y characters */
 .text-clip-fix {
   padding-bottom: 0.3em;
