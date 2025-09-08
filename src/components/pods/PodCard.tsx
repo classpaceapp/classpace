@@ -85,7 +85,7 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath }) => {
       </CardContent>
 
       <CardFooter className="pt-2">
-        <Link to={`${basePath}/pods/${pod.id}`} className="w-full">
+        <Link to={userRole === 'teacher' ? `/pod/${pod.id}` : `/student/pod/${pod.id}`} className="w-full">
           <Button 
             className="w-full group-hover:bg-primary/90 transition-colors"
             size="sm"

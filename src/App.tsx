@@ -15,6 +15,7 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import Profile from "./pages/Profile";
 import PodView from "./pages/PodView";
 import StudentPodView from "./pages/StudentPodView";
+import SessionView from "./pages/SessionView";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Pricing from "./pages/Pricing";
@@ -64,7 +65,7 @@ const App = () => (
               } 
             />
             <Route 
-              path="/dashboard/pods/:id" 
+              path="/pod/:id" 
               element={
                 <ProtectedRoute requireRole="teacher">
                   <PodView />
@@ -72,7 +73,7 @@ const App = () => (
               } 
             />
             <Route 
-              path="/student-dashboard/pods/:id" 
+              path="/student/pod/:id" 
               element={
                 <ProtectedRoute requireRole="learner">
                   <StudentPodView />
@@ -84,6 +85,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/session/:sessionId" 
+              element={
+                <ProtectedRoute>
+                  <SessionView />
                 </ProtectedRoute>
               } 
             />

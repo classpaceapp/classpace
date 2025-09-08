@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -55,6 +55,85 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          file_url: string | null
+          id: string
+          is_ai: boolean
+          message_type: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_ai?: boolean
+          message_type?: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          is_ai?: boolean
+          message_type?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          generated_by_ai: boolean
+          id: string
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          generated_by_ai?: boolean
+          id?: string
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          generated_by_ai?: boolean
+          id?: string
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -343,13 +422,213 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_questions: {
+        Row: {
+          correct_answer: number
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          order_index: number
+          question: string
+          quiz_id: string
+        }
+        Insert: {
+          correct_answer: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options: Json
+          order_index?: number
+          question: string
+          quiz_id: string
+        }
+        Update: {
+          correct_answer?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          order_index?: number
+          question?: string
+          quiz_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_submissions: {
+        Row: {
+          answers: Json
+          id: string
+          quiz_id: string
+          score: number
+          student_id: string
+          submitted_at: string
+          total_questions: number
+        }
+        Insert: {
+          answers: Json
+          id?: string
+          quiz_id: string
+          score?: number
+          student_id: string
+          submitted_at?: string
+          total_questions: number
+        }
+        Update: {
+          answers?: Json
+          id?: string
+          quiz_id?: string
+          score?: number
+          student_id?: string
+          submitted_at?: string
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_submissions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_published: boolean
+          pod_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          pod_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          pod_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          pod_id: string
+          started_at: string
+          started_by: string
+          status: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          pod_id: string
+          started_at?: string
+          started_by: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          pod_id?: string
+          started_at?: string
+          started_by?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          paypal_subscription_id: string | null
+          plan: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          paypal_subscription_id?: string | null
+          plan?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          paypal_subscription_id?: string | null
+          plan?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       get_user_pod_role: {
-        Args: { user_id: string; pod_id: string }
+        Args: { pod_id: string; user_id: string }
         Returns: Database["public"]["Enums"]["pod_member_role"]
       }
       get_user_role: {

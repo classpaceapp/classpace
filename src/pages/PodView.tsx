@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import StartSessionModal from '@/components/sessions/StartSessionModal';
+import SessionsList from '@/components/sessions/SessionsList';
 import { 
   ArrowLeft, 
   Users, 
@@ -39,6 +41,7 @@ const PodView: React.FC = () => {
   const [pod, setPod] = useState<Pod | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [startSessionModalOpen, setStartSessionModalOpen] = useState(false);
 
   const fetchPod = async () => {
     if (!id || !user?.id) return;
@@ -174,36 +177,46 @@ const PodView: React.FC = () => {
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pod Overview</CardTitle>
-                <CardDescription>
-                  Manage students and pod settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold mb-2">Pod Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm text-muted-foreground">Subject</label>
-                        <p className="font-medium">{pod.subject || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm text-muted-foreground">Grade Level</label>
-                        <p className="font-medium">{pod.grade_level || 'Not specified'}</p>
-                      </div>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Sessions</CardTitle>
+                      <CardDescription>
+                        Start and manage learning sessions
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      onClick={() => setStartSessionModalOpen(true)}
+                    >
+                      Start New Session
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <SessionsList podId={id!} />
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pod Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-muted-foreground">Subject</label>
+                      <p className="font-medium">{pod.subject || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-muted-foreground">Grade Level</label>
+                      <p className="font-medium">{pod.grade_level || 'Not specified'}</p>
                     </div>
                   </div>
-                  
-                  <div>
-                    <h3 className="font-semibold mb-2">Students</h3>
-                    <p className="text-muted-foreground">Student management features coming soon!</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="chat" className="mt-6">
@@ -290,6 +303,13 @@ const PodView: React.FC = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <StartSessionModal
+          isOpen={startSessionModalOpen}
+          onClose={() => setStartSessionModalOpen(false)}
+          podId={id!}
+          onSessionStarted={(sessionId) => navigate(`/session/${sessionId}`)}
+        />
       </div>
     </DashboardLayout>
   );
