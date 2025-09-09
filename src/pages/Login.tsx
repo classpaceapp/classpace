@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpen, Users, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ const Login = () => {
   const [role, setRole] = useState<"teacher" | "learner">("teacher");
   const [isSignUp, setIsSignUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const { toast } = useToast();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -56,6 +60,31 @@ const Login = () => {
   const handleGoogleAuth = () => {
     // TODO: Implement Google OAuth later
     console.log("Google auth not implemented yet");
+  };
+
+  const seedTestUsers = async () => {
+    try {
+      setIsSeeding(true);
+      const { data, error } = await supabase.functions.invoke('seed_test_users', { body: {} });
+      if (error) throw error;
+      const creds = (data as any)?.credentials;
+      toast({
+        title: "Test accounts ready",
+        description: `Teacher: ${creds?.teacher?.email} / ${creds?.teacher?.password} | Student: ${creds?.student?.email} / ${creds?.student?.password}`,
+        duration: 6000,
+      });
+      setEmail(creds?.teacher?.email || "teacher@classpace.test");
+      setPassword(creds?.teacher?.password || "Password123!");
+    } catch (err: any) {
+      toast({
+        title: "Seeding failed",
+        description: err?.message || "Could not create test users.",
+        variant: "destructive",
+      });
+      console.error(err);
+    } finally {
+      setIsSeeding(false);
+    }
   };
 
   if (loading) {
@@ -256,6 +285,21 @@ const Login = () => {
                 : "Don't have an account? Sign up"
               }
             </button>
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={seedTestUsers}
+              disabled={isSeeding}
+              className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              {isSeeding ? "Creating test accounts..." : "Create test accounts (teacher & student)"}
+            </Button>
+            <p className="text-xs text-gray-400 text-center">
+              Teacher: teacher@classpace.test · Password: Password123! — Student: student@classpace.test · Password: Password123!
+            </p>
           </div>
         </CardContent>
       </Card>
