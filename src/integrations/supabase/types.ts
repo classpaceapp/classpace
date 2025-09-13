@@ -635,6 +635,10 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      is_member_of_pod: {
+        Args: { _pod_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       ai_activity_type:
