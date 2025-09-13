@@ -144,58 +144,66 @@ const StudentDashboard: React.FC = () => {
     <DashboardLayout userRole="learner">
       <div className="space-y-8">
         {/* Welcome Section */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Welcome back, {profile?.first_name || 'Student'}! 
-            <Sparkles className="inline-block w-8 h-8 ml-2 text-primary" />
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Ready to continue your learning journey today?
-          </p>
+        <div className="border-b border-border pb-8">
+          <div className="bg-card border border-border rounded-lg p-8">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+              Welcome back, {profile?.first_name || 'Student'}!
+              <Sparkles className="inline-block w-8 h-8 ml-3 text-primary" />
+            </h1>
+            <p className="text-xl text-muted-foreground mt-4">
+              Ready to continue your learning journey today?
+            </p>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+          <Card className="bg-card border-2 border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">My Classes</CardTitle>
-              <BookOpen className="h-4 w-4 text-primary" />
+              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-foreground">My Classes</CardTitle>
+              <div className="p-2 bg-primary rounded-lg">
+                <BookOpen className="h-5 w-5 text-primary-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{totalClasses}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-4xl font-bold text-foreground mb-1">{totalClasses}</div>
+              <p className="text-sm font-medium text-muted-foreground">
                 Active learning pods
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+          <Card className="bg-card border-2 border-secondary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Classmates</CardTitle>
-              <Users className="h-4 w-4 text-secondary" />
+              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-foreground">Classmates</CardTitle>
+              <div className="p-2 bg-secondary rounded-lg">
+                <Users className="h-5 w-5 text-secondary-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-secondary">{totalClassmates}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-4xl font-bold text-foreground mb-1">{totalClassmates}</div>
+              <p className="text-sm font-medium text-muted-foreground">
                 Fellow students
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+          <Card className="bg-card border-2 border-accent">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
-              <MessageSquare className="h-4 w-4 text-accent" />
+              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-foreground">This Week</CardTitle>
+              <div className="p-2 bg-accent rounded-lg">
+                <MessageSquare className="h-5 w-5 text-accent-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-accent">
+              <div className="text-4xl font-bold text-foreground mb-1">
                 {pods.filter(pod => {
                   const weekAgo = new Date();
                   weekAgo.setDate(weekAgo.getDate() - 7);
                   return new Date(pod.updated_at) > weekAgo;
                 }).length}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm font-medium text-muted-foreground">
                 Active classes
               </p>
             </CardContent>
@@ -212,13 +220,13 @@ const StudentDashboard: React.FC = () => {
           </div>
 
           {pods.length === 0 ? (
-            <Card className="border-dashed border-2 border-border/50">
+            <Card className="border-2 border-dashed border-primary bg-card">
               <CardHeader className="text-center space-y-4 py-12">
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <BookOpen className="w-8 h-8 text-primary" />
+                <div className="mx-auto w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
+                  <BookOpen className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <div className="space-y-2">
-                  <CardTitle className="text-xl">No Classes Yet</CardTitle>
+                  <CardTitle className="text-xl font-bold text-foreground">No Classes Yet</CardTitle>
                   <CardDescription className="text-base max-w-md mx-auto">
                     You haven't been added to any classes yet. Your teachers will invite you 
                     to join their learning pods when classes begin.
