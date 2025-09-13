@@ -21,6 +21,8 @@ import Privacy from "./pages/Privacy";
 import Pricing from "./pages/Pricing";
 import Refunds from "./pages/Refunds";
 import OurJourney from "./pages/OurJourney";
+import Documentation from "./pages/Documentation";
+import AIChat from "./pages/AIChat";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
@@ -101,6 +103,16 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/refunds" element={<Refunds />} />
             <Route path="/our-journey" element={<OurJourney />} />
+            <Route path="/documentation" element={
+              <ProtectedRoute>
+                <Documentation />
+              </ProtectedRoute>
+            } />
+            <Route path="/ai-chat" element={
+              <ProtectedRoute>
+                <AIChat />
+              </ProtectedRoute>
+            } />
             <Route path="/support" element={<Support />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

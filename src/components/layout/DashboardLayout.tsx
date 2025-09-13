@@ -1,31 +1,18 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
-  Users, 
-  MessageSquare, 
+  Menu, 
+  X, 
   FileText, 
-  Upload, 
-  Palette, 
-  Bot, 
-  Clock, 
-  LogOut, 
-  Menu,
-  X,
-  Settings,
-  ChevronDown
+  HelpCircle, 
+  MessageSquare, 
+  LifeBuoy,
+  LogOut,
+  User
 } from 'lucide-react';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -33,177 +20,159 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const teacherNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', key: 'teacher-dashboard' },
-    { icon: Users, label: 'My Pods', href: '/dashboard', key: 'teacher-pods' },
+  const navigationItems = [
+    {
+      name: 'Documentation',
+      href: '/documentation',
+      icon: FileText,
+      current: location.pathname === '/documentation'
+    },
+    {
+      name: 'FAQs',
+      href: '/our-journey',
+      icon: HelpCircle,
+      current: location.pathname === '/our-journey'
+    },
+    {
+      name: 'AI Chat',
+      href: '/ai-chat',
+      icon: MessageSquare,
+      current: location.pathname === '/ai-chat'
+    },
+    {
+      name: 'Support',
+      href: '/support',
+      icon: LifeBuoy,
+      current: location.pathname === '/support'
+    }
   ];
 
-  const studentNavItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/student-dashboard', key: 'student-dashboard' },
-    { icon: Users, label: 'My Pods', href: '/student-dashboard', key: 'student-pods' },
-  ];
-
-  const navItems = userRole === 'teacher' ? teacherNavItems : studentNavItems;
+  const userInitials = profile?.first_name && profile?.last_name 
+    ? `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`
+    : user?.email?.charAt(0).toUpperCase() || 'U';
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/login');
   };
 
-  const initials = profile?.first_name && profile?.last_name 
-    ? `${profile.first_name[0]}${profile.last_name[0]}` 
-    : user?.email?.[0]?.toUpperCase() || 'U';
+  const handleNavigation = (href: string) => {
+    navigate(href);
+    setSidebarOpen(false);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
-      {/* Mobile menu button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="bg-background/80 backdrop-blur-md border-border/50"
-        >
-          {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+        </div>
+      )}
 
       {/* Sidebar */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-card/50 backdrop-blur-md border-r border-border/50 transform transition-transform duration-300 ease-in-out md:translate-x-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        {/* Logo */}
-        <div className="flex items-center gap-3 p-6 border-b border-border/50">
-          <img 
-            src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-            alt="Classpace Logo" 
-            className="w-8 h-8"
-          />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent animate-gradient-shift">
-            Classpace
-          </span>
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Sidebar header */}
+        <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200/50">
+          <div className="flex items-center space-x-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Classpace
+            </span>
+          </div>
+          <button
+            type="button"
+            className="lg:hidden text-gray-500 hover:text-gray-700 transition-colors"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.key}
-                to={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
+        <nav className="mt-8 px-6">
+          <div className="space-y-2">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => handleNavigation(item.href)}
+                  className={`group flex w-full items-center px-4 py-3 text-left text-sm font-medium rounded-xl transition-all duration-200 ${
+                    item.current
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                      : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700'
+                  }`}
+                >
+                  <Icon className={`mr-3 h-5 w-5 ${
+                    item.current ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'
+                  }`} />
+                  {item.name}
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        {/* User section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50">
-          <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="" />
-              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
-                {initials}
+        {/* User section at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200/50 bg-white/50">
+          <div className="flex items-center space-x-3 mb-4">
+            <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
+              <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+                {userInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {profile?.first_name} {profile?.last_name}
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {user?.email}
+              <p className="text-xs text-gray-500 capitalize">
+                {userRole}
               </p>
             </div>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
             onClick={handleSignOut}
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            variant="outline"
+            size="sm"
+            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
           >
-            <LogOut className="h-4 w-4" />
-            Sign Out
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
           </Button>
         </div>
-      </aside>
+      </div>
 
       {/* Main content */}
-      <main className={cn(
-        "transition-all duration-300 ease-in-out md:ml-64",
-        "min-h-screen"
-      )}>
+      <div className="lg:pl-72">
         {/* Top bar */}
-        <header className="bg-card/30 backdrop-blur-md border-b border-border/50 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="md:hidden" /> {/* Spacer for mobile menu button */}
-            
-            <div className="flex items-center gap-4 ml-auto">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-secondary/20">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="hidden md:block text-left">
-                      <p className="text-sm font-medium text-foreground">
-                        {profile?.first_name} {profile?.last_name}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {userRole === 'teacher' ? 'Teacher' : 'Student'}
-                      </p>
-                    </div>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-md border-border/50">
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
-                      <Settings className="h-4 w-4" />
-                      Profile Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 text-destructive">
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+        <div className="sticky top-0 z-40 lg:hidden flex h-16 items-center gap-x-4 border-b border-gray-200/50 bg-white/95 backdrop-blur-xl px-4 shadow-sm sm:gap-x-6 sm:px-6">
+          <button
+            type="button"
+            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
+            Dashboard
           </div>
-        </header>
+        </div>
 
         {/* Page content */}
-        <div className="p-6">
+        <main className="min-h-screen">
           {children}
-        </div>
-      </main>
-
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+        </main>
+      </div>
     </div>
   );
 };

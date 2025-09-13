@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Users, BookOpen, MessageSquare, Sparkles } from 'lucide-react';
+import { Users, BookOpen, Calendar, Sparkles } from 'lucide-react';
 
 interface Pod {
   id: string;
@@ -102,152 +103,138 @@ const StudentDashboard: React.FC = () => {
     fetchPods();
   }, [user?.id]);
 
-  const totalClasses = pods.length;
-  const totalClassmates = pods.reduce((sum, pod) => sum + (pod.student_count || 0), 0);
-
-  if (loading) {
-    return (
-      <DashboardLayout userRole="learner">
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
-                  <div className="h-8 bg-muted rounded w-3/4"></div>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardHeader>
-                  <div className="h-5 bg-muted rounded w-3/4"></div>
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded"></div>
-                    <div className="h-4 bg-muted rounded w-2/3"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   return (
     <DashboardLayout userRole="learner">
-      <div className="space-y-8">
-        {/* Welcome Section */}
-        <div className="border-b border-border pb-8">
-          <div className="bg-card border border-border rounded-lg p-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-              Welcome back, {profile?.first_name || 'Student'}!
-              <Sparkles className="inline-block w-8 h-8 ml-3 text-primary" />
-            </h1>
-            <p className="text-xl text-muted-foreground mt-4">
-              Ready to continue your learning journey today?
-            </p>
+      {loading ? (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-8">
+          <div className="mb-8">
+            <Skeleton className="h-12 w-80 mb-4 rounded-2xl" />
+            <Skeleton className="h-6 w-96 rounded-xl" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-40 rounded-3xl" />
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-72 rounded-3xl" />
+            ))}
           </div>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-card border-2 border-primary">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-foreground">My Classes</CardTitle>
-              <div className="p-2 bg-primary rounded-lg">
-                <BookOpen className="h-5 w-5 text-primary-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-foreground mb-1">{totalClasses}</div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Active learning pods
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-2 border-secondary">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-foreground">Classmates</CardTitle>
-              <div className="p-2 bg-secondary rounded-lg">
-                <Users className="h-5 w-5 text-secondary-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-foreground mb-1">{totalClassmates}</div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Fellow students
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-2 border-accent">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-semibold uppercase tracking-wide text-foreground">This Week</CardTitle>
-              <div className="p-2 bg-accent rounded-lg">
-                <MessageSquare className="h-5 w-5 text-accent-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-foreground mb-1">
-                {pods.filter(pod => {
-                  const weekAgo = new Date();
-                  weekAgo.setDate(weekAgo.getDate() - 7);
-                  return new Date(pod.updated_at) > weekAgo;
-                }).length}
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Active classes
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Pods Section */}
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground">Your Classes</h2>
-            <p className="text-muted-foreground">
-              Access your course materials, chat with classmates, and stay up to date
-            </p>
-          </div>
-
-          {pods.length === 0 ? (
-            <Card className="border-2 border-dashed border-primary bg-card">
-              <CardHeader className="text-center space-y-4 py-12">
-                <div className="mx-auto w-16 h-16 bg-primary rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-8 h-8 text-primary-foreground" />
+      ) : (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-8">
+          {/* Welcome Section */}
+          <div className="mb-12">
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-white" />
                 </div>
-                <div className="space-y-2">
-                  <CardTitle className="text-xl font-bold text-foreground">No Classes Yet</CardTitle>
-                  <CardDescription className="text-base max-w-md mx-auto">
-                    You haven't been added to any classes yet. Your teachers will invite you 
-                    to join their learning pods when classes begin.
-                  </CardDescription>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Welcome back, {user?.email?.split('@')[0]}!
+                  </h1>
+                  <p className="text-xl text-gray-600 mt-2">
+                    Ready to learn something amazing today? Here's your learning overview.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Total Classes</CardTitle>
+                  <BookOpen className="h-8 w-8" />
                 </div>
               </CardHeader>
+              <CardContent className="p-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">{pods.length}</div>
+                <p className="text-gray-600 font-medium">
+                  {pods.length === 1 ? 'class' : 'classes'} enrolled
+                </p>
+              </CardContent>
             </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pods.map((pod) => (
-                <PodCard 
-                  key={pod.id} 
-                  pod={pod} 
-                  userRole="learner"
-                  basePath="/student-dashboard"
-                />
-              ))}
+
+            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Total Classmates</CardTitle>
+                  <Users className="h-8 w-8" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">
+                  {pods.reduce((total, pod) => total + (pod.student_count || 0), 0) - pods.length}
+                </div>
+                <p className="text-gray-600 font-medium">across all classes</p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Active This Week</CardTitle>
+                  <Calendar className="h-8 w-8" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="text-4xl font-bold text-gray-900 mb-2">
+                  {pods.filter(pod => {
+                    const lastWeek = new Date();
+                    lastWeek.setDate(lastWeek.getDate() - 7);
+                    return pod.last_activity && new Date(pod.last_activity) > lastWeek;
+                  }).length}
+                </div>
+                <p className="text-gray-600 font-medium">
+                  {pods.filter(pod => {
+                    const lastWeek = new Date();
+                    lastWeek.setDate(lastWeek.getDate() - 7);
+                    return pod.last_activity && new Date(pod.last_activity) > lastWeek;
+                  }).length === 1 ? 'class' : 'classes'} active
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Classes Section */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                My Classes
+              </h2>
             </div>
-          )}
+
+            {pods.length === 0 ? (
+              <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl">
+                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center mb-8">
+                    <BookOpen className="h-12 w-12 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    No Classes Yet
+                  </h3>
+                  <p className="text-lg text-gray-600 mb-8 max-w-md">
+                    You haven't been enrolled in any classes yet. Contact your teacher to get started with your learning journey.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {pods.map((pod) => (
+                  <PodCard key={pod.id} pod={pod} userRole="learner" basePath="/student-dashboard" />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </DashboardLayout>
   );
 };
