@@ -12,7 +12,7 @@ import { useEffect } from "react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, signUp, user, profile, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -23,10 +23,11 @@ const Login = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && !loading) {
-      navigate("/");
+    if (user && profile && !loading) {
+      const dashboardPath = profile.role === 'learner' ? '/student-dashboard' : '/dashboard';
+      navigate(dashboardPath);
     }
-  }, [user, loading, navigate]);
+  }, [user, profile, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +46,7 @@ const Login = () => {
       } else {
         const { error } = await signIn(email, password);
         if (!error) {
-          navigate("/");
+          // Navigation will be handled by useEffect when profile loads
         }
       }
     } finally {

@@ -105,7 +105,10 @@ const Index = () => {
                   Welcome, {profile?.first_name || user.email}
                 </span>
                 <Button 
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => {
+                    const dashboardPath = profile?.role === 'learner' ? '/student-dashboard' : '/dashboard';
+                    navigate(dashboardPath);
+                  }}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 md:px-6 py-2 text-sm md:text-base border-0"
                 >
                   Dashboard
