@@ -34,9 +34,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     },
     {
       name: 'FAQs',
-      href: '/our-journey',
+      href: '/pricing',
       icon: HelpCircle,
-      current: location.pathname === '/our-journey'
+      current: location.pathname === '/pricing'
     },
     {
       name: 'AI Chat',
@@ -62,7 +62,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   };
 
   const handleNavigation = (href: string) => {
-    navigate(href);
+    if (href === '/pricing') {
+      navigate(href);
+      // Scroll to FAQ section after navigation
+      setTimeout(() => {
+        const faqSection = document.querySelector('h2');
+        if (faqSection && faqSection.textContent?.includes('Frequently Asked Questions')) {
+          faqSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      navigate(href);
+    }
     setSidebarOpen(false);
   };
 

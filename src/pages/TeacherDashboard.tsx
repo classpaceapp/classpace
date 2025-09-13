@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
-import CreatePodModal from '@/components/pods/CreatePodModal';
+import CreatePodFlow from '@/components/pods/CreatePodFlow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,7 +27,7 @@ const TeacherDashboard: React.FC = () => {
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [showCreateFlow, setShowCreateFlow] = useState(false);
 
   const fetchPods = async () => {
     if (!user?.id) return;
@@ -79,6 +79,20 @@ const TeacherDashboard: React.FC = () => {
   useEffect(() => {
     fetchPods();
   }, [user?.id]);
+
+  if (showCreateFlow) {
+    return (
+      <DashboardLayout userRole="teacher">
+        <CreatePodFlow 
+          onComplete={() => {
+            setShowCreateFlow(false);
+            fetchPods();
+          }}
+          onCancel={() => setShowCreateFlow(false)}
+        />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout userRole="teacher">
@@ -187,7 +201,7 @@ const TeacherDashboard: React.FC = () => {
                 My Pods
               </h2>
               <Button
-                onClick={() => setCreateModalOpen(true)}
+                onClick={() => setShowCreateFlow(true)}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl px-8 py-3 text-lg font-semibold shadow-xl"
               >
                 <Plus className="mr-3 h-6 w-6" />
@@ -208,7 +222,7 @@ const TeacherDashboard: React.FC = () => {
                     Pods are virtual classrooms where you can organize students, share materials, and conduct engaging learning sessions.
                   </p>
                   <Button
-                    onClick={() => setCreateModalOpen(true)}
+                    onClick={() => setShowCreateFlow(true)}
                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl px-8 py-4 text-lg font-semibold shadow-xl"
                   >
                     <Plus className="mr-3 h-6 w-6" />
@@ -224,12 +238,6 @@ const TeacherDashboard: React.FC = () => {
               </div>
             )}
           </div>
-
-          <CreatePodModal
-            open={createModalOpen}
-            onOpenChange={setCreateModalOpen}
-            onPodCreated={fetchPods}
-          />
         </div>
       )}
     </DashboardLayout>
