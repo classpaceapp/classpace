@@ -68,111 +68,124 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        </div>
-      )}
+      {/* Mobile menu button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="bg-background/80 backdrop-blur-md border-border/50"
+        >
+          {sidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
+      </div>
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-white/95 backdrop-blur-xl shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card/50 backdrop-blur-md border-r border-border/50 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        {/* Sidebar header */}
-        <div className="flex h-16 items-center justify-between px-6 border-b border-gray-200/50">
-          <div className="flex items-center space-x-3">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Classpace
-            </span>
-          </div>
-          <button
-            type="button"
-            className="lg:hidden text-gray-500 hover:text-gray-700 transition-colors"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-6 w-6" />
-          </button>
+        {/* Logo */}
+        <div className="flex items-center gap-3 p-6 border-b border-border/50">
+          <img 
+            src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
+            alt="Classpace Logo" 
+            className="w-8 h-8"
+          />
+          <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent animate-gradient-shift">
+            Classpace
+          </span>
         </div>
 
         {/* Navigation */}
-        <nav className="mt-8 px-6">
-          <div className="space-y-2">
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => handleNavigation(item.href)}
-                  className={`group flex w-full items-center px-4 py-3 text-left text-sm font-medium rounded-xl transition-all duration-200 ${
-                    item.current
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                      : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-blue-700'
-                  }`}
-                >
-                  <Icon className={`mr-3 h-5 w-5 ${
-                    item.current ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'
-                  }`} />
-                  {item.name}
-                </button>
-              );
-            })}
-          </div>
+        <nav className="p-4 space-y-2">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href;
+            return (
+              <button
+                key={item.name}
+                onClick={() => handleNavigation(item.href)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 w-full text-left ${
+                  isActive 
+                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' 
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="font-medium">{item.name}</span>
+              </button>
+            );
+          })}
         </nav>
 
-        {/* User section at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200/50 bg-white/50">
-          <div className="flex items-center space-x-3 mb-4">
-            <Avatar className="h-10 w-10 ring-2 ring-blue-500/20">
-              <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-semibold">
+        {/* User section */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50">
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">
-                {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
+              <p className="text-sm font-medium text-foreground truncate">
+                {profile?.first_name} {profile?.last_name}
               </p>
-              <p className="text-xs text-gray-500 capitalize">
-                {userRole}
+              <p className="text-xs text-muted-foreground truncate">
+                {user?.email}
               </p>
             </div>
           </div>
-          <Button
+          <Button 
+            variant="outline" 
             onClick={handleSignOut}
-            variant="outline"
-            size="sm"
-            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
+            <LogOut className="h-4 w-4" />
+            Sign Out
           </Button>
         </div>
-      </div>
+      </aside>
 
       {/* Main content */}
-      <div className="lg:pl-72">
+      <main className="transition-all duration-300 ease-in-out md:ml-64 min-h-screen">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 lg:hidden flex h-16 items-center gap-x-4 border-b border-gray-200/50 bg-white/95 backdrop-blur-xl px-4 shadow-sm sm:gap-x-6 sm:px-6">
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
-          <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
-            Dashboard
+        <header className="bg-card/30 backdrop-blur-md border-b border-border/50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="md:hidden" /> {/* Spacer for mobile menu button */}
+            
+            <div className="flex items-center gap-4 ml-auto">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden md:block text-left">
+                  <p className="text-sm font-medium text-foreground">
+                    {profile?.first_name} {profile?.last_name}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {userRole === 'teacher' ? 'Teacher' : 'Student'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </header>
 
         {/* Page content */}
-        <main className="min-h-screen">
+        <div className="p-6">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 };
