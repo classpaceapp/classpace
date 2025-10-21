@@ -55,13 +55,24 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, isTeacher }) =
   const fetchMessages = async () => {
     try {
       const { data, error } = await supabase
-        .from('messages')
+        .from('session_messages')
         .select('*')
         .eq('session_id', sessionId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages((data || []) as Message[]);
+      
+      const transformedMessages = (data || []).map(msg => ({
+        id: msg.id,
+        content: msg.message,
+        user_id: msg.user_id,
+        is_ai: false,
+        message_type: 'text' as const,
+        file_url: null,
+        created_at: msg.created_at
+      }));
+      
+      setMessages(transformedMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -82,11 +93,21 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, isTeacher }) =
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'messages',
+          table: 'session_messages',
           filter: `session_id=eq.${sessionId}`,
         },
         (payload) => {
-          setMessages(prev => [...prev, payload.new as Message]);
+          const newMsg = payload.new as any;
+          const transformedMsg: Message = {
+            id: newMsg.id,
+            content: newMsg.message,
+            user_id: newMsg.user_id,
+            is_ai: false,
+            message_type: 'text',
+            file_url: null,
+            created_at: newMsg.created_at
+          };
+          setMessages(prev => [...prev, transformedMsg]);
         }
       )
       .subscribe();
@@ -102,13 +123,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, isTeacher }) =
     setSending(true);
     try {
       const { error } = await supabase
-        .from('messages')
+        .from('session_messages')
         .insert({
           session_id: sessionId,
           user_id: user.id,
-          content: newMessage.trim(),
-          is_ai: false,
-          message_type: 'text'
+          message: newMessage.trim()
         });
 
       if (error) throw error;

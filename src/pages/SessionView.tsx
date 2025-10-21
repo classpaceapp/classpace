@@ -14,13 +14,12 @@ import { format } from 'date-fns';
 interface Session {
   id: string;
   pod_id: string;
-  started_by: string;
+  title: string;
   started_at: string;
   ended_at: string | null;
-  status: 'active' | 'ended';
-  title: string | null;
+  ai_recap: string | null;
   pod: {
-    name: string;
+    title: string;
     description: string | null;
   };
 }
@@ -56,7 +55,7 @@ const SessionView: React.FC = () => {
 
       const { data: podData, error: podError } = await supabase
         .from('pods')
-        .select('name, description')
+        .select('title, description')
         .eq('id', sessionData.pod_id)
         .single();
 
@@ -65,7 +64,7 @@ const SessionView: React.FC = () => {
       setSession({
         ...sessionData,
         pod: podData
-      } as Session);
+      });
     } catch (error) {
       console.error('Error fetching session:', error);
       toast({
@@ -80,17 +79,16 @@ const SessionView: React.FC = () => {
   };
 
   const endSession = async () => {
-    if (!user || !session || session.started_by !== user.id) return;
+    if (!user || !session) return;
 
     setEndingSession(true);
     try {
       const { error } = await supabase
         .from('sessions')
         .update({
-          status: 'ended',
           ended_at: new Date().toISOString()
         })
-        .eq('id', session.id);
+        .eq('id', sessionId);
 
       if (error) throw error;
 
@@ -152,8 +150,8 @@ const SessionView: React.FC = () => {
     );
   }
 
-  const isTeacher = profile?.role === 'teacher' && session.started_by === user?.id;
-  const isActive = session.status === 'active';
+  const isTeacher = profile?.role === 'teacher';
+  const isActive = !session.ended_at;
   const sessionTitle = session.title || `Session ${format(new Date(session.started_at), 'MMM d, h:mm a')}`;
 
   return (
@@ -167,7 +165,7 @@ const SessionView: React.FC = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold">{sessionTitle}</h1>
-              <p className="text-muted-foreground">{session.pod.name}</p>
+              <p className="text-muted-foreground">{session.pod.title}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">

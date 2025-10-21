@@ -24,13 +24,13 @@ import {
 
 interface Pod {
   id: string;
-  name: string;
+  title: string;
   description: string | null;
-  subject: string | null;
-  grade_level: string | null;
+  subject: string;
+  teacher_id: string;
+  pod_code: string;
   created_at: string;
   updated_at: string;
-  created_by: string;
 }
 
 const PodView: React.FC = () => {
@@ -49,25 +49,7 @@ const PodView: React.FC = () => {
     try {
       setLoading(true);
       
-      // Check if user is a member of this pod
-      const { data: membership, error: memberError } = await supabase
-        .from('pod_members')
-        .select('role')
-        .eq('pod_id', id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (memberError || !membership) {
-        toast({
-          title: "Access denied",
-          description: "You don't have permission to view this pod.",
-          variant: "destructive",
-        });
-        navigate('/dashboard');
-        return;
-      }
-
-      // Fetch pod details
+      // Check if user is a member of this pod or is the teacher
       const { data: podData, error: podError } = await supabase
         .from('pods')
         .select('*')
@@ -75,6 +57,28 @@ const PodView: React.FC = () => {
         .single();
 
       if (podError) throw podError;
+
+      // Check if user is teacher or member
+      const isTeacher = podData.teacher_id === user.id;
+      
+      if (!isTeacher) {
+        const { data: membership, error: memberError } = await supabase
+          .from('pod_members')
+          .select('*')
+          .eq('pod_id', id)
+          .eq('user_id', user.id)
+          .single();
+
+        if (memberError || !membership) {
+          toast({
+            title: "Access denied",
+            description: "You don't have permission to view this pod.",
+            variant: "destructive",
+          });
+          navigate('/dashboard');
+          return;
+        }
+      }
 
       setPod(podData);
     } catch (error: any) {
@@ -132,7 +136,7 @@ const PodView: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.title}</h1>
             {pod.description && (
               <p className="text-muted-foreground mt-1">{pod.description}</p>
             )}
@@ -207,11 +211,7 @@ const PodView: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm text-muted-foreground">Subject</label>
-                      <p className="font-medium">{pod.subject || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm text-muted-foreground">Grade Level</label>
-                      <p className="font-medium">{pod.grade_level || 'Not specified'}</p>
+                      <p className="font-medium">{pod.subject}</p>
                     </div>
                   </div>
                 </CardContent>

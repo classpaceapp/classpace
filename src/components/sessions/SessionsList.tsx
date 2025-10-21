@@ -9,11 +9,10 @@ import SessionCard from './SessionCard';
 
 interface Session {
   id: string;
-  title: string | null;
+  title: string;
   started_at: string;
   ended_at: string | null;
-  status: 'active' | 'ended';
-  started_by: string;
+  ai_recap: string | null;
 }
 
 interface SessionsListProps {
@@ -41,7 +40,7 @@ const SessionsList: React.FC<SessionsListProps> = ({ podId }) => {
         .order('started_at', { ascending: false });
 
       if (error) throw error;
-      setSessions((data || []) as Session[]);
+      setSessions(data || []);
     } catch (error) {
       console.error('Error fetching sessions:', error);
       toast({

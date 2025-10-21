@@ -15,14 +15,14 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface Pod {
   id: string;
-  name: string;
+  title: string;
   description: string | null;
-  subject: string | null;
-  grade_level: string | null;
+  subject: string;
+  teacher_id: string;
+  pod_code: string;
   created_at: string;
   updated_at: string;
   student_count?: number;
-  last_activity?: string;
 }
 
 interface PodCardProps {
@@ -36,7 +36,7 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath }) => {
     ? `${pod.description.substring(0, 120)}...` 
     : pod.description;
 
-  const lastActivityDate = pod.last_activity || pod.updated_at;
+  const lastActivityDate = pod.updated_at;
   const timeAgo = formatDistanceToNow(new Date(lastActivityDate), { addSuffix: true });
 
   return (
@@ -45,21 +45,13 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath }) => {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-1">
-              {pod.name}
+              {pod.title}
             </h3>
             <div className="flex items-center gap-2 flex-wrap">
-              {pod.subject && (
-                <Badge variant="secondary" className="text-xs">
-                  <BookOpen className="w-3 h-3 mr-1" />
-                  {pod.subject}
-                </Badge>
-              )}
-              {pod.grade_level && (
-                <Badge variant="outline" className="text-xs">
-                  <GraduationCap className="w-3 h-3 mr-1" />
-                  {pod.grade_level}
-                </Badge>
-              )}
+              <Badge variant="secondary" className="text-xs">
+                <BookOpen className="w-3 h-3 mr-1" />
+                {pod.subject}
+              </Badge>
             </div>
           </div>
         </div>

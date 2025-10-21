@@ -20,13 +20,13 @@ import {
 
 interface Pod {
   id: string;
-  name: string;
+  title: string;
   description: string | null;
-  subject: string | null;
-  grade_level: string | null;
+  subject: string;
+  teacher_id: string;
+  pod_code: string;
   created_at: string;
   updated_at: string;
-  created_by: string;
   teacher_name?: string;
 }
 
@@ -48,12 +48,12 @@ const StudentPodView: React.FC = () => {
       // Check if user is a member of this pod
       const { data: membership, error: memberError } = await supabase
         .from('pod_members')
-        .select('role')
+        .select('*')
         .eq('pod_id', id)
         .eq('user_id', user.id)
         .single();
 
-      if (memberError || !membership || membership.role !== 'student') {
+      if (memberError || !membership) {
         toast({
           title: "Access denied",
           description: "You don't have permission to view this pod.",
@@ -63,25 +63,27 @@ const StudentPodView: React.FC = () => {
         return;
       }
 
-      // Fetch pod details with teacher info
+      // Fetch pod details
       const { data: podData, error: podError } = await supabase
         .from('pods')
-        .select(`
-          *,
-          profiles!pods_created_by_fkey (
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
       if (podError) throw podError;
 
-      const teacher = podData.profiles;
+      // Get teacher info
+      const { data: teacherProfile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', podData.teacher_id)
+        .single();
+
       setPod({
         ...podData,
-        teacher_name: teacher ? `${teacher.first_name} ${teacher.last_name}` : 'Unknown Teacher'
+        teacher_name: teacherProfile 
+          ? `${teacherProfile.first_name} ${teacherProfile.last_name}` 
+          : 'Unknown Teacher'
       });
     } catch (error: any) {
       console.error('Error fetching pod:', error);
@@ -138,11 +140,10 @@ const StudentPodView: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.title}</h1>
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
               <span>Teacher: {pod.teacher_name}</span>
-              {pod.subject && <span>• {pod.subject}</span>}
-              {pod.grade_level && <span>• {pod.grade_level}</span>}
+              <span>• {pod.subject}</span>
             </div>
             {pod.description && (
               <p className="text-muted-foreground mt-2">{pod.description}</p>
@@ -202,11 +203,7 @@ const StudentPodView: React.FC = () => {
                       </div>
                       <div>
                         <label className="text-sm text-muted-foreground">Subject</label>
-                        <p className="font-medium">{pod.subject || 'Not specified'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm text-muted-foreground">Grade Level</label>
-                        <p className="font-medium">{pod.grade_level || 'Not specified'}</p>
+                        <p className="font-medium">{pod.subject}</p>
                       </div>
                     </div>
                   </div>

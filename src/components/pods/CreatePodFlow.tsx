@@ -20,12 +20,9 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     description: '',
-    subject: '',
-    grade_level: '',
-    learning_objectives: '',
-    estimated_duration: ''
+    subject: ''
   });
 
   const steps = [
@@ -63,39 +60,28 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
   };
 
   const handleSubmit = async () => {
-    if (!user?.id || !formData.name.trim()) return;
+    if (!user?.id || !formData.title.trim()) return;
 
     setLoading(true);
     try {
+      const podCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
       // Create the pod
-      const { data: pod, error: podError } = await supabase
+      const { error } = await supabase
         .from('pods')
         .insert({
-          name: formData.name.trim(),
+          title: formData.title.trim(),
           description: formData.description.trim() || null,
-          subject: formData.subject.trim() || null,
-          grade_level: formData.grade_level.trim() || null,
-          created_by: user.id
-        })
-        .select()
-        .single();
-
-      if (podError) throw podError;
-
-      // Add the creator as a teacher member
-      const { error: memberError } = await supabase
-        .from('pod_members')
-        .insert({
-          pod_id: pod.id,
-          user_id: user.id,
-          role: 'teacher'
+          subject: formData.subject.trim(),
+          teacher_id: user.id,
+          pod_code: podCode
         });
 
-      if (memberError) throw memberError;
+      if (error) throw error;
 
       toast({
         title: "Pod created successfully!",
-        description: `${formData.name} has been created and you're ready to start teaching.`,
+        description: `${formData.title} has been created and you're ready to start teaching.`,
       });
 
       onComplete();
@@ -114,7 +100,7 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return formData.name.trim() && formData.subject.trim();
+        return formData.title.trim() && formData.subject.trim();
       case 2:
         return formData.description.trim();
       case 3:
@@ -134,9 +120,9 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
                 Pod Name *
               </Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="e.g., Advanced Biology, Intro to Programming"
                 className="text-lg h-12"
               />
@@ -157,19 +143,6 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
                 className="text-lg h-12"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="grade_level" className="text-base font-semibold">
-                Grade Level
-              </Label>
-              <Input
-                id="grade_level"
-                value={formData.grade_level}
-                onChange={(e) => handleInputChange('grade_level', e.target.value)}
-                placeholder="e.g., Grade 9, High School, University"
-                className="text-lg h-12"
-              />
-            </div>
           </div>
         );
 
@@ -184,39 +157,9 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Describe what students will learn in this pod. What topics will you cover? What skills will they develop?"
-                rows={4}
+                placeholder="Describe what students will learn in this pod..."
+                rows={6}
                 className="resize-none text-base"
-              />
-              <p className="text-sm text-muted-foreground">
-                Help students understand what to expect from your pod
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="learning_objectives" className="text-base font-semibold">
-                Learning Objectives
-              </Label>
-              <Textarea
-                id="learning_objectives"
-                value={formData.learning_objectives}
-                onChange={(e) => handleInputChange('learning_objectives', e.target.value)}
-                placeholder="What specific goals will students achieve? List the key outcomes..."
-                rows={3}
-                className="resize-none text-base"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="estimated_duration" className="text-base font-semibold">
-                Estimated Duration
-              </Label>
-              <Input
-                id="estimated_duration"
-                value={formData.estimated_duration}
-                onChange={(e) => handleInputChange('estimated_duration', e.target.value)}
-                placeholder="e.g., 8 weeks, 1 semester, 3 months"
-                className="text-lg h-12"
               />
             </div>
           </div>
@@ -236,36 +179,18 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
             <Card className="border-2 border-gray-200">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="h-5 w-5 text-blue-600" />
-                  <span>{formData.name}</span>
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  <span>{formData.title}</span>
                 </CardTitle>
-                {formData.subject && (
-                  <CardDescription className="text-base">
-                    {formData.subject} {formData.grade_level && `• ${formData.grade_level}`}
-                  </CardDescription>
-                )}
+                <CardDescription className="text-base">
+                  {formData.subject}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {formData.description && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Description</h4>
-                    <p className="text-gray-700">{formData.description}</p>
-                  </div>
-                )}
-                
-                {formData.learning_objectives && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Learning Objectives</h4>
-                    <p className="text-gray-700">{formData.learning_objectives}</p>
-                  </div>
-                )}
-
-                {formData.estimated_duration && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Duration</h4>
-                    <p className="text-gray-700">{formData.estimated_duration}</p>
-                  </div>
-                )}
+                <div>
+                  <h4 className="font-semibold mb-1">Description</h4>
+                  <p className="text-muted-foreground">{formData.description}</p>
+                </div>
               </CardContent>
             </Card>
           </div>

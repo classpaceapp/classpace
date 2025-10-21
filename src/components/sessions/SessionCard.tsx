@@ -10,7 +10,6 @@ interface Session {
   title: string | null;
   started_at: string;
   ended_at: string | null;
-  status: 'active' | 'ended';
   messageCount?: number;
   participantCount?: number;
 }
@@ -28,7 +27,7 @@ const SessionCard: React.FC<SessionCardProps> = ({
   onViewSession,
   canJoin
 }) => {
-  const isActive = session.status === 'active';
+  const isActive = !session.ended_at;
   const startTime = format(new Date(session.started_at), 'MMM d, h:mm a');
   const endTime = session.ended_at ? format(new Date(session.ended_at), 'h:mm a') : null;
 

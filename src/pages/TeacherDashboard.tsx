@@ -12,14 +12,14 @@ import { Plus, Users, BookOpen, Activity, Sparkles } from 'lucide-react';
 
 interface Pod {
   id: string;
-  name: string;
+  title: string;
   description: string | null;
-  subject: string | null;
-  grade_level: string | null;
+  subject: string;
+  teacher_id: string;
+  pod_code: string;
   created_at: string;
   updated_at: string;
   student_count?: number;
-  last_activity?: string;
 }
 
 const TeacherDashboard: React.FC = () => {
@@ -35,26 +35,22 @@ const TeacherDashboard: React.FC = () => {
     try {
       setLoading(true);
       
-      // Fetch pods created by this teacher with student counts
+      // Fetch pods created by this teacher
       const { data: podsData, error } = await supabase
         .from('pods')
-        .select(`
-          *,
-          pod_members!inner(count)
-        `)
-        .eq('created_by', user.id)
+        .select('*')
+        .eq('teacher_id', user.id)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
-      // Transform data to include student counts
+      // Get student counts for each pod
       const podsWithCounts = await Promise.all(
         (podsData || []).map(async (pod) => {
           const { count } = await supabase
             .from('pod_members')
             .select('*', { count: 'exact', head: true })
-            .eq('pod_id', pod.id)
-            .eq('role', 'student');
+            .eq('pod_id', pod.id);
 
           return {
             ...pod,
@@ -177,18 +173,10 @@ const TeacherDashboard: React.FC = () => {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="text-4xl font-bold text-gray-900 mb-2">
-                  {pods.filter(pod => {
-                    const lastWeek = new Date();
-                    lastWeek.setDate(lastWeek.getDate() - 7);
-                    return pod.last_activity && new Date(pod.last_activity) > lastWeek;
-                  }).length}
+                  {pods.length}
                 </div>
-                <p className="text-gray-600 font-medium">
-                  {pods.filter(pod => {
-                    const lastWeek = new Date();
-                    lastWeek.setDate(lastWeek.getDate() - 7);
-                    return pod.last_activity && new Date(pod.last_activity) > lastWeek;
-                  }).length === 1 ? 'pod' : 'pods'} active
+                <p className="text-muted-foreground font-medium">
+                  pods active
                 </p>
               </CardContent>
             </Card>

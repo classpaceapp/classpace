@@ -27,51 +27,39 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     description: '',
-    subject: '',
-    grade_level: ''
+    subject: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user?.id || !formData.name.trim()) return;
+    if (!user?.id || !formData.title.trim()) return;
 
     setLoading(true);
     try {
+      const podCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
       // Create the pod
-      const { data: pod, error: podError } = await supabase
+      const { error } = await supabase
         .from('pods')
         .insert({
-          name: formData.name.trim(),
+          title: formData.title.trim(),
           description: formData.description.trim() || null,
-          subject: formData.subject.trim() || null,
-          grade_level: formData.grade_level.trim() || null,
-          created_by: user.id
-        })
-        .select()
-        .single();
-
-      if (podError) throw podError;
-
-      // Add the creator as a teacher member
-      const { error: memberError } = await supabase
-        .from('pod_members')
-        .insert({
-          pod_id: pod.id,
-          user_id: user.id,
-          role: 'teacher'
+          subject: formData.subject.trim(),
+          teacher_id: user.id,
+          pod_code: podCode
         });
 
-      if (memberError) throw memberError;
+      if (error) throw error;
 
       toast({
         title: "Pod created successfully!",
-        description: `${formData.name} has been created and you've been added as a teacher.`,
+        description: `${formData.title} has been created.`,
       });
 
       // Reset form and close modal
-      setFormData({ name: '', description: '', subject: '', grade_level: '' });
+      setFormData({ title: '', description: '', subject: '' });
       onOpenChange(false);
       onPodCreated();
     } catch (error: any) {
@@ -102,13 +90,13 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium">
-              Pod Name *
+            <Label htmlFor="title" className="text-sm font-medium">
+              Pod Title *
             </Label>
             <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="e.g., Biology 101, Math Grade 9"
               required
               className="w-full"
@@ -129,30 +117,16 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="subject" className="text-sm font-medium">
-                Subject
-              </Label>
-              <Input
-                id="subject"
-                value={formData.subject}
-                onChange={(e) => handleInputChange('subject', e.target.value)}
-                placeholder="e.g., Mathematics, Science"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="grade_level" className="text-sm font-medium">
-                Grade Level
-              </Label>
-              <Input
-                id="grade_level"
-                value={formData.grade_level}
-                onChange={(e) => handleInputChange('grade_level', e.target.value)}
-                placeholder="e.g., Grade 9, High School"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="subject" className="text-sm font-medium">
+              Subject
+            </Label>
+            <Input
+              id="subject"
+              value={formData.subject}
+              onChange={(e) => handleInputChange('subject', e.target.value)}
+              placeholder="e.g., Mathematics, Science"
+            />
           </div>
 
           <DialogFooter className="gap-2">
@@ -166,7 +140,7 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !formData.name.trim()}
+              disabled={loading || !formData.title.trim()}
               className="min-w-[100px]"
             >
               {loading ? (

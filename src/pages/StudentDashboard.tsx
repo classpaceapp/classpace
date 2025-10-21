@@ -10,15 +10,15 @@ import { Users, BookOpen, Calendar, Sparkles } from 'lucide-react';
 
 interface Pod {
   id: string;
-  name: string;
+  title: string;
   description: string | null;
-  subject: string | null;
-  grade_level: string | null;
+  subject: string;
+  teacher_id: string;
+  pod_code: string;
   created_at: string;
   updated_at: string;
   teacher_name?: string;
   student_count?: number;
-  last_activity?: string;
 }
 
 const StudentDashboard: React.FC = () => {
@@ -39,48 +39,36 @@ const StudentDashboard: React.FC = () => {
         .select(`
           pod_id,
           pods (
-            id,
-            name,
-            description,
-            subject,
-            grade_level,
-            created_at,
-            updated_at,
-            created_by,
-            profiles!pods_created_by_fkey (
-              first_name,
-              last_name
-            )
+            *
           )
         `)
-        .eq('user_id', user.id)
-        .eq('role', 'student');
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       // Transform data and get student counts
       const podsWithDetails = await Promise.all(
-        (memberPods || []).map(async (member) => {
+        (memberPods || []).map(async (member: any) => {
           const pod = member.pods;
           if (!pod) return null;
 
           const { count } = await supabase
             .from('pod_members')
             .select('*', { count: 'exact', head: true })
-            .eq('pod_id', pod.id)
-            .eq('role', 'student');
+            .eq('pod_id', pod.id);
 
-          const teacher = pod.profiles;
+          // Get teacher info
+          const { data: teacherProfile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', pod.teacher_id)
+            .single();
           
           return {
-            id: pod.id,
-            name: pod.name,
-            description: pod.description,
-            subject: pod.subject,
-            grade_level: pod.grade_level,
-            created_at: pod.created_at,
-            updated_at: pod.updated_at,
-            teacher_name: teacher ? `${teacher.first_name} ${teacher.last_name}` : 'Unknown Teacher',
+            ...pod,
+            teacher_name: teacherProfile 
+              ? `${teacherProfile.first_name} ${teacherProfile.last_name}` 
+              : 'Unknown Teacher',
             student_count: count || 0
           };
         })
@@ -186,18 +174,10 @@ const StudentDashboard: React.FC = () => {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="text-4xl font-bold text-gray-900 mb-2">
-                  {pods.filter(pod => {
-                    const lastWeek = new Date();
-                    lastWeek.setDate(lastWeek.getDate() - 7);
-                    return pod.last_activity && new Date(pod.last_activity) > lastWeek;
-                  }).length}
+                  {pods.length}
                 </div>
-                <p className="text-gray-600 font-medium">
-                  {pods.filter(pod => {
-                    const lastWeek = new Date();
-                    lastWeek.setDate(lastWeek.getDate() - 7);
-                    return pod.last_activity && new Date(pod.last_activity) > lastWeek;
-                  }).length === 1 ? 'class' : 'classes'} active
+                <p className="text-muted-foreground font-medium">
+                  classes active
                 </p>
               </CardContent>
             </Card>
