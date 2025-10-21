@@ -10,217 +10,76 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      ai_activity_logs: {
+      ai_actions: {
         Row: {
+          action_type: string
+          created_at: string
           id: string
-          input_text: string
-          output_text: string
-          pod_id: string
-          timestamp: string
-          type: Database["public"]["Enums"]["ai_activity_type"]
+          pod_id: string | null
           user_id: string
         }
         Insert: {
+          action_type: string
+          created_at?: string
           id?: string
-          input_text: string
-          output_text: string
-          pod_id: string
-          timestamp?: string
-          type: Database["public"]["Enums"]["ai_activity_type"]
+          pod_id?: string | null
           user_id: string
         }
         Update: {
+          action_type?: string
+          created_at?: string
           id?: string
-          input_text?: string
-          output_text?: string
-          pod_id?: string
-          timestamp?: string
-          type?: Database["public"]["Enums"]["ai_activity_type"]
+          pod_id?: string | null
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "ai_activity_logs_pod_id_fkey"
+            foreignKeyName: "ai_actions_pod_id_fkey"
             columns: ["pod_id"]
             isOneToOne: false
             referencedRelation: "pods"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "ai_activity_logs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
-      messages: {
-        Row: {
-          content: string
-          created_at: string
-          file_url: string | null
-          id: string
-          is_ai: boolean
-          message_type: string
-          session_id: string
-          user_id: string | null
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          file_url?: string | null
-          id?: string
-          is_ai?: boolean
-          message_type?: string
-          session_id: string
-          user_id?: string | null
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          file_url?: string | null
-          id?: string
-          is_ai?: boolean
-          message_type?: string
-          session_id?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      notes: {
-        Row: {
-          content: string
-          created_at: string
-          created_by: string | null
-          generated_by_ai: boolean
-          id: string
-          session_id: string
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          created_by?: string | null
-          generated_by_ai?: boolean
-          id?: string
-          session_id: string
-          updated_at?: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          created_by?: string | null
-          generated_by_ai?: boolean
-          id?: string
-          session_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notes_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pod_chats: {
+      materials: {
         Row: {
           created_at: string
-          id: string
-          message: string
-          pod_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          message: string
-          pod_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          message?: string
-          pod_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pod_chats_pod_id_fkey"
-            columns: ["pod_id"]
-            isOneToOne: false
-            referencedRelation: "pods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pod_chats_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pod_materials: {
-        Row: {
-          created_at: string
-          file_name: string
-          file_size: number | null
-          file_type: Database["public"]["Enums"]["file_type"]
+          file_type: string
           file_url: string
           id: string
           pod_id: string
+          title: string
           uploaded_by: string
         }
         Insert: {
           created_at?: string
-          file_name: string
-          file_size?: number | null
-          file_type: Database["public"]["Enums"]["file_type"]
+          file_type: string
           file_url: string
           id?: string
           pod_id: string
+          title: string
           uploaded_by: string
         }
         Update: {
           created_at?: string
-          file_name?: string
-          file_size?: number | null
-          file_type?: Database["public"]["Enums"]["file_type"]
+          file_type?: string
           file_url?: string
           id?: string
           pod_id?: string
+          title?: string
           uploaded_by?: string
         }
         Relationships: [
           {
-            foreignKeyName: "pod_materials_pod_id_fkey"
+            foreignKeyName: "materials_pod_id_fkey"
             columns: ["pod_id"]
             isOneToOne: false
             referencedRelation: "pods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pod_materials_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -230,21 +89,18 @@ export type Database = {
           id: string
           joined_at: string
           pod_id: string
-          role: Database["public"]["Enums"]["pod_member_role"]
           user_id: string
         }
         Insert: {
           id?: string
           joined_at?: string
           pod_id: string
-          role?: Database["public"]["Enums"]["pod_member_role"]
           user_id: string
         }
         Update: {
           id?: string
           joined_at?: string
           pod_id?: string
-          role?: Database["public"]["Enums"]["pod_member_role"]
           user_id?: string
         }
         Relationships: [
@@ -255,245 +111,175 @@ export type Database = {
             referencedRelation: "pods"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "pod_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pod_notes: {
-        Row: {
-          content: string
-          created_at: string
-          created_by: string
-          id: string
-          pod_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          created_by: string
-          id?: string
-          pod_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          created_by?: string
-          id?: string
-          pod_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pod_notes_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pod_notes_pod_id_fkey"
-            columns: ["pod_id"]
-            isOneToOne: false
-            referencedRelation: "pods"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pod_whiteboards: {
-        Row: {
-          id: string
-          last_updated: string
-          pod_id: string
-          updated_by: string
-          whiteboard_data: Json
-        }
-        Insert: {
-          id?: string
-          last_updated?: string
-          pod_id: string
-          updated_by: string
-          whiteboard_data?: Json
-        }
-        Update: {
-          id?: string
-          last_updated?: string
-          pod_id?: string
-          updated_by?: string
-          whiteboard_data?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pod_whiteboards_pod_id_fkey"
-            columns: ["pod_id"]
-            isOneToOne: false
-            referencedRelation: "pods"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pod_whiteboards_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       pods: {
         Row: {
           created_at: string
-          created_by: string
           description: string | null
-          grade_level: string | null
           id: string
-          name: string
-          subject: string | null
+          pod_code: string
+          subject: string
+          teacher_id: string
+          title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          created_by: string
           description?: string | null
-          grade_level?: string | null
           id?: string
-          name: string
-          subject?: string | null
+          pod_code: string
+          subject: string
+          teacher_id: string
+          title: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          created_by?: string
           description?: string | null
-          grade_level?: string | null
           id?: string
-          name?: string
-          subject?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pods_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          created_at: string
-          email: string | null
-          first_name: string | null
-          id: string
-          last_name: string | null
-          phone_number: string | null
-          role: Database["public"]["Enums"]["user_role"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          id: string
-          last_name?: string | null
-          phone_number?: string | null
-          role: Database["public"]["Enums"]["user_role"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          phone_number?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
+          pod_code?: string
+          subject?: string
+          teacher_id?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []
       }
-      quiz_questions: {
+      profiles: {
         Row: {
-          correct_answer: number
+          avatar_url: string | null
           created_at: string
-          explanation: string | null
+          first_name: string | null
           id: string
-          options: Json
-          order_index: number
-          question: string
-          quiz_id: string
+          last_name: string | null
+          role: string
+          updated_at: string
         }
         Insert: {
-          correct_answer: number
+          avatar_url?: string | null
           created_at?: string
-          explanation?: string | null
-          id?: string
-          options: Json
-          order_index?: number
-          question: string
-          quiz_id: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          role: string
+          updated_at?: string
         }
         Update: {
-          correct_answer?: number
+          avatar_url?: string | null
           created_at?: string
-          explanation?: string | null
+          first_name?: string | null
           id?: string
-          options?: Json
-          order_index?: number
-          question?: string
-          quiz_id?: string
+          last_name?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_submissions: {
+        Row: {
+          ai_feedback: string | null
+          id: string
+          project_id: string
+          submission_text: string | null
+          submission_url: string | null
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          id?: string
+          project_id: string
+          submission_text?: string | null
+          submission_url?: string | null
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          id?: string
+          project_id?: string
+          submission_text?: string | null
+          submission_url?: string | null
+          submitted_at?: string
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "quiz_questions_quiz_id_fkey"
-            columns: ["quiz_id"]
+            foreignKeyName: "project_submissions_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "quizzes"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
       }
-      quiz_submissions: {
+      projects: {
         Row: {
-          answers: Json
+          created_at: string
+          created_by: string
+          description: string
+          due_date: string | null
           id: string
-          quiz_id: string
-          score: number
-          student_id: string
-          submitted_at: string
-          total_questions: number
+          pod_id: string
+          title: string
         }
         Insert: {
-          answers: Json
+          created_at?: string
+          created_by: string
+          description: string
+          due_date?: string | null
           id?: string
-          quiz_id: string
-          score?: number
-          student_id: string
-          submitted_at?: string
-          total_questions: number
+          pod_id: string
+          title: string
         }
         Update: {
-          answers?: Json
+          created_at?: string
+          created_by?: string
+          description?: string
+          due_date?: string | null
           id?: string
-          quiz_id?: string
-          score?: number
-          student_id?: string
-          submitted_at?: string
-          total_questions?: number
+          pod_id?: string
+          title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "quiz_submissions_quiz_id_fkey"
+            foreignKeyName: "projects_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          completed_at: string
+          id: string
+          quiz_id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          completed_at?: string
+          id?: string
+          quiz_id: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string
+          id?: string
+          quiz_id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_quiz_id_fkey"
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quizzes"
@@ -505,32 +291,29 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
-          description: string | null
           id: string
-          is_published: boolean
           pod_id: string
+          published: boolean | null
+          questions: Json
           title: string
-          updated_at: string
         }
         Insert: {
           created_at?: string
           created_by: string
-          description?: string | null
           id?: string
-          is_published?: boolean
           pod_id: string
+          published?: boolean | null
+          questions: Json
           title: string
-          updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string
-          description?: string | null
           id?: string
-          is_published?: boolean
           pod_id?: string
+          published?: boolean | null
+          questions?: Json
           title?: string
-          updated_at?: string
         }
         Relationships: [
           {
@@ -542,39 +325,68 @@ export type Database = {
           },
         ]
       }
+      session_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_pinned: boolean | null
+          message: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          message: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          message?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
+          ai_recap: string | null
           created_at: string
           ended_at: string | null
           id: string
           pod_id: string
           started_at: string
-          started_by: string
-          status: string
-          title: string | null
-          updated_at: string
+          title: string
         }
         Insert: {
+          ai_recap?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
           pod_id: string
           started_at?: string
-          started_by: string
-          status?: string
-          title?: string | null
-          updated_at?: string
+          title: string
         }
         Update: {
+          ai_recap?: string | null
           created_at?: string
           ended_at?: string | null
           id?: string
           pod_id?: string
           started_at?: string
-          started_by?: string
-          status?: string
-          title?: string | null
-          updated_at?: string
+          title?: string
         }
         Relationships: [
           {
@@ -589,34 +401,34 @@ export type Database = {
       subscriptions: {
         Row: {
           created_at: string
-          end_date: string | null
+          current_period_end: string | null
           id: string
-          paypal_subscription_id: string | null
-          plan: string
-          start_date: string
           status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          end_date?: string | null
+          current_period_end?: string | null
           id?: string
-          paypal_subscription_id?: string | null
-          plan?: string
-          start_date?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          end_date?: string | null
+          current_period_end?: string | null
           id?: string
-          paypal_subscription_id?: string | null
-          plan?: string
-          start_date?: string
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
           updated_at?: string
           user_id?: string
         }
@@ -627,37 +439,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_pod_role: {
-        Args: { pod_id: string; user_id: string }
-        Returns: Database["public"]["Enums"]["pod_member_role"]
-      }
-      get_user_role: {
-        Args: { user_id: string }
-        Returns: Database["public"]["Enums"]["user_role"]
-      }
-      is_member_of_pod: {
-        Args: { _pod_id: string; _user_id: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      ai_activity_type:
-        | "summary"
-        | "quiz"
-        | "question"
-        | "timeline"
-        | "explanation"
-      file_type:
-        | "pdf"
-        | "docx"
-        | "png"
-        | "jpg"
-        | "jpeg"
-        | "mp4"
-        | "pptx"
-        | "txt"
-      pod_member_role: "teacher" | "student"
-      user_role: "teacher" | "learner"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -784,17 +569,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      ai_activity_type: [
-        "summary",
-        "quiz",
-        "question",
-        "timeline",
-        "explanation",
-      ],
-      file_type: ["pdf", "docx", "png", "jpg", "jpeg", "mp4", "pptx", "txt"],
-      pod_member_role: ["teacher", "student"],
-      user_role: ["teacher", "learner"],
-    },
+    Enums: {},
   },
 } as const
