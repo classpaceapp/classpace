@@ -12,57 +12,54 @@ const Pricing = () => {
 
   const plans = [
     {
-      name: "Starter",
+      name: "Free",
       price: "Free",
-      description: "Perfect for trying out Classpace",
+      description: "Basic but fully usable",
       icon: Star,
       features: [
-        "2 AI Pods",
-        "Basic AI summaries",
-        "5 quiz generations per month",
-        "Email support",
-        "Up to 3 students per pod"
+        "1 AI Pod (teacher)",
+        "Core features enabled",
+        "Create and run sessions",
+        "Invite students",
+        "Email support"
       ],
       buttonText: "Get Started",
       popular: false
     },
     {
-      name: "Educator",
-      price: "$18",
+      name: "Premium",
+      price: "$7",
       period: "/month",
-      description: "Ideal for individual teachers",
+      description: "Unlimited pods and growth",
       icon: Zap,
       features: [
         "Unlimited AI Pods",
-        "Advanced AI summaries & flashcards",
-        "Unlimited quiz & content generation",
         "Priority support",
-        "Up to 25 students per pod",
-        "Progress tracking & analytics",
-        "File uploads (PDFs, audio)",
-        "Weekly recap emails"
+        "Faster refresh & checks",
+        "Bigger class sizes",
+        "All Free features"
       ],
-      buttonText: "Start Free Trial",
-      popular: false
+      buttonText: "Upgrade Now",
+      popular: true
     }
   ];
 
   const faqs = [
     {
+      question: "What's included in Free vs Premium?",
+      answer: "Free includes 1 AI Pod with all core features. Premium unlocks unlimited pods and priority support for just $7/month."
+    },
+    {
       question: "Can I change plans anytime?",
-      answer: "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges accordingly."
+      answer: "Yes. Upgrades apply immediately and billing is prorated where applicable."
     },
     {
       question: "Is there a free trial?",
-      answer: "The Educator plan comes with a 14-day free trial. No credit card required to get started. The Starter plan is always free with basic features."
+      answer: "The Free plan is always available. You can upgrade to Premium anytime for $7/month."
     },
     {
       question: "What happens to my data if I cancel?",
-      answer: "You can export all your data at any time. After cancellation, your data is retained for 30 days before being permanently deleted, giving you time to reconsider or export your content."
-    },
-    {
-      question: "Do you offer discounts for schools?",
-      answer: "Yes! We offer special pricing for educational institutions, nonprofits, and bulk purchases. Contact our sales team for a custom quote."
+      answer: "You'll keep access to your data. If you move back to Free, you'll retain only your first pod; additional pods will be hidden until you upgrade again."
     }
   ];
 

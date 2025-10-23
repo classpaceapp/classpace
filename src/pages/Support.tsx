@@ -13,7 +13,7 @@ const Support = () => {
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
             <button 
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
               <img 

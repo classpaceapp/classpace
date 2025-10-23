@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -27,8 +27,11 @@ const StudentDashboard: React.FC = () => {
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMounted = useRef(true);
+  const requestIdRef = useRef(0);
 
   const fetchPods = async () => {
+    const currentId = ++requestIdRef.current;
     if (!user?.id) return;
 
     try {
@@ -75,21 +78,28 @@ const StudentDashboard: React.FC = () => {
         })
       );
 
+      if (!isMounted.current || currentId !== requestIdRef.current) return;
       setPods(podsWithDetails.filter(Boolean) as Pod[]);
     } catch (error: any) {
       console.error('Error fetching pods:', error);
-      toast({
-        title: "Failed to load pods",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
+      if (isMounted.current && error?.message && !/Failed to fetch/i.test(error.message)) {
+        toast({
+          title: "Failed to load pods",
+          description: error.message || "Please try again later.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    isMounted.current = true;
     fetchPods();
+    return () => {
+      isMounted.current = false;
+    };
   }, [user?.id]);
 
   return (

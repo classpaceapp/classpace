@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -55,6 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
   const { toast } = useToast();
+  const isCheckingRef = useRef(false);
+  const sessionRef = useRef<Session | null>(null);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -76,7 +78,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshSubscription = async () => {
-    if (!session) return;
+    if (!sessionRef.current) return;
+    if (isCheckingRef.current) return;
+    isCheckingRef.current = true;
     
     try {
       setCheckingSubscription(true);
@@ -94,57 +98,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null });
     } finally {
       setCheckingSubscription(false);
+      isCheckingRef.current = false;
     }
   };
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Defer profile fetching to prevent potential deadlocks
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-            refreshSubscription();
-          }, 0);
-        } else {
-          setProfile(null);
-          setSubscription(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
+    // Auth state listener (mount once)
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((event, sess) => {
+      console.log('Auth state change:', event, sess);
+      setSession(sess);
+      sessionRef.current = sess;
+      setUser(sess?.user ?? null);
+      
+      if (sess?.user) {
+        // Defer Supabase calls to prevent deadlocks
         setTimeout(() => {
-          fetchProfile(session.user.id);
+          fetchProfile(sess.user.id);
+          refreshSubscription();
+        }, 0);
+      } else {
+        setProfile(null);
+        setSubscription(null);
+      }
+      setLoading(false);
+    });
+
+    // Initialize with existing session
+    supabase.auth.getSession().then(({ data: { session: current } }) => {
+      setSession(current);
+      sessionRef.current = current;
+      setUser(current?.user ?? null);
+      if (current?.user) {
+        setTimeout(() => {
+          fetchProfile(current.user.id);
           refreshSubscription();
         }, 0);
       }
       setLoading(false);
     });
 
-    // Set up periodic subscription check (every 5 minutes to avoid rate limits)
-    const subscriptionInterval = setInterval(() => {
-      if (session) {
+    // Periodic subscription refresh (every 5 minutes)
+    const id = window.setInterval(() => {
+      if (sessionRef.current) {
         refreshSubscription();
       }
     }, 300000);
 
     return () => {
-      subscription.unsubscribe();
-      clearInterval(subscriptionInterval);
+      authSub.unsubscribe();
+      clearInterval(id);
     };
-  }, [session]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {

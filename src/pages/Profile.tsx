@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Save, Sparkles, Palette } from 'lucide-react';
+import { User, Mail, Phone, Save, Sparkles, Palette, Image as ImageIcon, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Profile: React.FC = () => {
@@ -18,16 +19,24 @@ const Profile: React.FC = () => {
     first_name: '',
     last_name: '',
     email: '',
-    phone_number: ''
+    phone_number: '',
+    date_of_birth: '',
+    bio: '',
+    avatar_url: ''
   });
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (profile) {
       setFormData({
         first_name: profile.first_name || '',
         last_name: profile.last_name || '',
-        email: (profile as any).email || user?.email || '',
-        phone_number: (profile as any).phone_number || ''
+        email: user?.email || '',
+        phone_number: profile.phone_number || '',
+        date_of_birth: profile.date_of_birth || '',
+        bio: profile.bio || '',
+        avatar_url: profile.avatar_url || ''
       });
     }
   }, [profile, user]);
@@ -50,8 +59,10 @@ const Profile: React.FC = () => {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
-          email: formData.email,
-          phone_number: formData.phone_number
+          phone_number: formData.phone_number,
+          date_of_birth: formData.date_of_birth || null,
+          bio: formData.bio || null,
+          avatar_url: formData.avatar_url || null
         })
         .eq('id', user.id);
 
@@ -95,8 +106,8 @@ const Profile: React.FC = () => {
           <Card className="lg:col-span-1 bg-gradient-to-br from-primary/10 via-purple-500/10 to-secondary/10 border-primary/20">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4">
-                <Avatar className="h-24 w-24 mx-auto border-4 border-primary/20 shadow-2xl shadow-primary/20">
-                  <AvatarImage src="" />
+                  <Avatar className="h-24 w-24 mx-auto border-4 border-primary/20 shadow-2xl shadow-primary/20">
+                  <AvatarImage src={formData.avatar_url || ''} />
                   <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-2xl font-bold">
                     {initials}
                   </AvatarFallback>
@@ -112,6 +123,44 @@ const Profile: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4 text-center">
+                <div className="flex items-center justify-center">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !user?.id) return;
+                      try {
+                        setUploading(true);
+                        const filePath = `${user.id}/${Date.now()}_${file.name}`;
+                        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+                        if (uploadError) throw uploadError;
+                        const { data: publicUrl } = supabase.storage.from('avatars').getPublicUrl(filePath);
+                        const avatarUrl = publicUrl.publicUrl;
+                        setFormData((prev) => ({ ...prev, avatar_url: avatarUrl }));
+                        // Persist immediately
+                        await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+                        toast({ title: 'Avatar updated' });
+                      } catch (err: any) {
+                        toast({ title: 'Avatar upload failed', description: err.message, variant: 'destructive' });
+                      } finally {
+                        setUploading(false);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <ImageIcon className="h-4 w-4 mr-2" /> {uploading ? 'Uploading...' : 'Upload Avatar'}
+                  </Button>
+                </div>
                 <div className="p-4 bg-card/50 rounded-lg border border-border/50">
                   <p className="text-sm text-muted-foreground">Member since</p>
                   <p className="font-semibold">
@@ -167,34 +216,61 @@ const Profile: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="Enter your email address"
-                  className="bg-background/50 border-border/50 focus:border-primary/50"
-                />
-              </div>
+                  <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    readOnly
+                    className="bg-background/50 border-border/50 focus:border-primary/50"
+                  />
+                </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone_number" className="text-sm font-medium flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone_number"
-                  type="tel"
-                  value={formData.phone_number}
-                  onChange={(e) => handleInputChange('phone_number', e.target.value)}
-                  placeholder="Enter your phone number"
-                  className="bg-background/50 border-border/50 focus:border-primary/50"
-                />
-              </div>
+                  <Label htmlFor="phone_number" className="text-sm font-medium flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Phone Number
+                  </Label>
+                  <Input
+                    id="phone_number"
+                    type="tel"
+                    value={formData.phone_number}
+                    onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                    placeholder="Enter your phone number"
+                    className="bg-background/50 border-border/50 focus:border-primary/50"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="date_of_birth" className="text-sm font-medium flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Date of Birth
+                    </Label>
+                    <Input
+                      id="date_of_birth"
+                      type="date"
+                      value={formData.date_of_birth}
+                      onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                      className="bg-background/50 border-border/50 focus:border-primary/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bio" className="text-sm font-medium">
+                      Bio
+                    </Label>
+                    <Textarea
+                      id="bio"
+                      value={formData.bio}
+                      onChange={(e) => handleInputChange('bio', e.target.value)}
+                      placeholder="Tell us a bit about yourself"
+                      className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[120px]"
+                    />
+                  </div>
+                </div>
 
               <div className="pt-6 border-t border-border/50">
                 <Button 
