@@ -439,7 +439,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_pod_access: {
+        Args: { _pod_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_pod_member: {
+        Args: { _pod_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_pod_teacher: {
+        Args: { _pod_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
