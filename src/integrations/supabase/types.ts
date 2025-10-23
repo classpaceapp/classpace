@@ -439,6 +439,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_pod_limit: { Args: { _user_id: string }; Returns: boolean }
       has_pod_access: {
         Args: { _pod_id: string; _user_id: string }
         Returns: boolean
