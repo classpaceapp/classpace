@@ -41,9 +41,7 @@ const StartSessionModal: React.FC<StartSessionModalProps> = ({
         .from('sessions')
         .insert({
           pod_id: podId,
-          started_by: user.id,
-          title: title.trim() || null,
-          status: 'active'
+          title: title.trim() || 'Untitled Session',
         })
         .select()
         .single();

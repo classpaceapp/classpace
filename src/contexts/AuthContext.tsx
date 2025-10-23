@@ -13,14 +13,24 @@ interface Profile {
   updated_at: string;
 }
 
+interface Subscription {
+  subscribed: boolean;
+  tier: string;
+  product_id: string | null;
+  subscription_end: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  subscription: Subscription | null;
   loading: boolean;
+  checkingSubscription: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, role: 'teacher' | 'learner', firstName?: string, lastName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  refreshSubscription: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,7 +47,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkingSubscription, setCheckingSubscription] = useState(false);
   const { toast } = useToast();
 
   const fetchProfile = async (userId: string) => {
@@ -59,6 +71,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshSubscription = async () => {
+    if (!session) return;
+    
+    try {
+      setCheckingSubscription(true);
+      const { data, error } = await supabase.functions.invoke('check-subscription');
+      
+      if (error) {
+        console.error('Error checking subscription:', error);
+        setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null });
+        return;
+      }
+      
+      setSubscription(data as Subscription);
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null });
+    } finally {
+      setCheckingSubscription(false);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -71,9 +105,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Defer profile fetching to prevent potential deadlocks
           setTimeout(() => {
             fetchProfile(session.user.id);
+            refreshSubscription();
           }, 0);
         } else {
           setProfile(null);
+          setSubscription(null);
         }
         
         setLoading(false);
@@ -87,13 +123,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         setTimeout(() => {
           fetchProfile(session.user.id);
+          refreshSubscription();
         }, 0);
       }
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Set up periodic subscription check (every 60 seconds)
+    const subscriptionInterval = setInterval(() => {
+      if (session) {
+        refreshSubscription();
+      }
+    }, 60000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(subscriptionInterval);
+    };
+  }, [session]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -224,10 +271,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     profile,
+    subscription,
     loading,
+    checkingSubscription,
     signIn,
     signUp,
     signOut,
+    refreshSubscription,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

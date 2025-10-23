@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
+import SubscriptionCard from '@/components/subscription/SubscriptionCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -133,8 +134,10 @@ const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          {/* Stats and Subscription Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {/* Stats Cards */}
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
                 <div className="flex items-center justify-between">
@@ -165,22 +168,28 @@ const StudentDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold">Active This Week</CardTitle>
-                  <Calendar className="h-8 w-8" />
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="text-4xl font-bold text-gray-900 mb-2">
-                  {pods.length}
-                </div>
-                <p className="text-muted-foreground font-medium">
-                  classes active
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-6">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg font-bold">Active This Week</CardTitle>
+                    <Calendar className="h-8 w-8" />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="text-4xl font-bold text-gray-900 mb-2">
+                    {pods.length}
+                  </div>
+                  <p className="text-gray-600 font-medium">
+                    classes active
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Subscription Card */}
+            <div>
+              <SubscriptionCard />
+            </div>
           </div>
 
           {/* Classes Section */}
