@@ -129,12 +129,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // Set up periodic subscription check (every 60 seconds)
+    // Set up periodic subscription check (every 5 minutes to avoid rate limits)
     const subscriptionInterval = setInterval(() => {
       if (session) {
         refreshSubscription();
       }
-    }, 60000);
+    }, 300000);
 
     return () => {
       subscription.unsubscribe();

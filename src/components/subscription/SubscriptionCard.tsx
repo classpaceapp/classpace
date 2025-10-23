@@ -179,7 +179,7 @@ const SubscriptionCard: React.FC = () => {
             
             <div className="pt-4 border-t border-gray-200">
               <div className="flex items-baseline space-x-2 mb-4">
-                <span className="text-4xl font-bold text-gray-900">$9.99</span>
+                <span className="text-4xl font-bold text-gray-900">$7</span>
                 <span className="text-gray-600">/month</span>
               </div>
               

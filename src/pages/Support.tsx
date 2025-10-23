@@ -27,11 +27,11 @@ const Support = () => {
             </button>
             <Button 
               variant="ghost"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
               className="flex items-center space-x-2 text-gray-300 hover:text-white hover:bg-white/10"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
+              <span>Back to Dashboard</span>
             </Button>
           </nav>
         </div>
