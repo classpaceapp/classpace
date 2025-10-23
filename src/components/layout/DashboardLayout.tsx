@@ -12,7 +12,8 @@ import {
   User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const navigate = useNavigate();
 
   const navigationItems = [
+    {
+      name: 'Profile',
+      href: '/profile',
+      icon: User,
+      current: location.pathname === '/profile'
+    },
     {
       name: 'Documentation',
       href: '/documentation',
@@ -133,6 +140,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50">
           <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-10 w-10">
+              {profile?.avatar_url && (
+                <AvatarImage src={profile.avatar_url} alt="Profile avatar" />
+              )}
               <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                 {userInitials}
               </AvatarFallback>
@@ -165,21 +175,40 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             <div className="md:hidden" /> {/* Spacer for mobile menu button */}
             
             <div className="flex items-center gap-4 ml-auto">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-foreground">
-                    {profile?.first_name} {profile?.last_name}
-                  </p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {userRole === 'teacher' ? 'Teacher' : 'Student'}
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-center gap-4 ml-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 focus:outline-none">
+                    <Avatar className="h-8 w-8">
+                      {profile?.avatar_url && (
+                        <AvatarImage src={profile.avatar_url} alt="Profile avatar" />
+                      )}
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:block text-left">
+                      <p className="text-sm font-medium text-foreground">
+                        {profile?.first_name} {profile?.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {userRole === 'teacher' ? 'Teacher' : 'Student'}
+                      </p>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             </div>
           </div>
         </header>
