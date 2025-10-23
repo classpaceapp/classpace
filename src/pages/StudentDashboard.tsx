@@ -138,6 +138,11 @@ const StudentDashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    fetchPods();
+    return () => {
+      isMounted.current = false;
+    };
+  }, [user?.id]);
 
   return (
     <DashboardLayout userRole="learner">
