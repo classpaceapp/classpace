@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import StartSessionModal from '@/components/sessions/StartSessionModal';
 import SessionsList from '@/components/sessions/SessionsList';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { 
   ArrowLeft, 
   Users, 
@@ -31,6 +32,7 @@ interface Pod {
   pod_code: string;
   created_at: string;
   updated_at: string;
+  is_public: boolean;
 }
 
 const PodView: React.FC = () => {
@@ -48,8 +50,6 @@ const PodView: React.FC = () => {
 
     try {
       setLoading(true);
-      
-      // Check if user is a member of this pod or is the teacher
       const { data: podData, error: podError } = await supabase
         .from('pods')
         .select('*')
@@ -58,39 +58,45 @@ const PodView: React.FC = () => {
 
       if (podError) throw podError;
 
-      // Check if user is teacher or member
+      // Authorization: teacher or member
       const isTeacher = podData.teacher_id === user.id;
-      
       if (!isTeacher) {
         const { data: membership, error: memberError } = await supabase
           .from('pod_members')
           .select('*')
           .eq('pod_id', id)
           .eq('user_id', user.id)
-          .single();
-
+          .maybeSingle();
         if (memberError || !membership) {
-          toast({
-            title: "Access denied",
-            description: "You don't have permission to view this pod.",
-            variant: "destructive",
-          });
+          toast({ title: 'Access denied', description: "You don't have permission to view this pod.", variant: 'destructive' });
           navigate('/dashboard');
           return;
         }
       }
 
-      setPod(podData);
+      setPod(podData as Pod);
     } catch (error: any) {
       console.error('Error fetching pod:', error);
-      toast({
-        title: "Failed to load pod",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
+      toast({ title: 'Failed to load pod', description: error.message || 'Please try again later.', variant: 'destructive' });
       navigate('/dashboard');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setPublic = async (value: boolean) => {
+    if (!pod || !user?.id) return;
+    try {
+      const { error } = await supabase
+        .from('pods')
+        .update({ is_public: value })
+        .eq('id', pod.id)
+        .eq('teacher_id', user.id);
+      if (error) throw error;
+      setPod({ ...pod, is_public: value });
+      toast({ title: value ? 'Pod is now public' : 'Pod set to private' });
+    } catch (err: any) {
+      toast({ title: 'Update failed', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -141,10 +147,18 @@ const PodView: React.FC = () => {
               <p className="text-muted-foreground mt-1">{pod.description}</p>
             )}
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setPublic(true)} className="cursor-pointer">Make Public</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setPublic(false)} className="cursor-pointer">Make Private</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Pod Navigation Tabs */}

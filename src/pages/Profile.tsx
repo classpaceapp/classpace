@@ -12,7 +12,7 @@ import { User, Mail, Phone, Save, Sparkles, Palette, Image as ImageIcon, Calenda
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Profile: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -53,20 +53,14 @@ const Profile: React.FC = () => {
 
     try {
       setLoading(true);
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone_number: formData.phone_number,
-          date_of_birth: formData.date_of_birth || null,
-          bio: formData.bio || null,
-          avatar_url: formData.avatar_url || null
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
+      await updateProfile({
+        first_name: formData.first_name || null,
+        last_name: formData.last_name || null,
+        phone_number: formData.phone_number || null,
+        date_of_birth: formData.date_of_birth || null,
+        bio: formData.bio || null,
+        avatar_url: formData.avatar_url || null
+      });
 
       toast({
         title: "Profile updated successfully!",
@@ -140,8 +134,8 @@ const Profile: React.FC = () => {
                         const { data: publicUrl } = supabase.storage.from('avatars').getPublicUrl(filePath);
                         const avatarUrl = publicUrl.publicUrl;
                         setFormData((prev) => ({ ...prev, avatar_url: avatarUrl }));
-                        // Persist immediately
-                        await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+                        // Persist immediately via context
+                        await updateProfile({ avatar_url: avatarUrl });
                         toast({ title: 'Avatar updated' });
                       } catch (err: any) {
                         toast({ title: 'Avatar upload failed', description: err.message, variant: 'destructive' });

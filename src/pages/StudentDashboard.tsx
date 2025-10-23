@@ -7,7 +7,9 @@ import SubscriptionCard from '@/components/subscription/SubscriptionCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Users, BookOpen, Calendar, Sparkles } from 'lucide-react';
+import { Users, BookOpen, Calendar, Sparkles, Search, KeyRound } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface Pod {
   id: string;
@@ -29,6 +31,10 @@ const StudentDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
   const requestIdRef = useRef(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [publicResults, setPublicResults] = useState<Pod[]>([]);
+  const [joinCode, setJoinCode] = useState('');
+  const [searching, setSearching] = useState(false);
 
   const fetchPods = async () => {
     const currentId = ++requestIdRef.current;
@@ -94,13 +100,44 @@ const StudentDashboard: React.FC = () => {
     }
   };
 
+  const searchPublicPods = async () => {
+    try {
+      setSearching(true);
+      const term = searchTerm.trim();
+      if (!term) {
+        setPublicResults([]);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('pods')
+        .select('*')
+        .eq('is_public', true)
+        .or(`title.ilike.%${term}%,subject.ilike.%${term}%`)
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      setPublicResults((data || []) as Pod[]);
+    } catch (err: any) {
+      toast({ title: 'Search failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const joinByCode = async () => {
+    try {
+      const code = joinCode.trim().toUpperCase();
+      if (!code) return;
+      const { data, error } = await supabase.rpc('join_pod_with_code', { code });
+      if (error) throw error;
+      toast({ title: 'Joined pod', description: 'You have been added to the pod.' });
+      setJoinCode('');
+      await fetchPods();
+    } catch (err: any) {
+      toast({ title: 'Join failed', description: err.message === 'INVALID_CODE' ? 'Invalid code' : err.message, variant: 'destructive' });
+    }
+  };
+
   useEffect(() => {
-    isMounted.current = true;
-    fetchPods();
-    return () => {
-      isMounted.current = false;
-    };
-  }, [user?.id]);
 
   return (
     <DashboardLayout userRole="learner">
@@ -134,7 +171,7 @@ const StudentDashboard: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    Welcome back, {user?.email?.split('@')[0]}!
+                    Welcome back, {(profile?.first_name || '') + (profile?.last_name ? ` ${profile.last_name}` : '') || user?.email?.split('@')[0]}!
                   </h1>
                   <p className="text-xl text-gray-600 mt-2">
                     Ready to learn something amazing today? Here's your learning overview.
@@ -142,6 +179,44 @@ const StudentDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Discovery and Join */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <Card className="lg:col-span-2 border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Discover Public Classes</CardTitle>
+                  <Search className="h-6 w-6" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex gap-3">
+                  <Input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search by title or subject" />
+                  <Button onClick={searchPublicPods} disabled={searching}>{searching ? 'Searching...' : 'Search'}</Button>
+                </div>
+                {publicResults.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {publicResults.map((pod) => (
+                      <PodCard key={pod.id} pod={pod} userRole="learner" basePath="/student-dashboard" />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Join with a Code</CardTitle>
+                  <KeyRound className="h-6 w-6" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <Input value={joinCode} onChange={(e) => setJoinCode(e.target.value)} placeholder="Enter pod code (e.g., ABC123)" />
+                <Button onClick={joinByCode} className="w-full">Join</Button>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Stats and Subscription Section */}

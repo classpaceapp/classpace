@@ -135,7 +135,7 @@ const TeacherDashboard: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Welcome back, {user?.email?.split('@')[0]}!
+                    Welcome back, {(profile?.first_name || '') + (profile?.last_name ? ` ${profile.last_name}` : '') || user?.email?.split('@')[0]}!
                   </h1>
                   <p className="text-xl text-gray-600 mt-2">
                     Ready to inspire and educate? Here's what's happening in your classroom.

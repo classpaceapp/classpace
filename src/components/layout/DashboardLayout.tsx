@@ -9,7 +9,8 @@ import {
   MessageSquare, 
   LifeBuoy,
   LogOut,
-  User
+  User,
+  Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,6 +28,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const navigate = useNavigate();
 
   const navigationItems = [
+    {
+      name: 'Dashboard',
+      href: '/dashboard',
+      icon: Home,
+      current: location.pathname === '/dashboard'
+    },
     {
       name: 'Profile',
       href: '/profile',

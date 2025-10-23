@@ -118,6 +118,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_public: boolean
           pod_code: string
           subject: string
           teacher_id: string
@@ -128,6 +129,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_public?: boolean
           pod_code: string
           subject: string
           teacher_id: string
@@ -138,6 +140,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_public?: boolean
           pod_code?: string
           subject?: string
           teacher_id?: string
@@ -461,6 +464,7 @@ export type Database = {
         Args: { _pod_id: string; _user_id: string }
         Returns: boolean
       }
+      join_pod_with_code: { Args: { code: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

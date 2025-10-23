@@ -35,6 +35,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, role: 'teacher' | 'learner', firstName?: string, lastName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -149,6 +151,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       clearInterval(id);
     };
   }, []);
+
+  // Realtime sync for profile so changes reflect instantly everywhere
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel('realtime:profiles')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'profiles',
+        filter: `id=eq.${user.id}`
+      }, (payload) => {
+        if (payload.new) {
+          setProfile(payload.new as Profile);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -275,6 +300,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshProfile = async () => {
+    if (user?.id) {
+      await fetchProfile(user.id);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user?.id) return;
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id);
+    if (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+    setProfile((prev) => {
+      if (prev) return { ...prev, ...updates } as Profile;
+      return prev;
+    });
+  };
+
   const value = {
     user,
     session,
@@ -286,6 +333,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     refreshSubscription,
+    refreshProfile,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
