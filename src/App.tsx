@@ -23,6 +23,7 @@ import Refunds from "./pages/Refunds";
 import OurJourney from "./pages/OurJourney";
 import Documentation from "./pages/Documentation";
 import AIChat from "./pages/AIChat";
+import Learnspace from "./pages/Learnspace";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
@@ -111,6 +112,11 @@ const App = () => (
             <Route path="/ai-chat" element={
               <ProtectedRoute>
                 <AIChat />
+              </ProtectedRoute>
+            } />
+            <Route path="/learnspace" element={
+              <ProtectedRoute requireRole="learner">
+                <Learnspace />
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />

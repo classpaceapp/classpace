@@ -10,7 +10,8 @@ import {
   LifeBuoy,
   LogOut,
   User,
-  Home
+  Home,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -27,44 +28,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navigationItems = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home,
-      current: location.pathname === '/dashboard'
-    },
-    {
-      name: 'Profile',
-      href: '/profile',
-      icon: User,
-      current: location.pathname === '/profile'
-    },
-    {
-      name: 'Documentation',
-      href: '/documentation',
-      icon: FileText,
-      current: location.pathname === '/documentation'
-    },
-    {
-      name: 'FAQs',
-      href: '/pricing',
-      icon: HelpCircle,
-      current: location.pathname === '/pricing'
-    },
-    {
-      name: 'AI Chat',
-      href: '/ai-chat',
-      icon: MessageSquare,
-      current: location.pathname === '/ai-chat'
-    },
-    {
-      name: 'Support',
-      href: '/support',
-      icon: LifeBuoy,
-      current: location.pathname === '/support'
-    }
+  const teacherNavItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Profile', href: '/profile', icon: User },
+    { name: 'Documentation', href: '/documentation', icon: FileText },
+    { name: 'FAQs', href: '/pricing', icon: HelpCircle },
+    { name: 'AI Chat', href: '/ai-chat', icon: MessageSquare },
+    { name: 'Support', href: '/support', icon: LifeBuoy }
   ];
+
+  const learnerNavItems = [
+    { name: 'Dashboard', href: '/student-dashboard', icon: Home },
+    { name: 'Learnspace', href: '/learnspace', icon: Sparkles },
+    { name: 'Profile', href: '/profile', icon: User },
+    { name: 'Documentation', href: '/documentation', icon: FileText },
+    { name: 'FAQs', href: '/pricing', icon: HelpCircle },
+    { name: 'Support', href: '/support', icon: LifeBuoy }
+  ];
+
+  const navigationItems = userRole === 'teacher' ? teacherNavItems : learnerNavItems;
 
   const userInitials = profile?.first_name && profile?.last_name 
     ? `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`

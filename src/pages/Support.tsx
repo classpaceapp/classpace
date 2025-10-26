@@ -2,9 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare, Mail, ArrowLeft, Instagram, Linkedin } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Support = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const dashboardPath = profile?.role === 'learner' ? '/student-dashboard' : '/dashboard';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -13,7 +16,7 @@ const Support = () => {
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
             <button 
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate(dashboardPath)}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
               <img 
@@ -27,7 +30,7 @@ const Support = () => {
             </button>
             <Button 
               variant="ghost"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate(dashboardPath)}
               className="flex items-center space-x-2 text-gray-300 hover:text-white hover:bg-white/10"
             >
               <ArrowLeft className="w-4 h-4" />
