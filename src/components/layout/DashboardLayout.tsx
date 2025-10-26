@@ -67,6 +67,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
           faqSection.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
+    } else if (href === '/dashboard') {
+      // Navigate to role-specific dashboard
+      if (userRole === 'learner') {
+        navigate('/student-dashboard');
+      } else {
+        navigate('/teacher-dashboard');
+      }
     } else {
       navigate(href);
     }

@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
-import SubscriptionCard from '@/components/subscription/SubscriptionCard';
+import { StudentSubscriptionCard } from '@/components/subscription/StudentSubscriptionCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -278,7 +278,7 @@ const StudentDashboard: React.FC = () => {
 
             {/* Subscription Card */}
             <div>
-              <SubscriptionCard />
+              <StudentSubscriptionCard />
             </div>
           </div>
 

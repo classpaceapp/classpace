@@ -38,6 +38,17 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Get request body if provided (for specifying price)
+    const body = await req.json().catch(() => ({}));
+    const { priceId, isStudent } = body;
+
+    // Default price IDs - replace with actual Stripe price IDs after creating products
+    const TEACHER_PREMIUM_PRICE_ID = "price_1SLVsKBm9rSu4II69kAPi7Z7"; // Replace with actual
+    const STUDENT_PREMIUM_PRICE_ID = "price_student_premium"; // Replace with actual
+    
+    const finalPriceId = priceId || (isStudent ? STUDENT_PREMIUM_PRICE_ID : TEACHER_PREMIUM_PRICE_ID);
+    logStep("Price ID determined", { finalPriceId, isStudent });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
@@ -56,7 +67,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [
         {
-          price: "price_1SLVsKBm9rSu4II69kAPi7Z7",
+          price: finalPriceId,
           quantity: 1,
         },
       ],

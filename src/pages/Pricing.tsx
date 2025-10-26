@@ -10,24 +10,25 @@ const Pricing = () => {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const plans = [
+  const teacherPlans = [
     {
       name: "Free",
       price: "Free",
       description: "Basic but fully usable",
       icon: Star,
       features: [
-        "1 AI Pod (teacher)",
+        "1 AI Pod",
         "Core features enabled",
         "Create and run sessions",
         "Invite students",
         "Email support"
       ],
       buttonText: "Get Started",
-      popular: false
+      popular: false,
+      type: "teacher"
     },
     {
-      name: "Premium",
+      name: "Teacher Premium",
       price: "$7",
       period: "/month",
       description: "Unlimited pods and growth",
@@ -40,26 +41,71 @@ const Pricing = () => {
         "All Free features"
       ],
       buttonText: "Upgrade Now",
-      popular: true
+      popular: true,
+      type: "teacher"
+    }
+  ];
+
+  const studentPlans = [
+    {
+      name: "Free",
+      price: "Free",
+      description: "Essential learning tools",
+      icon: Star,
+      features: [
+        "Join unlimited pods",
+        "AI-powered Learnspace",
+        "Limited chat history",
+        "Core learning features",
+        "Email support"
+      ],
+      buttonText: "Get Started",
+      popular: false,
+      type: "student"
+    },
+    {
+      name: "Student Premium",
+      price: "$7",
+      period: "/month",
+      description: "Advanced AI learning",
+      icon: Zap,
+      features: [
+        "Unlimited chat history",
+        "Priority AI responses",
+        "Advanced image analysis",
+        "Personalized learning",
+        "Early feature access"
+      ],
+      buttonText: "Upgrade Now",
+      popular: true,
+      type: "student"
     }
   ];
 
   const faqs = [
     {
-      question: "What's included in Free vs Premium?",
-      answer: "Free includes 1 AI Pod with all core features. Premium unlocks unlimited pods and priority support for just $7/month."
+      question: "What's the difference between Teacher and Student Premium?",
+      answer: "Teacher Premium focuses on classroom management with unlimited AI Pods and bigger class sizes. Student Premium enhances individual learning with personalized AI tutoring, unlimited chat history, and advanced problem-solving tools. Both are $7/month."
+    },
+    {
+      question: "What's included in Free vs Premium plans?",
+      answer: "Free plans provide essential features for both teachers and students. Teachers get 1 AI Pod, while students can join unlimited pods and use Learnspace with limited chat history. Premium unlocks unlimited pods for teachers and advanced AI features for students."
     },
     {
       question: "Can I change plans anytime?",
-      answer: "Yes. Upgrades apply immediately and billing is prorated where applicable."
+      answer: "Yes. Upgrades apply immediately and billing is prorated where applicable. You can manage your subscription anytime through your dashboard."
     },
     {
       question: "Is there a free trial?",
-      answer: "The Free plan is always available. You can upgrade to Premium anytime for $7/month."
+      answer: "The Free plan is always available for both teachers and students. You can upgrade to Premium anytime for $7/month to unlock advanced features."
     },
     {
       question: "What happens to my data if I cancel?",
-      answer: "You'll keep access to your data. If you move back to Free, you'll retain only your first pod; additional pods will be hidden until you upgrade again."
+      answer: "You'll keep access to your data. Teachers moving back to Free will retain their first pod (additional pods hidden). Students will have limited chat history access but can still use core features."
+    },
+    {
+      question: "Do students and teachers need separate subscriptions?",
+      answer: "Yes. Teacher Premium is for educators managing classrooms and creating pods. Student Premium is for learners who want enhanced AI tutoring and personalized learning features. Each serves different needs."
     }
   ];
 
@@ -100,50 +146,110 @@ const Pricing = () => {
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
-            Choose the perfect plan for your teaching needs. All plans include our core AI features.
+            Choose the perfect plan for your needs. Separate plans for teachers and students.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16 md:mb-24">
-          {plans.map((plan, index) => {
-            const IconComponent = plan.icon;
-            return (
-              <Card 
-                key={index} 
-                className="relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900"
-              >
-                <CardHeader className="text-center pb-8 pt-12 bg-gradient-to-br from-gray-800 to-gray-900">
-                  <div className="w-24 h-24 mx-auto mb-8 rounded-3xl flex items-center justify-center shadow-xl bg-gradient-to-r from-purple-600 to-pink-600">
-                    <IconComponent className="w-12 h-12 text-white" />
-                  </div>
-                  <CardTitle className="text-4xl font-bold mb-6 text-white">{plan.name}</CardTitle>
-                  <p className="text-gray-300 mb-8 text-lg">{plan.description}</p>
-                  <div className="mb-8">
-                    <span className="text-6xl font-bold text-white">{plan.price}</span>
-                    {plan.period && <span className="text-2xl text-gray-400">{plan.period}</span>}
-                  </div>
-                </CardHeader>
+        {/* Teacher Plans */}
+        <div className="mb-20">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-8 text-white">
+            For Teachers
+          </h2>
+          <p className="text-lg text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+            Manage classrooms and create AI-powered learning pods
+          </p>
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {teacherPlans.map((plan, index) => {
+              const IconComponent = plan.icon;
+              return (
+                <Card 
+                  key={index} 
+                  className="relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900"
+                >
+                  <CardHeader className="text-center pb-8 pt-12 bg-gradient-to-br from-gray-800 to-gray-900">
+                    <div className="w-24 h-24 mx-auto mb-8 rounded-3xl flex items-center justify-center shadow-xl bg-gradient-to-r from-purple-600 to-pink-600">
+                      <IconComponent className="w-12 h-12 text-white" />
+                    </div>
+                    <CardTitle className="text-4xl font-bold mb-6 text-white">{plan.name}</CardTitle>
+                    <p className="text-gray-300 mb-8 text-lg">{plan.description}</p>
+                    <div className="mb-8">
+                      <span className="text-6xl font-bold text-white">{plan.price}</span>
+                      {plan.period && <span className="text-2xl text-gray-400">{plan.period}</span>}
+                    </div>
+                  </CardHeader>
 
-                <CardContent className="p-8 bg-gradient-to-br from-gray-800 to-gray-900">
-                  <ul className="space-y-6 mb-12">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center">
-                        <Check className="w-6 h-6 text-green-400 mr-4 flex-shrink-0" />
-                        <span className="text-gray-300 text-lg">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Button 
-                    className="w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-                    onClick={() => navigate("/login")}
-                  >
-                    {plan.buttonText}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  <CardContent className="p-8 bg-gradient-to-br from-gray-800 to-gray-900">
+                    <ul className="space-y-6 mb-12">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center">
+                          <Check className="w-6 h-6 text-green-400 mr-4 flex-shrink-0" />
+                          <span className="text-gray-300 text-lg">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <Button 
+                      className="w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+                      onClick={() => navigate("/login")}
+                    >
+                      {plan.buttonText}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Student Plans */}
+        <div className="mb-16 md:mb-24">
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-8 text-white">
+            For Students
+          </h2>
+          <p className="text-lg text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+            Enhance your learning with AI-powered tools
+          </p>
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {studentPlans.map((plan, index) => {
+              const IconComponent = plan.icon;
+              return (
+                <Card 
+                  key={index} 
+                  className="relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900"
+                >
+                  <CardHeader className="text-center pb-8 pt-12 bg-gradient-to-br from-gray-800 to-gray-900">
+                    <div className="w-24 h-24 mx-auto mb-8 rounded-3xl flex items-center justify-center shadow-xl bg-gradient-to-r from-purple-600 to-pink-600">
+                      <IconComponent className="w-12 h-12 text-white" />
+                    </div>
+                    <CardTitle className="text-4xl font-bold mb-6 text-white">{plan.name}</CardTitle>
+                    <p className="text-gray-300 mb-8 text-lg">{plan.description}</p>
+                    <div className="mb-8">
+                      <span className="text-6xl font-bold text-white">{plan.price}</span>
+                      {plan.period && <span className="text-2xl text-gray-400">{plan.period}</span>}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="p-8 bg-gradient-to-br from-gray-800 to-gray-900">
+                    <ul className="space-y-6 mb-12">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center">
+                          <Check className="w-6 h-6 text-green-400 mr-4 flex-shrink-0" />
+                          <span className="text-gray-300 text-lg">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <Button 
+                      className="w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+                      onClick={() => navigate("/login")}
+                    >
+                      {plan.buttonText}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
 
         {/* Enhanced FAQ Section */}

@@ -87,8 +87,30 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       productId = subscription.items.data[0].price.product as string;
-      tier = 'premium';
-      logStep("Determined subscription tier", { productId, tier });
+      
+      // Get user profile to determine if student or teacher
+      const { data: profileData } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      // Determine tier based on product ID and user role
+      // You'll need to set these product IDs after creating the products in Stripe
+      const TEACHER_PREMIUM_PRODUCT_ID = 'prod_teacher_premium'; // Replace with actual Stripe product ID
+      const STUDENT_PREMIUM_PRODUCT_ID = 'prod_student_premium'; // Replace with actual Stripe product ID
+      
+      if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
+        tier = 'teacher_premium';
+      } else if (productId === STUDENT_PREMIUM_PRODUCT_ID) {
+        tier = 'student_premium';
+      } else if (profileData?.role === 'teacher') {
+        tier = 'teacher_premium';
+      } else {
+        tier = 'student_premium';
+      }
+      
+      logStep("Determined subscription tier", { productId, tier, userRole: profileData?.role });
       
       // Update subscription record
       await supabaseClient
