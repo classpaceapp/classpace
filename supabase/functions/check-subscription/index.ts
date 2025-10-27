@@ -96,9 +96,8 @@ serve(async (req) => {
         .single();
       
       // Determine tier based on product ID and user role
-      // You'll need to set these product IDs after creating the products in Stripe
-      const TEACHER_PREMIUM_PRODUCT_ID = 'prod_teacher_premium'; // Replace with actual Stripe product ID
-      const STUDENT_PREMIUM_PRODUCT_ID = 'prod_student_premium'; // Replace with actual Stripe product ID
+      const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TI64fNw74rXOQ4';
+      const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJS0AgYeVzi9Gv';
       
       if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
         tier = 'teacher_premium';

@@ -32,10 +32,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const teacherNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Profile', href: '/profile', icon: User },
+    { name: 'My Plan', href: '/my-plan', icon: Sparkles },
     { name: 'Documentation', href: '/documentation', icon: FileText },
-    { name: 'FAQs', href: '/pricing', icon: HelpCircle },
+    { name: 'FAQs', href: '/faqs', icon: HelpCircle },
     { name: 'AI Chat', href: '/ai-chat', icon: MessageSquare },
-    { name: 'Support', href: '/support', icon: LifeBuoy }
+    { name: 'Support', href: '/support-tab', icon: LifeBuoy }
   ];
 
   const learnerNavItems = [
@@ -43,9 +44,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'Learnspace', href: '/learnspace', icon: Sparkles },
     { name: 'Phoenix', href: '/phoenix', icon: Flame },
     { name: 'Profile', href: '/profile', icon: User },
+    { name: 'My Plan', href: '/my-plan', icon: Sparkles },
     { name: 'Documentation', href: '/documentation', icon: FileText },
-    { name: 'FAQs', href: '/pricing', icon: HelpCircle },
-    { name: 'Support', href: '/support', icon: LifeBuoy }
+    { name: 'FAQs', href: '/faqs', icon: HelpCircle },
+    { name: 'Support', href: '/support-tab', icon: LifeBuoy }
   ];
 
   const navigationItems = userRole === 'teacher' ? teacherNavItems : learnerNavItems;
@@ -60,21 +62,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   };
 
   const handleNavigation = (href: string) => {
-    if (href === '/pricing') {
-      navigate(href);
-      // Scroll to FAQ section after navigation
-      setTimeout(() => {
-        const faqSection = document.querySelector('h2');
-        if (faqSection && faqSection.textContent?.includes('Frequently Asked Questions')) {
-          faqSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    } else if (href === '/dashboard') {
+    if (href === '/dashboard') {
       // Navigate to role-specific dashboard
       if (userRole === 'learner') {
         navigate('/student-dashboard');
       } else {
-        navigate('/teacher-dashboard');
+        navigate('/dashboard');
       }
     } else {
       navigate(href);

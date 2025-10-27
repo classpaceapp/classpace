@@ -27,6 +27,9 @@ import Learnspace from "./pages/Learnspace";
 import Phoenix from "./pages/Phoenix";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
+import { FAQsTab } from "./components/dashboard/FAQsTab";
+import { SupportTab } from "./components/dashboard/SupportTab";
+import { MyPlanTab } from "./components/dashboard/MyPlanTab";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +129,21 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />
+            <Route path="/faqs" element={
+              <ProtectedRoute>
+                <FAQsTab />
+              </ProtectedRoute>
+            } />
+            <Route path="/support-tab" element={
+              <ProtectedRoute>
+                <SupportTab />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-plan" element={
+              <ProtectedRoute>
+                <MyPlanTab />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

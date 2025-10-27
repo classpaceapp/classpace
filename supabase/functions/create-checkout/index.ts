@@ -42,9 +42,9 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { priceId, isStudent } = body;
 
-    // Default price IDs - replace with actual Stripe price IDs after creating products
-    const TEACHER_PREMIUM_PRICE_ID = "price_1SLVsKBm9rSu4II69kAPi7Z7"; // Replace with actual
-    const STUDENT_PREMIUM_PRICE_ID = "price_student_premium"; // Replace with actual
+    // Default price IDs
+    const TEACHER_PREMIUM_PRICE_ID = "price_1SLVsKBm9rSu4II69kAPi7Z7";
+    const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
     
     const finalPriceId = priceId || (isStudent ? STUDENT_PREMIUM_PRICE_ID : TEACHER_PREMIUM_PRICE_ID);
     logStep("Price ID determined", { finalPriceId, isStudent });
