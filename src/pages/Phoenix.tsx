@@ -405,45 +405,47 @@ const Phoenix: React.FC = () => {
           <div className="px-4 py-2 border-b border-gray-200">
             <h3 className="text-sm font-semibold text-gray-700">Your Sessions</h3>
           </div>
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-2">
-              {sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className={cn(
-                    "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all",
-                    currentSessionId === session.id
-                      ? "bg-gradient-to-r from-orange-100 to-red-100 border-2 border-orange-300"
-                      : "hover:bg-gray-100/50 border border-transparent"
-                  )}
-                  onClick={() => {
-                    setCurrentSessionId(session.id);
-                    setIsConnected(true);
-                  }}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-gray-900 truncate">
-                      {session.title}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(session.updated_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteSession(session.id);
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full p-4">
+              <div className="space-y-2">
+                {sessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className={cn(
+                      "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all",
+                      currentSessionId === session.id
+                        ? "bg-gradient-to-r from-orange-100 to-red-100 border-2 border-orange-300"
+                        : "hover:bg-gray-100/50 border border-transparent"
+                    )}
+                    onClick={() => {
+                      setCurrentSessionId(session.id);
+                      setIsConnected(true);
                     }}
                   >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-gray-900 truncate">
+                        {session.title}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(session.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSession(session.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
 
           {/* Transcript */}
           {isConnected && (
@@ -451,36 +453,38 @@ const Phoenix: React.FC = () => {
               <div className="px-4 py-2 border-t border-gray-200">
                 <h3 className="text-sm font-semibold text-gray-700">Transcript</h3>
               </div>
-              <ScrollArea className="flex-1 p-4 border-t border-gray-200">
-                <div className="space-y-3">
-                  {transcript.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={cn(
-                        "p-3 rounded-lg text-sm",
-                        msg.role === 'assistant'
-                          ? "bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200"
-                          : "bg-blue-50 border border-blue-200"
-                      )}
-                    >
-                      <p className="font-medium text-xs mb-1">
-                        {msg.role === 'assistant' ? 'Phoenix' : 'You'}
-                      </p>
-                      <div className="text-gray-800 prose prose-sm max-w-none">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+              <div className="flex-1 overflow-hidden border-t border-gray-200">
+                <ScrollArea className="h-full p-4">
+                  <div className="space-y-3">
+                    {transcript.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={cn(
+                          "p-3 rounded-lg text-sm",
+                          msg.role === 'assistant'
+                            ? "bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200"
+                            : "bg-blue-50 border border-blue-200"
+                        )}
+                      >
+                        <p className="font-medium text-xs mb-1">
+                          {msg.role === 'assistant' ? 'Phoenix' : 'You'}
+                        </p>
+                        <div className="text-gray-800 prose prose-sm max-w-none">
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {isAiThinking && (
-                    <div className="flex justify-start">
-                      <div className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-lg p-3">
-                        <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
+                    ))}
+                    {isAiThinking && (
+                      <div className="flex justify-start">
+                        <div className="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-lg p-3">
+                          <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <div ref={transcriptEndRef} />
-                </div>
-              </ScrollArea>
+                    )}
+                    <div ref={transcriptEndRef} />
+                  </div>
+                </ScrollArea>
+              </div>
             </>
           )}
         </div>
