@@ -143,6 +143,36 @@ export type Database = {
           },
         ]
       }
+      phoenix_sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          session_transcript: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          whiteboard_state: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          session_transcript?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id: string
+          whiteboard_state?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          session_transcript?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          whiteboard_state?: Json | null
+        }
+        Relationships: []
+      }
       pod_members: {
         Row: {
           id: string
