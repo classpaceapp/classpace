@@ -74,6 +74,11 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${origin}/dashboard?subscription=success`,
       cancel_url: `${origin}/dashboard?subscription=cancelled`,
+      subscription_data: {
+        metadata: {
+          plan_name: isStudent ? "Learn +" : "Teach +"
+        }
+      }
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });

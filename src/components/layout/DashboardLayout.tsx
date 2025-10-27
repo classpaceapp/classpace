@@ -100,7 +100,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             alt="Classpace Logo" 
             className="w-8 h-8"
           />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent animate-gradient-shift">
+          <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
             Classpace
           </span>
         </div>
@@ -205,9 +205,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         </header>
 
         {/* Page content */}
-        <div className="p-6">
-          {children}
-        </div>
+        {children}
       </main>
 
       {/* Mobile overlay */}

@@ -33,18 +33,18 @@ export const FAQsTab: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-8">
+    <div className="p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-            Frequently Asked Questions
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent mb-3">
+            FAQs
           </h1>
-          <p className="text-xl text-gray-600">
-            Find answers to common questions about Classpace
+          <p className="text-lg text-foreground/70">
+            Quick answers to common questions
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {faqs.map((faq, index) => (
             <Collapsible 
               key={index}
@@ -52,13 +52,13 @@ export const FAQsTab: React.FC = () => {
               onOpenChange={() => setOpenFaq(openFaq === index ? null : index)}
             >
               <CollapsibleTrigger asChild>
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 hover:border-purple-300">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-900 text-left pr-4">
+                <div className="bg-card/50 backdrop-blur-sm rounded-xl p-5 hover:bg-card/70 transition-all cursor-pointer border border-border/50 hover:border-primary/30">
+                  <div className="flex items-center justify-between gap-4">
+                    <h3 className="font-semibold text-foreground text-left">
                       {faq.question}
                     </h3>
                     <ChevronDown 
-                      className={`w-5 h-5 text-purple-600 transition-transform duration-200 flex-shrink-0 ${
+                      className={`w-4 h-4 text-primary transition-transform flex-shrink-0 ${
                         openFaq === index ? 'transform rotate-180' : ''
                       }`} 
                     />
@@ -66,8 +66,8 @@ export const FAQsTab: React.FC = () => {
                 </div>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mt-2 border border-gray-200 shadow-md">
-                  <p className="text-gray-700 leading-relaxed">
+                <div className="bg-muted/30 rounded-xl p-5 mt-2 border border-border/30">
+                  <p className="text-foreground/80 text-sm leading-relaxed">
                     {faq.answer}
                   </p>
                 </div>

@@ -83,40 +83,40 @@ const Profile: React.FC = () => {
 
   return (
     <DashboardLayout userRole={profile?.role === 'teacher' ? 'teacher' : 'learner'}>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="p-8">
+        <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
+        <div className="space-y-2">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent">
             Profile Settings
-            <Sparkles className="inline-block w-8 h-8 ml-2 text-primary" />
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Manage your personal information and preferences
+          <p className="text-lg text-foreground/70">
+            Manage your personal information
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Card */}
-          <Card className="lg:col-span-1 bg-gradient-to-br from-primary/10 via-purple-500/10 to-secondary/10 border-primary/20">
-            <CardHeader className="text-center">
+          <Card className="lg:col-span-1 bg-gradient-to-br from-purple-50/80 to-pink-50/80 border-purple-200/50">
+            <CardHeader className="text-center pb-4">
               <div className="mx-auto mb-4">
-                  <Avatar className="h-24 w-24 mx-auto border-4 border-primary/20 shadow-2xl shadow-primary/20">
+                  <Avatar className="h-24 w-24 mx-auto border-4 border-white shadow-xl">
                   <AvatarImage src={formData.avatar_url || ''} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-2xl font-bold">
+                  <AvatarFallback className="bg-gradient-to-br from-purple-600 to-pink-600 text-white text-2xl font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <CardTitle className="text-xl">
+              <CardTitle className="text-xl text-foreground">
                 {formData.first_name} {formData.last_name}
               </CardTitle>
-              <CardDescription className="capitalize flex items-center justify-center gap-2">
+              <CardDescription className="capitalize flex items-center justify-center gap-2 text-foreground/60">
                 <Palette className="h-4 w-4" />
                 {profile?.role === 'teacher' ? 'Teacher' : 'Student'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4 text-center">
+            <CardContent className="pt-0">
+              <div className="space-y-3 text-center">
                 <div className="flex items-center justify-center">
                   <input
                     ref={fileInputRef}
@@ -134,7 +134,6 @@ const Profile: React.FC = () => {
                         const { data: publicUrl } = supabase.storage.from('avatars').getPublicUrl(filePath);
                         const avatarUrl = publicUrl.publicUrl;
                         setFormData((prev) => ({ ...prev, avatar_url: avatarUrl }));
-                        // Persist immediately via context
                         await updateProfile({ avatar_url: avatarUrl });
                         toast({ title: 'Avatar updated' });
                       } catch (err: any) {
@@ -148,35 +147,35 @@ const Profile: React.FC = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="mt-2"
+                    size="sm"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
                   >
-                    <ImageIcon className="h-4 w-4 mr-2" /> {uploading ? 'Uploading...' : 'Upload Avatar'}
+                    <ImageIcon className="h-3.5 w-3.5 mr-2" /> {uploading ? 'Uploading...' : 'Change Photo'}
                   </Button>
                 </div>
-                <div className="p-4 bg-card/50 rounded-lg border border-border/50">
-                  <p className="text-sm text-muted-foreground">Member since</p>
-                  <p className="font-semibold">
+                <div className="p-3 bg-white/60 rounded-lg border border-purple-200/50">
+                  <p className="text-xs text-foreground/60 mb-1">Member since</p>
+                  <p className="font-semibold text-sm text-foreground">
                     {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Recently'}
                   </p>
                 </div>
-                <div className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg border border-primary/20">
-                  <p className="text-sm text-muted-foreground">Account Status</p>
-                  <p className="font-semibold text-primary">Active</p>
+                <div className="p-3 bg-gradient-to-r from-purple-100/60 to-pink-100/60 rounded-lg border border-purple-300/50">
+                  <p className="text-xs text-foreground/60 mb-1">Account Status</p>
+                  <p className="font-semibold text-sm text-purple-700">Active</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Settings Form */}
-          <Card className="lg:col-span-2 bg-card/50 backdrop-blur-sm border-border/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
+          <Card className="lg:col-span-2 bg-white/60 backdrop-blur-sm border-border">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-foreground">
+                <User className="h-5 w-5 text-purple-600" />
                 Personal Information
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-foreground/60">
                 Update your personal details and contact information
               </CardDescription>
             </CardHeader>
@@ -266,11 +265,11 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-              <div className="pt-6 border-t border-border/50">
+              <div className="pt-5 border-t border-border">
                 <Button 
                   onClick={handleSave} 
                   disabled={loading}
-                  className="w-full md:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-lg shadow-primary/25"
+                  className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg font-medium"
                 >
                   {loading ? (
                     <>
@@ -287,6 +286,7 @@ const Profile: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     </DashboardLayout>
