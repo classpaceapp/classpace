@@ -7,20 +7,26 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import StartSessionModal from '@/components/sessions/StartSessionModal';
 import SessionsList from '@/components/sessions/SessionsList';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
+import { PodChat } from '@/components/pods/PodChat';
+import { PodNotes } from '@/components/pods/PodNotes';
+import { PodMaterials } from '@/components/pods/PodMaterials';
+import { DeletePodDialog } from '@/components/pods/DeletePodDialog';
 import { 
   ArrowLeft, 
   Users, 
   MessageSquare, 
   FileText, 
   Upload, 
-  Palette, 
-  Bot, 
-  Clock,
-  Settings
+  Palette,
+  Settings,
+  Copy,
+  Trash2
 } from 'lucide-react';
 
 interface Pod {
@@ -44,6 +50,7 @@ const PodView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [startSessionModalOpen, setStartSessionModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const fetchPod = async () => {
     if (!id || !user?.id) return;
@@ -84,19 +91,26 @@ const PodView: React.FC = () => {
     }
   };
 
-  const setPublic = async (value: boolean) => {
+  const togglePublic = async (checked: boolean) => {
     if (!pod || !user?.id) return;
     try {
       const { error } = await supabase
         .from('pods')
-        .update({ is_public: value })
+        .update({ is_public: checked })
         .eq('id', pod.id)
         .eq('teacher_id', user.id);
       if (error) throw error;
-      setPod({ ...pod, is_public: value });
-      toast({ title: value ? 'Pod is now public' : 'Pod set to private' });
+      setPod({ ...pod, is_public: checked });
+      toast({ title: checked ? 'Pod is now public' : 'Pod set to private' });
     } catch (err: any) {
       toast({ title: 'Update failed', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  const copyJoinCode = () => {
+    if (pod?.pod_code) {
+      navigator.clipboard.writeText(pod.pod_code);
+      toast({ title: 'Join code copied!', description: 'Share this code with your students.' });
     }
   };
 
@@ -130,7 +144,7 @@ const PodView: React.FC = () => {
 
   return (
     <DashboardLayout userRole="teacher">
-      <div className="space-y-6">
+      <div className="space-y-6 pl-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
@@ -154,16 +168,49 @@ const PodView: React.FC = () => {
                 Settings
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setPublic(true)} className="cursor-pointer">Make Public</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setPublic(false)} className="cursor-pointer">Make Private</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Pod Settings</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="public-toggle" className="text-sm cursor-pointer">
+                    Public Pod
+                  </Label>
+                  <Switch
+                    id="public-toggle"
+                    checked={pod.is_public}
+                    onCheckedChange={togglePublic}
+                  />
+                </div>
+                {!pod.is_public && (
+                  <div className="space-y-2 pt-2 border-t">
+                    <Label className="text-xs text-muted-foreground">Join Code</Label>
+                    <div className="flex gap-2">
+                      <code className="flex-1 px-3 py-2 bg-secondary rounded text-sm font-mono">
+                        {pod.pod_code}
+                      </code>
+                      <Button size="sm" variant="outline" onClick={copyJoinCode}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => setDeleteDialogOpen(true)}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Pod
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
         {/* Pod Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 lg:w-fit lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
             <TabsTrigger value="overview" className="gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -183,14 +230,6 @@ const PodView: React.FC = () => {
             <TabsTrigger value="whiteboard" className="gap-2">
               <Palette className="h-4 w-4" />
               <span className="hidden sm:inline">Whiteboard</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="gap-2">
-              <Bot className="h-4 w-4" />
-              <span className="hidden sm:inline">AI Assistant</span>
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="gap-2">
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">Timeline</span>
             </TabsTrigger>
           </TabsList>
 
@@ -234,45 +273,15 @@ const PodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="chat" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pod Chat</CardTitle>
-                <CardDescription>
-                  Real-time messaging with your students
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Chat functionality coming soon!</p>
-              </CardContent>
-            </Card>
+            <PodChat podId={id!} />
           </TabsContent>
 
           <TabsContent value="notes" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Class Notes</CardTitle>
-                <CardDescription>
-                  Create and manage notes for your students
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Notes functionality coming soon!</p>
-              </CardContent>
-            </Card>
+            <PodNotes podId={id!} isTeacher={true} />
           </TabsContent>
 
           <TabsContent value="materials" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Learning Materials</CardTitle>
-                <CardDescription>
-                  Upload and share files with your students
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Materials upload coming soon!</p>
-              </CardContent>
-            </Card>
+            <PodMaterials podId={id!} isTeacher={true} />
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">
@@ -289,33 +298,6 @@ const PodView: React.FC = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="ai" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Teaching Assistant</CardTitle>
-                <CardDescription>
-                  Get help with lesson planning and content creation
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">AI assistant coming soon!</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="timeline" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity Timeline</CardTitle>
-                <CardDescription>
-                  Track all pod activity and engagement
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Timeline functionality coming soon!</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         <StartSessionModal
@@ -323,6 +305,13 @@ const PodView: React.FC = () => {
           onClose={() => setStartSessionModalOpen(false)}
           podId={id!}
           onSessionStarted={(sessionId) => navigate(`/session/${sessionId}`)}
+        />
+
+        <DeletePodDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          podId={id!}
+          podTitle={pod.title}
         />
       </div>
     </DashboardLayout>

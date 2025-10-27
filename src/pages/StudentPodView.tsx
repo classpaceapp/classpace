@@ -7,15 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { PodChat } from '@/components/pods/PodChat';
+import { PodNotes } from '@/components/pods/PodNotes';
+import { PodMaterials } from '@/components/pods/PodMaterials';
 import { 
   ArrowLeft, 
   Users, 
   MessageSquare, 
   FileText, 
-  Download, 
-  Palette, 
-  Bot, 
-  Clock
+  Upload, 
+  Palette
 } from 'lucide-react';
 
 interface Pod {
@@ -128,7 +129,7 @@ const StudentPodView: React.FC = () => {
 
   return (
     <DashboardLayout userRole="learner">
-      <div className="space-y-6">
+      <div className="space-y-6 pl-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
@@ -153,7 +154,7 @@ const StudentPodView: React.FC = () => {
 
         {/* Pod Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 lg:w-fit lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
             <TabsTrigger value="overview" className="gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
@@ -167,20 +168,12 @@ const StudentPodView: React.FC = () => {
               <span className="hidden sm:inline">Notes</span>
             </TabsTrigger>
             <TabsTrigger value="materials" className="gap-2">
-              <Download className="h-4 w-4" />
+              <Upload className="h-4 w-4" />
               <span className="hidden sm:inline">Materials</span>
             </TabsTrigger>
             <TabsTrigger value="whiteboard" className="gap-2">
               <Palette className="h-4 w-4" />
               <span className="hidden sm:inline">Whiteboard</span>
-            </TabsTrigger>
-            <TabsTrigger value="ai" className="gap-2">
-              <Bot className="h-4 w-4" />
-              <span className="hidden sm:inline">AI Assistant</span>
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="gap-2">
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">Timeline</span>
             </TabsTrigger>
           </TabsList>
 
@@ -218,45 +211,15 @@ const StudentPodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="chat" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Class Discussion</CardTitle>
-                <CardDescription>
-                  Chat with your teacher and classmates
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Chat functionality coming soon!</p>
-              </CardContent>
-            </Card>
+            <PodChat podId={id!} />
           </TabsContent>
 
           <TabsContent value="notes" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Class Notes</CardTitle>
-                <CardDescription>
-                  Read notes shared by your teacher
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Notes will appear here when your teacher shares them!</p>
-              </CardContent>
-            </Card>
+            <PodNotes podId={id!} isTeacher={false} />
           </TabsContent>
 
           <TabsContent value="materials" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Learning Materials</CardTitle>
-                <CardDescription>
-                  Download and view materials shared by your teacher
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Materials will appear here when your teacher uploads them!</p>
-              </CardContent>
-            </Card>
+            <PodMaterials podId={id!} isTeacher={false} />
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">
@@ -273,33 +236,6 @@ const StudentPodView: React.FC = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="ai" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Study Assistant</CardTitle>
-                <CardDescription>
-                  Get help understanding concepts and preparing for tests
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">AI study assistant coming soon!</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="timeline" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Class Activity</CardTitle>
-                <CardDescription>
-                  See what's been happening in your class
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Activity timeline coming soon!</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>

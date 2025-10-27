@@ -105,6 +105,44 @@ export type Database = {
           },
         ]
       }
+      material_submissions: {
+        Row: {
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          material_id: string
+          student_id: string
+          submitted_at: string
+        }
+        Insert: {
+          file_name: string
+          file_type: string
+          file_url: string
+          id?: string
+          material_id: string
+          student_id: string
+          submitted_at?: string
+        }
+        Update: {
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          material_id?: string
+          student_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_submissions_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "pod_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           created_at: string
@@ -173,6 +211,53 @@ export type Database = {
         }
         Relationships: []
       }
+      pod_materials: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id: string
+          pod_id: string
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_type: string
+          file_url: string
+          id?: string
+          pod_id: string
+          title: string
+          uploaded_by: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          pod_id?: string
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pod_materials_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pod_members: {
         Row: {
           id: string
@@ -195,6 +280,76 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "pod_members_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pod_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          pod_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          pod_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          pod_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pod_messages_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pod_notes: {
+        Row: {
+          color: string
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          pod_id: string
+          title: string
+        }
+        Insert: {
+          color?: string
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          pod_id: string
+          title: string
+        }
+        Update: {
+          color?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          pod_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pod_notes_pod_id_fkey"
             columns: ["pod_id"]
             isOneToOne: false
             referencedRelation: "pods"
