@@ -18,6 +18,8 @@ import StudentPodView from "./pages/StudentPodView";
 import SessionView from "./pages/SessionView";
 import WhiteboardView from "./pages/WhiteboardView";
 import PublicPodsDiscovery from "./pages/PublicPodsDiscovery";
+import TeacherPodsPage from "./pages/TeacherPodsPage";
+import StudentPodsPage from "./pages/StudentPodsPage";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Pricing from "./pages/Pricing";
@@ -94,6 +96,22 @@ const App = () => (
               element={
                 <ProtectedRoute requireRole="learner">
                   <PublicPodsDiscovery />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/teacher-pods" 
+              element={
+                <ProtectedRoute requireRole="teacher">
+                  <TeacherPodsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student-pods" 
+              element={
+                <ProtectedRoute requireRole="learner">
+                  <StudentPodsPage />
                 </ProtectedRoute>
               } 
             />

@@ -42,11 +42,14 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { priceId, isStudent } = body;
 
-    // Default price IDs
-    const TEACHER_PREMIUM_PRICE_ID = "price_1SLVsKBm9rSu4II69kAPi7Z7";
+    // Default price IDs - TEMPORARILY using $1/month for testing
+    const TEACHER_PREMIUM_PRICE_ID = "price_1SLVsKBm9rSu4II69kAPi7Z7"; // TODO: Replace with actual $1 price
     const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
     
-    const finalPriceId = priceId || (isStudent ? STUDENT_PREMIUM_PRICE_ID : TEACHER_PREMIUM_PRICE_ID);
+    // TEMPORARY: Use a $1/month test price for teacher subscriptions
+    const TEMP_TEST_PRICE_ID = "price_1SLVsKBm9rSu4II69kAPi7Z7"; // Replace this with an actual $1 price ID
+    
+    const finalPriceId = priceId || (isStudent ? STUDENT_PREMIUM_PRICE_ID : TEMP_TEST_PRICE_ID);
     logStep("Price ID determined", { finalPriceId, isStudent });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });

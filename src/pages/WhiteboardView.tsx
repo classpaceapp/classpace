@@ -53,24 +53,26 @@ const WhiteboardView: React.FC = () => {
         // Initialize canvas after we have the data
         if (canvasRef.current) {
           const canvas = new FabricCanvas(canvasRef.current, {
-            width: window.innerWidth,
-            height: window.innerHeight - 80,
+            width: window.innerWidth - 40,
+            height: window.innerHeight - 100,
             backgroundColor: '#ffffff',
           });
 
-          // Initialize free drawing brush for Fabric v6 and default modes
-          if (canvas.freeDrawingBrush) {
-            canvas.freeDrawingBrush.color = activeColor;
-            canvas.freeDrawingBrush.width = 3;
-          }
+          // Initialize free drawing brush
+          canvas.freeDrawingBrush.color = activeColor;
+          canvas.freeDrawingBrush.width = 3;
           canvas.isDrawingMode = false;
           canvas.selection = true;
 
           // Load existing whiteboard data if any
           if (data.whiteboard_data && typeof data.whiteboard_data === 'object' && Object.keys(data.whiteboard_data).length > 0) {
-            canvas.loadFromJSON(data.whiteboard_data as any, () => {
-              canvas.renderAll();
-            });
+            try {
+              canvas.loadFromJSON(data.whiteboard_data as any, () => {
+                canvas.renderAll();
+              });
+            } catch (e) {
+              console.error('Error loading whiteboard data:', e);
+            }
           }
 
           setFabricCanvas(canvas);
@@ -150,9 +152,16 @@ const WhiteboardView: React.FC = () => {
 
     setActiveTool(tool);
     
-    // Toggle modes
-    fabricCanvas.isDrawingMode = tool === 'draw' || tool === 'eraser';
-    fabricCanvas.selection = tool === 'select';
+    // Reset modes first
+    fabricCanvas.isDrawingMode = false;
+    fabricCanvas.selection = false;
+    
+    // Then set the correct mode
+    if (tool === 'select') {
+      fabricCanvas.selection = true;
+    } else if (tool === 'draw' || tool === 'eraser') {
+      fabricCanvas.isDrawingMode = true;
+    }
 
     if (tool === 'rectangle') {
       const rect = new Rect({

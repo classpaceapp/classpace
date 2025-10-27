@@ -304,7 +304,7 @@ const Learnspace: React.FC = () => {
 
   return (
     <DashboardLayout userRole="learner">
-      <div className="flex h-[calc(100vh-120px)] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
+      <div className="flex h-[calc(100vh-120px)] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 rounded-3xl overflow-hidden shadow-2xl border border-gray-200 mx-4">
         {/* Sidebar */}
         <div className="w-72 bg-white/60 backdrop-blur-xl border-r border-gray-200 flex flex-col">
           <div className="p-6 border-b border-gray-200">

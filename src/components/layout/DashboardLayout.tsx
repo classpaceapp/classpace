@@ -37,6 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
 
   const teacherNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-blue-500' },
+    { name: 'Pods', href: '/teacher-pods', icon: Sparkles, color: 'text-indigo-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
     { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },
@@ -47,6 +48,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
 
   const learnerNavItems = [
     { name: 'Dashboard', href: '/student-dashboard', icon: Home, color: 'text-blue-500' },
+    { name: 'Pods', href: '/student-pods', icon: Sparkles, color: 'text-indigo-500' },
     { name: 'Learnspace', href: '/learnspace', icon: 'learnspace', color: '' },
     { name: 'Phoenix', href: '/phoenix', icon: 'phoenix', color: '' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
