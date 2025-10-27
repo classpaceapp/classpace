@@ -28,7 +28,7 @@ const Pricing = () => {
       type: "teacher"
     },
     {
-      name: "Teacher Premium",
+      name: "Teach +",
       price: "$7",
       period: "/month",
       description: "Unlimited pods and growth",
@@ -64,7 +64,7 @@ const Pricing = () => {
       type: "student"
     },
     {
-      name: "Student Premium",
+      name: "Learn +",
       price: "$7",
       period: "/month",
       description: "Advanced AI learning",
@@ -84,28 +84,28 @@ const Pricing = () => {
 
   const faqs = [
     {
-      question: "What's the difference between Teacher and Student Premium?",
-      answer: "Teacher Premium focuses on classroom management with unlimited AI Pods and bigger class sizes. Student Premium enhances individual learning with personalized AI tutoring, unlimited chat history, and advanced problem-solving tools. Both are $7/month."
+      question: "What's the difference between Learn + and Teach + subscriptions?",
+      answer: "Learn + is designed for students and includes AI tutoring with Phoenix, unlimited learning sessions, image analysis for homework help, and personalized learning insights. Teach + is for educators and provides unlimited pods, advanced analytics, AI teaching assistant, and priority support. Both are $7/month."
     },
     {
-      question: "What's included in Free vs Premium plans?",
-      answer: "Free plans provide essential features for both teachers and students. Teachers get 1 AI Pod, while students can join unlimited pods and use Learnspace with limited chat history. Premium unlocks unlimited pods for teachers and advanced AI features for students."
+      question: "What's included in the Learn + subscription?",
+      answer: "Learn + includes unlimited AI tutoring sessions with Phoenix (voice and text), advanced homework help with image analysis, personalized learning recommendations, access to collaborative whiteboards for interactive learning, and unlimited chat history storage."
     },
     {
-      question: "Can I change plans anytime?",
-      answer: "Yes. Upgrades apply immediately and billing is prorated where applicable. You can manage your subscription anytime through your dashboard."
+      question: "What's included in the Teach + subscription?",
+      answer: "Teach + unlocks unlimited AI pods for classroom management, advanced AI teaching assistant, comprehensive student analytics, priority support, faster refresh rates, bigger class sizes, and exclusive access to new teaching features as they're released."
     },
     {
-      question: "Is there a free trial?",
-      answer: "The Free plan is always available for both teachers and students. You can upgrade to Premium anytime for $7/month to unlock advanced features."
+      question: "Can I cancel my subscription anytime?",
+      answer: "Yes. You can cancel your Learn + or Teach + subscription anytime through your dashboard. You'll continue to have access to premium features until the end of your current billing period."
     },
     {
-      question: "What happens to my data if I cancel?",
-      answer: "You'll keep access to your data. Teachers moving back to Free will retain their first pod (additional pods hidden). Students will have limited chat history access but can still use core features."
+      question: "Is there a free plan available?",
+      answer: "Yes! Both teachers and students have access to free plans. Teachers get 1 AI Pod with core features, while students can join unlimited pods and use Learnspace with limited chat history. You can upgrade to Learn + or Teach + anytime for $7/month."
     },
     {
       question: "Do students and teachers need separate subscriptions?",
-      answer: "Yes. Teacher Premium is for educators managing classrooms and creating pods. Student Premium is for learners who want enhanced AI tutoring and personalized learning features. Each serves different needs."
+      answer: "Yes. Teach + is specifically for educators managing classrooms and creating pods. Learn + is for students who want enhanced AI tutoring features with Phoenix and personalized learning. Each subscription is tailored to different needs and use cases."
     }
   ];
 

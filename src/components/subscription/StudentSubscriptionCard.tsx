@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Crown, Zap, CheckCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
-const STUDENT_PREMIUM_PRICE_ID = "price_student_premium";
+const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
 
 export const StudentSubscriptionCard = () => {
   const { toast } = useToast();
@@ -61,7 +61,7 @@ export const StudentSubscriptionCard = () => {
             </div>
             <div>
               <CardTitle className="text-2xl">
-                {isStudentPremium ? 'Student Premium' : 'Upgrade to Premium'}
+                {isStudentPremium ? 'Learn +' : 'Upgrade to Learn +'}
               </CardTitle>
               <CardDescription>
                 {isStudentPremium ? 'You have access to all premium features' : 'Unlock advanced learning features'}

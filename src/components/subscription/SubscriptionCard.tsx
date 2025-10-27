@@ -98,7 +98,7 @@ const SubscriptionCard: React.FC = () => {
             </div>
             <div>
               <CardTitle className="text-xl font-bold">
-                {isPremium ? 'Premium' : 'Free Tier'}
+                {isPremium ? 'Teach +' : 'Free Tier'}
               </CardTitle>
               <CardDescription className="text-white/80">
                 {isPremium ? 'All features unlocked' : 'Basic features'}
@@ -189,7 +189,7 @@ const SubscriptionCard: React.FC = () => {
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               >
                 <Crown className="mr-2 h-4 w-4" />
-                {loading ? 'Loading...' : 'Upgrade to Premium'}
+                {loading ? 'Loading...' : 'Upgrade to Teach +'}
               </Button>
             </div>
           </div>

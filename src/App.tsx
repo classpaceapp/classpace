@@ -24,6 +24,7 @@ import OurJourney from "./pages/OurJourney";
 import Documentation from "./pages/Documentation";
 import AIChat from "./pages/AIChat";
 import Learnspace from "./pages/Learnspace";
+import Phoenix from "./pages/Phoenix";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
@@ -117,6 +118,11 @@ const App = () => (
             <Route path="/learnspace" element={
               <ProtectedRoute requireRole="learner">
                 <Learnspace />
+              </ProtectedRoute>
+            } />
+            <Route path="/phoenix" element={
+              <ProtectedRoute requireRole="learner">
+                <Phoenix />
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />

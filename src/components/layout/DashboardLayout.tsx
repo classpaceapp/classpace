@@ -11,7 +11,8 @@ import {
   LogOut,
   User,
   Home,
-  Sparkles
+  Sparkles,
+  Flame
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -40,6 +41,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const learnerNavItems = [
     { name: 'Dashboard', href: '/student-dashboard', icon: Home },
     { name: 'Learnspace', href: '/learnspace', icon: Sparkles },
+    { name: 'Phoenix', href: '/phoenix', icon: Flame },
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Documentation', href: '/documentation', icon: FileText },
     { name: 'FAQs', href: '/pricing', icon: HelpCircle },

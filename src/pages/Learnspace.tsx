@@ -306,7 +306,7 @@ const Learnspace: React.FC = () => {
     <DashboardLayout userRole="learner">
       <div className="flex h-[calc(100vh-120px)] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
         {/* Sidebar */}
-        <div className="w-80 bg-white/60 backdrop-blur-xl border-r border-gray-200 flex flex-col">
+        <div className="w-72 bg-white/60 backdrop-blur-xl border-r border-gray-200 flex flex-col">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
@@ -376,16 +376,6 @@ const Learnspace: React.FC = () => {
             </div>
           </ScrollArea>
 
-          <div className="p-4 border-t border-gray-200">
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
-              <p className="text-sm font-semibold text-amber-900 mb-2">
-                Coming Soon
-              </p>
-              <p className="text-xs text-amber-700">
-                Virtual AI Teaching Agent - Your personal tutor
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Main Chat Area */}
