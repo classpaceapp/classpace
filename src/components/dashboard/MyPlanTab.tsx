@@ -121,99 +121,110 @@ export const MyPlanTab: React.FC = () => {
         ];
 
   return (
-    <div className="p-8">
+    <div className="p-8 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent mb-3">
-            My Subscription
-          </h1>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-600 bg-clip-text text-transparent">
+                My Plan
+              </h1>
+            </div>
+          </div>
           <p className="text-lg text-foreground/70">
-            Manage your Classpace plan and billing
+            Manage your subscription
           </p>
         </div>
 
-        <Card className={`backdrop-blur-sm rounded-2xl overflow-hidden border ${
-          isPremium ? 'border-purple-500/30 bg-gradient-to-br from-purple-50/50 to-pink-50/50' : 'border-border/50 bg-card/50'
+        <Card className={`border-2 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl ${
+          isPremium ? 'border-purple-500/30 bg-gradient-to-br from-card/80 to-card/50 hover:shadow-purple-500/20' : 'border-border/30 bg-gradient-to-br from-card/80 to-card/50'
         }`}>
-          <CardHeader className={`p-6 border-b ${
+          <CardHeader className={`p-8 border-b-2 ${
             isPremium 
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 border-purple-500/30' 
-              : 'bg-gradient-to-r from-foreground/5 to-foreground/10 border-border/50'
+              ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 border-purple-500/30' 
+              : 'bg-gradient-to-r from-foreground/10 to-foreground/5 border-border/30'
           }`}>
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+              <div className="flex items-center gap-4">
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg ${
                   isPremium ? 'bg-white/20' : 'bg-background/50'
                 }`}>
-                  {isPremium ? <Crown className="h-6 w-6 text-white" /> : <Sparkles className="h-6 w-6 text-foreground/60" />}
+                  {isPremium ? <Crown className="h-8 w-8 text-white" /> : <Sparkles className="h-8 w-8 text-foreground/60" />}
                 </div>
                 <div>
-                  <CardTitle className={`text-2xl font-bold ${isPremium ? 'text-white' : 'text-foreground'}`}>
+                  <CardTitle className={`text-3xl font-bold ${isPremium ? 'text-white' : 'text-foreground'}`}>
                     {planName}
                   </CardTitle>
-                  <CardDescription className={isPremium ? 'text-white/80' : 'text-muted-foreground'}>
+                  <CardDescription className={`text-base ${isPremium ? 'text-white/80' : 'text-muted-foreground'}`}>
                     {isPremium ? 'All premium features' : 'Core features'}
                   </CardDescription>
                 </div>
               </div>
               {isPremium && (
-                <Badge className="bg-white text-purple-600 hover:bg-white font-semibold px-3 py-1">
+                <Badge className="bg-white text-purple-600 hover:bg-white font-bold px-4 py-2 text-base shadow-lg">
                   Active
                 </Badge>
               )}
             </div>
           </CardHeader>
           
-          <CardContent className="p-6">
-            <div className="space-y-5 mb-6">
-              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+          <CardContent className="p-8">
+            <div className="space-y-6 mb-8">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
                 {isPremium ? '✓ Your benefits' : '→ Unlock with premium'}
               </h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-4">
                 {features.map((feature, index) => (
-                  <li key={index} className="flex items-start space-x-2.5">
-                    <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                      isPremium ? 'bg-green-100' : 'bg-muted'
+                  <li key={index} className="flex items-start gap-4 bg-muted/20 rounded-xl p-4 border border-border/20">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                      isPremium ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30' : 'bg-muted border-border'
                     }`}>
-                      <Check className={`h-3.5 w-3.5 ${isPremium ? 'text-green-600' : 'text-muted-foreground'}`} />
+                      <Check className={`h-4 w-4 font-bold ${isPremium ? 'text-green-600' : 'text-muted-foreground'}`} />
                     </div>
-                    <span className="text-foreground/80 text-sm leading-relaxed">{feature}</span>
+                    <span className="text-foreground font-medium leading-relaxed">{feature}</span>
                   </li>
                 ))}
               </ul>
             </div>
             
             {!isPremium && (
-              <div className="py-4 mb-4">
-                <div className="flex items-baseline space-x-2">
-                  <span className="text-4xl font-bold text-foreground">$7</span>
-                  <span className="text-lg text-muted-foreground">/month</span>
+              <div className="py-6 mb-6 border-y border-border/30">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-bold text-foreground">$7</span>
+                  <span className="text-xl text-muted-foreground font-medium">/month</span>
                 </div>
               </div>
             )}
 
             {subscription?.subscription_end && isPremium && (
-              <div className="py-4 mb-4 border-t border-border/50">
-                <p className="text-sm text-muted-foreground">
+              <div className="py-6 mb-6 border-y border-border/30 bg-muted/10 rounded-xl px-4">
+                <p className="text-base text-foreground/80 font-medium">
                   {isPremium ? 'Renews' : 'Ends'} on{' '}
-                  <span className="font-semibold text-foreground">
-                    {new Date(subscription.subscription_end).toLocaleDateString()}
+                  <span className="font-bold text-foreground">
+                    {new Date(subscription.subscription_end).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
                   </span>
                 </p>
               </div>
             )}
             
-            <div className="space-y-2.5">
+            <div className="space-y-4">
               {isPremium ? (
                 <Button
                   onClick={handleManageSubscription}
                   disabled={loading}
-                  className="w-full py-5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium"
+                  className="w-full py-6 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all"
                 >
                   {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   ) : (
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard className="mr-2 h-5 w-5" />
                   )}
                   {loading ? 'Loading...' : 'Manage Subscription'}
                 </Button>
@@ -221,12 +232,12 @@ export const MyPlanTab: React.FC = () => {
                 <Button
                   onClick={handleUpgrade}
                   disabled={loading}
-                  className="w-full py-5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium"
+                  className="w-full py-6 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all"
                 >
                   {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   ) : (
-                    <Crown className="mr-2 h-4 w-4" />
+                    <Crown className="mr-2 h-5 w-5" />
                   )}
                   {loading ? 'Loading...' : `Upgrade to ${isStudent ? 'Learn' : 'Teach'} +`}
                 </Button>
@@ -236,11 +247,11 @@ export const MyPlanTab: React.FC = () => {
                 onClick={() => refreshSubscription()}
                 variant="outline"
                 disabled={checkingSubscription}
-                className="w-full py-3 border"
+                className="w-full py-4 border-2 font-semibold hover:bg-primary/5"
               >
                 {checkingSubscription ? (
                   <>
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Checking...
                   </>
                 ) : (

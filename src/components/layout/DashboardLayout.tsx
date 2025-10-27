@@ -30,24 +30,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const navigate = useNavigate();
 
   const teacherNavItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Profile', href: '/profile', icon: User },
-    { name: 'My Plan', href: '/my-plan', icon: Sparkles },
-    { name: 'Documentation', href: '/documentation', icon: FileText },
-    { name: 'FAQs', href: '/faqs', icon: HelpCircle },
-    { name: 'AI Chat', href: '/ai-chat', icon: MessageSquare },
-    { name: 'Support', href: '/support-tab', icon: LifeBuoy }
+    { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-blue-500' },
+    { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
+    { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
+    { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },
+    { name: 'FAQs', href: '/faqs', icon: HelpCircle, color: 'text-orange-500' },
+    { name: 'AI Chat', href: '/ai-chat', icon: MessageSquare, color: 'text-cyan-500' },
+    { name: 'Support', href: '/support-tab', icon: LifeBuoy, color: 'text-red-500' }
   ];
 
   const learnerNavItems = [
-    { name: 'Dashboard', href: '/student-dashboard', icon: Home },
-    { name: 'Learnspace', href: '/learnspace', icon: Sparkles },
-    { name: 'Phoenix', href: '/phoenix', icon: Flame },
-    { name: 'Profile', href: '/profile', icon: User },
-    { name: 'My Plan', href: '/my-plan', icon: Sparkles },
-    { name: 'Documentation', href: '/documentation', icon: FileText },
-    { name: 'FAQs', href: '/faqs', icon: HelpCircle },
-    { name: 'Support', href: '/support-tab', icon: LifeBuoy }
+    { name: 'Dashboard', href: '/student-dashboard', icon: Home, color: 'text-blue-500' },
+    { name: 'Learnspace', href: '/learnspace', icon: 'learnspace', color: '' },
+    { name: 'Phoenix', href: '/phoenix', icon: 'phoenix', color: '' },
+    { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
+    { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
+    { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },
+    { name: 'FAQs', href: '/faqs', icon: HelpCircle, color: 'text-orange-500' },
+    { name: 'Support', href: '/support-tab', icon: LifeBuoy, color: 'text-red-500' }
   ];
 
   const navigationItems = userRole === 'teacher' ? teacherNavItems : learnerNavItems;
@@ -100,7 +100,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             alt="Classpace Logo" 
             className="w-8 h-8"
           />
-          <span className="text-xl font-bold bg-gradient-to-r from-primary via-purple-500 to-secondary bg-clip-text text-transparent">
+          <span className="text-xl font-bold text-foreground">
             Classpace
           </span>
         </div>
@@ -108,8 +108,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         {/* Navigation */}
         <nav className="p-4 space-y-2">
           {navigationItems.map((item) => {
-            const Icon = item.icon;
             const isActive = location.pathname === item.href;
+            
             return (
               <button
                 key={item.name}
@@ -120,7 +120,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                {typeof item.icon === 'string' ? (
+                  item.icon === 'learnspace' ? (
+                    <img src="/src/assets/learnspace-logo.png" alt="Learnspace" className="h-5 w-5" />
+                  ) : item.icon === 'phoenix' ? (
+                    <img src="/src/assets/phoenix-logo.png" alt="Phoenix" className="h-5 w-5" />
+                  ) : null
+                ) : (
+                  React.createElement(item.icon, { 
+                    className: `h-5 w-5 ${!isActive && item.color ? item.color : ''}` 
+                  })
+                )}
                 <span className="font-medium">{item.name}</span>
               </button>
             );

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Crown, CreditCard, Loader2 } from 'lucide-react';
+import { Crown, CreditCard, Loader2, Sparkles, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const SubscriptionCard: React.FC = () => {
-  const { subscription, checkingSubscription, refreshSubscription } = useAuth();
+  const { subscription, checkingSubscription } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -73,107 +73,67 @@ const SubscriptionCard: React.FC = () => {
         <div className="space-y-3">
           <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
-      ) : isPremium ? (
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm rounded-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 p-5 border-b border-blue-500/30">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-bold flex items-center text-white">
-                <Crown className="mr-2 h-5 w-5" />
-                Teach +
-              </CardTitle>
-              <Badge className="bg-white text-blue-600 hover:bg-white text-xs px-2 py-0.5">Active</Badge>
-            </div>
-          </CardHeader>
-          
-          <CardContent className="p-5 space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start space-x-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-                <span className="text-xs text-foreground/80 leading-relaxed">Unlimited AI Pods</span>
-              </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-                <span className="text-xs text-foreground/80 leading-relaxed">Advanced teaching assistant</span>
-              </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-                <span className="text-xs text-foreground/80 leading-relaxed">Comprehensive analytics</span>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleManageSubscription}
-              disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-medium"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <CreditCard className="mr-2 h-3.5 w-3.5" />
-              )}
-              {loading ? 'Loading...' : 'Manage Subscription'}
-            </Button>
-          </CardContent>
-        </Card>
       ) : (
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm rounded-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 p-5 border-b border-blue-500/30">
-            <CardTitle className="text-base font-bold flex items-center text-white">
-              <Crown className="mr-2 h-5 w-5" />
-              Upgrade to Teach +
-            </CardTitle>
-          </CardHeader>
-          
-          <CardContent className="p-5 space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-start space-x-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-                <span className="text-xs text-foreground/80 leading-relaxed">Unlimited AI Pods</span>
+        <Card className="bg-gradient-to-br from-card/60 to-card/40 border-2 border-blue-500/30 hover:border-blue-500/50 shadow-2xl hover:shadow-blue-500/20 transition-all backdrop-blur-sm">
+          <CardContent className="p-8">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                  <Crown className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Teach +
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-medium">Unlimited Potential</p>
+                </div>
               </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-                <span className="text-xs text-foreground/80 leading-relaxed">Advanced teaching assistant</span>
-              </div>
-              <div className="flex items-start space-x-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></div>
-                <span className="text-xs text-foreground/80 leading-relaxed">Comprehensive analytics</span>
-              </div>
+              {isPremium ? (
+                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 hover:from-green-500/30 hover:to-emerald-500/30 border-2 border-green-500/30 px-3 py-1 text-sm">
+                  Active
+                </Badge>
+              ) : (
+                <div className="text-right bg-gradient-to-br from-blue-500/10 to-purple-500/10 px-4 py-2 rounded-xl border border-blue-500/20">
+                  <p className="text-3xl font-bold text-foreground">$7</p>
+                  <p className="text-xs text-muted-foreground font-semibold">per month</p>
+                </div>
+              )}
             </div>
-            
-            <div className="pt-3 border-t border-border/50">
-              <div className="flex items-baseline space-x-1.5">
-                <span className="text-2xl font-bold text-foreground">$7</span>
-                <span className="text-sm text-muted-foreground">/month</span>
-              </div>
-            </div>
-            
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-blue-500/30">
+                  <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited AI Pods</span>
+              </li>
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-blue-500/30">
+                  <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Advanced teaching assistant</span>
+              </li>
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-blue-500/30">
+                  <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Comprehensive analytics</span>
+              </li>
+            </ul>
+
             <Button 
-              onClick={handleUpgrade}
+              onClick={isPremium ? handleManageSubscription : handleUpgrade}
               disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-sm font-medium"
+              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
             >
               {loading ? (
-                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              ) : isPremium ? (
+                <CreditCard className="w-5 h-5 mr-2" />
               ) : (
-                <Crown className="mr-2 h-3.5 w-3.5" />
+                <Sparkles className="w-5 h-5 mr-2" />
               )}
-              {loading ? 'Loading...' : 'Upgrade Now'}
-            </Button>
-            
-            <Button
-              onClick={() => refreshSubscription()}
-              variant="outline"
-              disabled={checkingSubscription}
-              className="w-full py-2 text-sm"
-            >
-              {checkingSubscription ? (
-                <>
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  Checking...
-                </>
-              ) : (
-                'Refresh Status'
-              )}
+              {loading ? 'Processing...' : isPremium ? 'Manage Subscription' : 'Upgrade to Teach +'}
             </Button>
           </CardContent>
         </Card>
