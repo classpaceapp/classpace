@@ -41,9 +41,12 @@ const WhiteboardView: React.FC = () => {
           .from('whiteboards')
           .select('*')
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
         if (error) throw error;
+        if (!data) {
+          throw new Error('Whiteboard not found or access denied');
+        }
 
         setWhiteboard(data);
 
@@ -54,6 +57,14 @@ const WhiteboardView: React.FC = () => {
             height: window.innerHeight - 80,
             backgroundColor: '#ffffff',
           });
+
+          // Initialize free drawing brush for Fabric v6 and default modes
+          if (canvas.freeDrawingBrush) {
+            canvas.freeDrawingBrush.color = activeColor;
+            canvas.freeDrawingBrush.width = 3;
+          }
+          canvas.isDrawingMode = false;
+          canvas.selection = true;
 
           // Load existing whiteboard data if any
           if (data.whiteboard_data && typeof data.whiteboard_data === 'object' && Object.keys(data.whiteboard_data).length > 0) {
@@ -84,6 +95,7 @@ const WhiteboardView: React.FC = () => {
     if (!fabricCanvas) return;
 
     fabricCanvas.isDrawingMode = activeTool === 'draw' || activeTool === 'eraser';
+    fabricCanvas.selection = activeTool === 'select';
 
     if (activeTool === 'draw' && fabricCanvas.freeDrawingBrush) {
       fabricCanvas.freeDrawingBrush.color = activeColor;
@@ -124,15 +136,23 @@ const WhiteboardView: React.FC = () => {
     };
   }, [fabricCanvas, id]);
 
+  // Cleanup Fabric canvas on unmount
+  useEffect(() => {
+    return () => {
+      if (fabricCanvas) {
+        fabricCanvas.dispose();
+      }
+    };
+  }, [fabricCanvas]);
+
   const handleToolClick = (tool: typeof activeTool) => {
     if (!fabricCanvas) return;
 
     setActiveTool(tool);
     
-    // Turn off drawing mode for non-drawing tools
-    if (tool !== 'draw' && tool !== 'eraser') {
-      fabricCanvas.isDrawingMode = false;
-    }
+    // Toggle modes
+    fabricCanvas.isDrawingMode = tool === 'draw' || tool === 'eraser';
+    fabricCanvas.selection = tool === 'select';
 
     if (tool === 'rectangle') {
       const rect = new Rect({

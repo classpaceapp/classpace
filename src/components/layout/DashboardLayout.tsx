@@ -17,6 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import learnspaceLogo from '@/assets/learnspace-logo.png';
 import phoenixLogo from '@/assets/phoenix-logo.png';
 
@@ -30,6 +32,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const PHOENIX_COMING_SOON = true;
 
   const teacherNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-blue-500' },
@@ -64,6 +68,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   };
 
   const handleNavigation = (href: string) => {
+    if (userRole === 'learner' && href === '/phoenix' && PHOENIX_COMING_SOON) {
+      toast({ title: 'Phoenix', description: 'Coming soon' });
+      setSidebarOpen(false);
+      return;
+    }
     if (href === '/dashboard') {
       // Navigate to role-specific dashboard
       if (userRole === 'learner') {
@@ -134,6 +143,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
                   })
                 )}
                 <span className="font-medium">{item.name}</span>
+                {userRole === 'learner' && item.icon === 'phoenix' && PHOENIX_COMING_SOON && (
+                  <Badge variant="secondary" className="ml-auto">Coming soon</Badge>
+                )}
               </button>
             );
           })}
