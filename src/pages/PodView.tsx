@@ -144,7 +144,8 @@ const PodView: React.FC = () => {
 
   return (
     <DashboardLayout userRole="teacher">
-      <div className="space-y-6 pl-6">
+      <div className="container mx-auto px-4 py-8 mt-6">
+        <div className="space-y-6 pl-8">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
@@ -163,7 +164,7 @@ const PodView: React.FC = () => {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2 mr-8">
                 <Settings className="h-4 w-4" />
                 Settings
               </Button>
@@ -313,6 +314,7 @@ const PodView: React.FC = () => {
           podId={id!}
           podTitle={pod.title}
         />
+        </div>
       </div>
     </DashboardLayout>
   );

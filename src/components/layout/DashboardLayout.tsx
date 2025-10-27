@@ -100,7 +100,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
             alt="Classpace Logo" 
             className="w-8 h-8"
           />
-          <span className="text-xl font-bold text-foreground">
+          <span className="text-xl font-bold" style={{ color: 'hsl(280, 70%, 40%)' }}>
             Classpace
           </span>
         </div>

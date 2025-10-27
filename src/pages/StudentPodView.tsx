@@ -129,7 +129,8 @@ const StudentPodView: React.FC = () => {
 
   return (
     <DashboardLayout userRole="learner">
-      <div className="space-y-6 pl-6">
+      <div className="container mx-auto px-4 py-8 mt-6">
+        <div className="space-y-6 pl-8">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button 
@@ -237,6 +238,7 @@ const StudentPodView: React.FC = () => {
           </TabsContent>
 
         </Tabs>
+        </div>
       </div>
     </DashboardLayout>
   );

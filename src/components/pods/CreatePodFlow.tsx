@@ -22,7 +22,8 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    subject: ''
+    subject: '',
+    isPublic: false
   });
 
   const steps = [
@@ -37,13 +38,18 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
       icon: Target
     },
     {
+      title: 'Privacy Settings',
+      description: 'Set who can access your pod',
+      icon: Users
+    },
+    {
       title: 'Review & Create',
       description: 'Confirm your pod details',
       icon: Sparkles
     }
   ];
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -74,7 +80,8 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
           description: formData.description.trim() || null,
           subject: formData.subject.trim(),
           teacher_id: user.id,
-          pod_code: podCode
+          pod_code: podCode,
+          is_public: formData.isPublic
         });
 
       if (error) throw error;
@@ -106,6 +113,8 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
       case 2:
         return formData.description.trim();
       case 3:
+        return true;
+      case 4:
         return true;
       default:
         return false;
@@ -170,6 +179,55 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
       case 3:
         return (
           <div className="space-y-6">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Privacy Settings</h3>
+              <p className="text-gray-600">Choose who can access your pod</p>
+            </div>
+
+            <div className="space-y-4">
+              <Card 
+                className={`border-2 cursor-pointer transition-all ${formData.isPublic ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
+                onClick={() => handleInputChange('isPublic', true)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 ${formData.isPublic ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
+                      {formData.isPublic && <div className="w-3 h-3 bg-white rounded-full" />}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-lg mb-2">Public Pod</h4>
+                      <p className="text-muted-foreground">Anyone can discover and join your pod. Great for open courses and community learning.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`border-2 cursor-pointer transition-all ${!formData.isPublic ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}
+                onClick={() => handleInputChange('isPublic', false)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 ${!formData.isPublic ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
+                      {!formData.isPublic && <div className="w-3 h-3 bg-white rounded-full" />}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-lg mb-2">Private Pod (Recommended)</h4>
+                      <p className="text-muted-foreground">Only students with a join code can access. Perfect for classroom settings and controlled groups.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Check className="h-8 w-8 text-white" />
@@ -192,6 +250,10 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
                 <div>
                   <h4 className="font-semibold mb-1">Description</h4>
                   <p className="text-muted-foreground">{formData.description}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Privacy</h4>
+                  <p className="text-muted-foreground">{formData.isPublic ? 'Public - Anyone can join' : 'Private - Join code required'}</p>
                 </div>
               </CardContent>
             </Card>

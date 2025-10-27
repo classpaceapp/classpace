@@ -35,7 +35,10 @@ export const PodChat: React.FC<PodChatProps> = ({ podId }) => {
     try {
       const { data, error } = await supabase
         .from('pod_messages')
-        .select('*, profiles:user_id(first_name, last_name)')
+        .select(`
+          *,
+          profiles!pod_messages_user_id_fkey(first_name, last_name)
+        `)
         .eq('pod_id', podId)
         .order('created_at', { ascending: true });
 
