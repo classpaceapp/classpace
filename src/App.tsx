@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import PodView from "./pages/PodView";
 import StudentPodView from "./pages/StudentPodView";
 import SessionView from "./pages/SessionView";
+import WhiteboardView from "./pages/WhiteboardView";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Pricing from "./pages/Pricing";
@@ -100,6 +101,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <SessionView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/whiteboard/:id" 
+              element={
+                <ProtectedRoute>
+                  <WhiteboardView />
                 </ProtectedRoute>
               } 
             />

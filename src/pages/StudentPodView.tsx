@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PodChat } from '@/components/pods/PodChat';
 import { PodNotes } from '@/components/pods/PodNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
+import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
 import { 
   ArrowLeft, 
   Users, 
@@ -29,6 +30,10 @@ interface Pod {
   created_at: string;
   updated_at: string;
   teacher_name?: string;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 const StudentPodView: React.FC = () => {
@@ -39,6 +44,37 @@ const StudentPodView: React.FC = () => {
   const [pod, setPod] = useState<Pod | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [leaving, setLeaving] = useState(false);
+
+  const handleLeavePod = async () => {
+    if (!user?.id || !id) return;
+
+    setLeaving(true);
+    try {
+      const { error } = await supabase
+        .from('pod_members')
+        .delete()
+        .eq('pod_id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Left pod successfully',
+        description: 'You are no longer a member of this pod',
+      });
+
+      navigate('/student-dashboard');
+    } catch (error: any) {
+      toast({
+        title: 'Failed to leave pod',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLeaving(false);
+    }
+  };
 
   const fetchPod = async () => {
     if (!id || !user?.id) return;
@@ -67,25 +103,22 @@ const StudentPodView: React.FC = () => {
       // Fetch pod details
       const { data: podData, error: podError } = await supabase
         .from('pods')
-        .select('*')
+        .select(`
+          *,
+          profiles!pods_teacher_id_fkey(first_name, last_name)
+        `)
         .eq('id', id)
         .single();
 
       if (podError) throw podError;
 
-      // Get teacher info
-      const { data: teacherProfile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', podData.teacher_id)
-        .single();
-
-      setPod({
+      // Transform the data to match our interface
+      const transformedPod = {
         ...podData,
-        teacher_name: teacherProfile 
-          ? `${teacherProfile.first_name} ${teacherProfile.last_name}` 
-          : 'Unknown Teacher'
-      });
+        profiles: Array.isArray(podData.profiles) ? podData.profiles[0] : podData.profiles
+      };
+
+      setPod(transformedPod);
     } catch (error: any) {
       console.error('Error fetching pod:', error);
       toast({
@@ -144,8 +177,13 @@ const StudentPodView: React.FC = () => {
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.title}</h1>
             <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-              <span>Teacher: {pod.teacher_name}</span>
-              <span>• {pod.subject}</span>
+              {pod.profiles && (
+                <>
+                  <span>Teacher: {pod.profiles.first_name} {pod.profiles.last_name}</span>
+                  <span>•</span>
+                </>
+              )}
+              <span>{pod.subject}</span>
             </div>
             {pod.description && (
               <p className="text-muted-foreground mt-2">{pod.description}</p>
@@ -179,33 +217,44 @@ const StudentPodView: React.FC = () => {
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <Card>
+            <Card className="border-primary/20">
               <CardHeader>
-                <CardTitle>Class Overview</CardTitle>
-                <CardDescription>
-                  View class information and classmates
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Pod Information</CardTitle>
+                  <Button 
+                    variant="outline"
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    onClick={handleLeavePod}
+                    disabled={leaving}
+                  >
+                    {leaving ? 'Leaving...' : 'Leave Pod'}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold mb-2">Class Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-sm text-muted-foreground">Teacher</label>
-                        <p className="font-medium">{pod.teacher_name}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm text-muted-foreground">Subject</label>
-                        <p className="font-medium">{pod.subject}</p>
-                      </div>
+                    <label className="text-sm text-muted-foreground">Title</label>
+                    <p className="font-medium text-lg">{pod.title}</p>
+                  </div>
+                  {pod.description && (
+                    <div>
+                      <label className="text-sm text-muted-foreground">Description</label>
+                      <p className="font-medium">{pod.description}</p>
                     </div>
-                  </div>
-                  
+                  )}
                   <div>
-                    <h3 className="font-semibold mb-2">Classmates</h3>
-                    <p className="text-muted-foreground">Classmate list coming soon!</p>
+                    <label className="text-sm text-muted-foreground">Subject</label>
+                    <p className="font-medium">{pod.subject}</p>
                   </div>
+                  {pod.profiles && (
+                    <div>
+                      <label className="text-sm text-muted-foreground">Teacher</label>
+                      <p className="font-medium">
+                        {pod.profiles.first_name} {pod.profiles.last_name}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -224,17 +273,7 @@ const StudentPodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Collaborative Whiteboard</CardTitle>
-                <CardDescription>
-                  View and interact with the class whiteboard
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Whiteboard functionality coming soon!</p>
-              </CardContent>
-            </Card>
+            <WhiteboardTab podId={id!} isTeacher={false} />
           </TabsContent>
 
         </Tabs>

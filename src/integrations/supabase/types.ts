@@ -690,6 +690,51 @@ export type Database = {
         }
         Relationships: []
       }
+      whiteboards: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          pod_id: string
+          title: string
+          updated_at: string
+          whiteboard_data: Json | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          pod_id: string
+          title: string
+          updated_at?: string
+          whiteboard_data?: Json | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          pod_id?: string
+          title?: string
+          updated_at?: string
+          whiteboard_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whiteboards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whiteboards_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -10,13 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import StartSessionModal from '@/components/sessions/StartSessionModal';
-import SessionsList from '@/components/sessions/SessionsList';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { PodChat } from '@/components/pods/PodChat';
 import { PodNotes } from '@/components/pods/PodNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
 import { DeletePodDialog } from '@/components/pods/DeletePodDialog';
+import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
+import { EditPodDialog } from '@/components/pods/EditPodDialog';
 import { 
   ArrowLeft, 
   Users, 
@@ -49,8 +49,8 @@ const PodView: React.FC = () => {
   const [pod, setPod] = useState<Pod | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-  const [startSessionModalOpen, setStartSessionModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const fetchPod = async () => {
     if (!id || !user?.id) return;
@@ -235,42 +235,58 @@ const PodView: React.FC = () => {
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Sessions</CardTitle>
-                      <CardDescription>
-                        Start and manage learning sessions
-                      </CardDescription>
-                    </div>
+            <Card className="border-primary/20">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Pod Information</CardTitle>
+                  <div className="flex gap-2">
                     <Button 
-                      onClick={() => setStartSessionModalOpen(true)}
+                      variant="outline"
+                      onClick={() => setEditDialogOpen(true)}
                     >
-                      Start New Session
+                      Edit Details
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => setDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Pod
                     </Button>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <SessionsList podId={id!} />
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pod Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground">Title</label>
+                    <p className="font-medium text-lg">{pod.title}</p>
+                  </div>
+                  {pod.description && (
                     <div>
-                      <label className="text-sm text-muted-foreground">Subject</label>
-                      <p className="font-medium">{pod.subject}</p>
+                      <label className="text-sm text-muted-foreground">Description</label>
+                      <p className="font-medium">{pod.description}</p>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-sm text-muted-foreground">Subject</label>
+                    <p className="font-medium">{pod.subject}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground">Pod Code</label>
+                    <div className="flex gap-2 items-center mt-1">
+                      <code className="px-3 py-2 bg-secondary rounded text-sm font-mono">
+                        {pod.pod_code}
+                      </code>
+                      <Button size="sm" variant="outline" onClick={copyJoinCode}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="chat" className="mt-6">
@@ -286,33 +302,26 @@ const PodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Collaborative Whiteboard</CardTitle>
-                <CardDescription>
-                  Interactive whiteboard for visual learning
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">Whiteboard functionality coming soon!</p>
-              </CardContent>
-            </Card>
+            <WhiteboardTab podId={id!} isTeacher={true} />
           </TabsContent>
 
         </Tabs>
-
-        <StartSessionModal
-          isOpen={startSessionModalOpen}
-          onClose={() => setStartSessionModalOpen(false)}
-          podId={id!}
-          onSessionStarted={(sessionId) => navigate(`/session/${sessionId}`)}
-        />
 
         <DeletePodDialog
           open={deleteDialogOpen}
           onOpenChange={setDeleteDialogOpen}
           podId={id!}
           podTitle={pod.title}
+        />
+
+        <EditPodDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          podId={id!}
+          currentTitle={pod.title}
+          currentDescription={pod.description}
+          currentSubject={pod.subject}
+          onUpdate={fetchPod}
         />
         </div>
       </div>
