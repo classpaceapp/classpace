@@ -100,23 +100,30 @@ const StudentPodView: React.FC = () => {
         return;
       }
 
-      // Fetch pod details
+      // Fetch pod details (without relationship hints)
       const { data: podData, error: podError } = await supabase
         .from('pods')
-        .select(`
-          *,
-          profiles!pods_teacher_id_fkey(first_name, last_name)
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
       if (podError) throw podError;
 
-      // Transform the data to match our interface
+      // Fetch teacher profile separately to avoid schema join dependency
+      let teacherProfile: { first_name: string | null; last_name: string | null } | null = null;
+      if (podData?.teacher_id) {
+        const { data: prof, error: profErr } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', podData.teacher_id)
+          .maybeSingle();
+        if (!profErr) teacherProfile = prof;
+      }
+
       const transformedPod = {
         ...podData,
-        profiles: Array.isArray(podData.profiles) ? podData.profiles[0] : podData.profiles
-      };
+        profiles: teacherProfile || undefined,
+      } as Pod;
 
       setPod(transformedPod);
     } catch (error: any) {

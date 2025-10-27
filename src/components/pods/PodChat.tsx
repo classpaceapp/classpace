@@ -33,23 +33,37 @@ export const PodChat: React.FC<PodChatProps> = ({ podId }) => {
 
   const fetchMessages = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: msgs, error: msgError } = await supabase
         .from('pod_messages')
-        .select(`
-          *,
-          profiles!pod_messages_user_id_fkey(first_name, last_name)
-        `)
+        .select('*')
         .eq('pod_id', podId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (msgError) throw msgError;
 
-      const messagesWithNames = data.map((msg: any) => ({
-        ...msg,
-        user_name: msg.profiles
-          ? `${msg.profiles.first_name} ${msg.profiles.last_name}`
-          : 'Unknown User',
-      }));
+      const messages = (msgs || []) as any[];
+      const userIds = Array.from(new Set(messages.map(m => m.user_id).filter(Boolean)));
+
+      let profilesMap: Record<string, { first_name: string | null; last_name: string | null }> = {};
+      if (userIds.length) {
+        const { data: profs, error: profErr } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', userIds);
+        if (!profErr && profs) {
+          profilesMap = Object.fromEntries(
+            profs.map((p: any) => [p.id, { first_name: p.first_name, last_name: p.last_name }])
+          );
+        }
+      }
+
+      const messagesWithNames = messages.map((msg: any) => {
+        const p = profilesMap[msg.user_id];
+        return {
+          ...msg,
+          user_name: p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Unknown User' : 'Unknown User',
+        } as Message;
+      });
 
       setMessages(messagesWithNames);
     } catch (error: any) {

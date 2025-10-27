@@ -17,6 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import learnspaceLogo from '@/assets/learnspace-logo.png';
+import phoenixLogo from '@/assets/phoenix-logo.png';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -122,9 +124,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
               >
                 {typeof item.icon === 'string' ? (
                   item.icon === 'learnspace' ? (
-                    <img src="/src/assets/learnspace-logo.png" alt="Learnspace" className="h-5 w-5" />
+                    <img src={learnspaceLogo} alt="Learnspace" className="h-5 w-5" />
                   ) : item.icon === 'phoenix' ? (
-                    <img src="/src/assets/phoenix-logo.png" alt="Phoenix" className="h-5 w-5" />
+                    <img src={phoenixLogo} alt="Phoenix" className="h-5 w-5" />
                   ) : null
                 ) : (
                   React.createElement(item.icon, { 
