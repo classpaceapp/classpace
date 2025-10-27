@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -25,16 +26,14 @@ interface Pod {
 }
 
 const StudentDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
   const requestIdRef = useRef(0);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [publicResults, setPublicResults] = useState<Pod[]>([]);
   const [joinCode, setJoinCode] = useState('');
-  const [searching, setSearching] = useState(false);
 
   const fetchPods = async () => {
     const currentId = ++requestIdRef.current;
@@ -100,28 +99,6 @@ const StudentDashboard: React.FC = () => {
     }
   };
 
-  const searchPublicPods = async () => {
-    try {
-      setSearching(true);
-      const term = searchTerm.trim();
-      if (!term) {
-        setPublicResults([]);
-        return;
-      }
-      const { data, error } = await supabase
-        .from('pods')
-        .select('*')
-        .eq('is_public', true)
-        .or(`title.ilike.%${term}%,subject.ilike.%${term}%`)
-        .order('updated_at', { ascending: false });
-      if (error) throw error;
-      setPublicResults((data || []) as Pod[]);
-    } catch (err: any) {
-      toast({ title: 'Search failed', description: err.message, variant: 'destructive' });
-    } finally {
-      setSearching(false);
-    }
-  };
 
   const joinByCode = async () => {
     try {
@@ -196,17 +173,17 @@ const StudentDashboard: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <div className="flex gap-3">
-                  <Input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search by title or subject" />
-                  <Button onClick={searchPublicPods} disabled={searching}>{searching ? 'Searching...' : 'Search'}</Button>
-                </div>
-                {publicResults.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {publicResults.map((pod) => (
-                      <PodCard key={pod.id} pod={pod} userRole="learner" basePath="/student-dashboard" />
-                    ))}
-                  </div>
-                )}
+                <p className="text-gray-600 mb-4">
+                  Search for public classes and join them instantly
+                </p>
+                <Button 
+                  onClick={() => navigate('/discover-pods')} 
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
+                  size="lg"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Browse Public Classes
+                </Button>
               </CardContent>
             </Card>
 
