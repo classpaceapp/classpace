@@ -89,7 +89,7 @@ serve(async (req) => {
           user_id: user.id,
           tier: 'free',
           status: 'active'
-        });
+        }, { onConflict: 'user_id' });
       
       return new Response(JSON.stringify({ 
         subscribed: false,
@@ -129,7 +129,7 @@ serve(async (req) => {
           tier: 'free',
           status: 'active',
           stripe_customer_id: customerId
-        });
+        }, { onConflict: 'user_id' });
 
       return new Response(JSON.stringify({
         subscribed: false,
@@ -218,7 +218,7 @@ serve(async (req) => {
         stripe_customer_id: customerId,
         stripe_subscription_id: subscription.id,
         current_period_end: subscriptionEnd
-      });
+      }, { onConflict: 'user_id' });
     
     if (upsertError) {
       logStep("Database upsert error", { error: upsertError.message });
