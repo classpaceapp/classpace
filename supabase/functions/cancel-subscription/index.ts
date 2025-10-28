@@ -68,14 +68,24 @@ serve(async (req) => {
       cancel_at_period_end: true,
     });
 
+    // Handle missing or invalid current_period_end
+    let cancelDate: string;
+    if (updatedSub.current_period_end && typeof updatedSub.current_period_end === 'number') {
+      cancelDate = new Date(updatedSub.current_period_end * 1000).toISOString();
+    } else {
+      // Fallback to 30 days from now if period_end is missing
+      cancelDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      logStep("Warning: current_period_end missing, using 30-day estimate");
+    }
+
     logStep("Subscription set to cancel at period end", { 
       subscriptionId: updatedSub.id,
-      cancelAt: new Date(updatedSub.current_period_end * 1000).toISOString()
+      cancelAt: cancelDate
     });
 
     return new Response(JSON.stringify({ 
       success: true,
-      cancel_at: new Date(updatedSub.current_period_end * 1000).toISOString()
+      cancel_at: cancelDate
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

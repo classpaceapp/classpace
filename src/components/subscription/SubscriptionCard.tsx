@@ -87,26 +87,28 @@ const SubscriptionCard: React.FC = () => {
     }
   };
 
-  const handleManageSubscription = async () => {
+  const handleCancelSubscription = async () => {
+    if (!confirm('Cancel your Teach+ subscription? You\'ll keep access until your renewal date.')) {
+      return;
+    }
+    
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
-      
+      const { data, error } = await supabase.functions.invoke('cancel-subscription');
+
       if (error) throw error;
-      
-      if (data?.url) {
-        window.open(data.url, '_blank');
-        toast({
-          title: "Opening subscription portal",
-          description: "Manage your subscription in the new tab.",
-        });
-      }
-    } catch (error: any) {
-      console.error('Error opening customer portal:', error);
+
       toast({
-        title: "Failed to open portal",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
+        title: "Subscription cancelled",
+        description: `Access continues until ${new Date(data.cancel_at).toLocaleDateString()}`,
+      });
+      
+      await refreshSubscription?.();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to cancel subscription",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
@@ -169,20 +171,52 @@ const SubscriptionCard: React.FC = () => {
               </li>
             </ul>
 
-            <Button 
-              onClick={isPremium ? handleManageSubscription : handleUpgrade}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              ) : isPremium ? (
-                <CreditCard className="w-5 h-5 mr-2" />
-              ) : (
-                <Sparkles className="w-5 h-5 mr-2" />
-              )}
-              {loading ? 'Processing...' : isPremium ? 'Manage Subscription' : 'Upgrade to Teach +'}
-            </Button>
+            {isPremium && !(subscription as any)?.cancel_at_period_end ? (
+              <Button 
+                onClick={handleCancelSubscription}
+                disabled={loading}
+                variant="destructive"
+                className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : null}
+                {loading ? 'Cancelling...' : 'Cancel Subscription'}
+              </Button>
+            ) : !isPremium ? (
+              <Button 
+                onClick={handleUpgrade}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5 mr-2" />
+                )}
+                {loading ? 'Processing...' : 'Upgrade to Teach +'}
+              </Button>
+            ) : null}
+            
+            {isPremium && subscription?.subscription_end && (
+              <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${
+                (subscription as any)?.cancel_at_period_end 
+                  ? 'bg-red-500/10 border-red-500/30' 
+                  : 'bg-muted/20 border-border/30'
+              }`}>
+                <p className="text-sm font-medium text-foreground/80">
+                  {(subscription as any)?.cancel_at_period_end ? (
+                    <>Cancels on <span className="font-bold text-red-600 dark:text-red-400">
+                      {new Date(subscription.subscription_end).toLocaleDateString()}
+                    </span></>
+                  ) : (
+                    <>Renews on <span className="font-bold">
+                      {new Date(subscription.subscription_end).toLocaleDateString()}
+                    </span></>
+                  )}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
