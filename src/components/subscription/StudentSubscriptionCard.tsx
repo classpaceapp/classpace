@@ -49,7 +49,7 @@ export const StudentSubscriptionCard = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId: STUDENT_PREMIUM_PRICE_ID, isStudent: true }
+        body: { isStudent: true }
       });
 
       if (error) throw error;

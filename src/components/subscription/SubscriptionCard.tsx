@@ -52,7 +52,7 @@ const SubscriptionCard: React.FC = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { priceId: TEACHER_PREMIUM_PRICE_ID, isStudent: false }
+        body: { isStudent: false }
       });
       
       if (error) throw error;
