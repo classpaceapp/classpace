@@ -7,6 +7,7 @@ import { Crown, CreditCard, Loader2, Sparkles, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
+// Learn+ price ID from Stripe
 const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
 
 export const StudentSubscriptionCard = () => {
