@@ -17,7 +17,14 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
+  // Create client with ANON key for JWT validation
+  const supabaseAuth = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  );
+
+  // Create client with SERVICE ROLE for database operations
+  const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     { auth: { persistSession: false } }
@@ -37,8 +44,8 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     logStep("Authenticating user with token");
     
-    // Use service role client to verify the JWT token
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    // Use ANON client to verify the JWT token
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
     if (userError || !user?.email) {
       throw new Error(`Authentication error: ${userError?.message || 'User not found'}`);
     }
@@ -51,7 +58,7 @@ serve(async (req) => {
       logStep("No customer found, returning free tier");
       
       // Update subscription record to free
-      await supabaseClient
+      await supabaseAdmin
         .from('subscriptions')
         .upsert({
           user_id: user.id,
@@ -90,7 +97,7 @@ serve(async (req) => {
       productId = subscription.items.data[0].price.product as string;
       
       // Get user profile to determine if student or teacher
-      const { data: profileData } = await supabaseClient
+      const { data: profileData } = await supabaseAdmin
         .from('profiles')
         .select('role')
         .eq('id', user.id)
@@ -113,7 +120,7 @@ serve(async (req) => {
       logStep("Determined subscription tier", { productId, tier, userRole: profileData?.role });
       
       // Update subscription record
-      await supabaseClient
+      await supabaseAdmin
         .from('subscriptions')
         .upsert({
           user_id: user.id,
@@ -127,7 +134,7 @@ serve(async (req) => {
       logStep("No active subscription found");
       
       // Update to free tier
-      await supabaseClient
+      await supabaseAdmin
         .from('subscriptions')
         .upsert({
           user_id: user.id,

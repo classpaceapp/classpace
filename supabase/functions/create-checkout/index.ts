@@ -17,9 +17,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
+  // Create client with ANON key for JWT validation
+  const supabaseAuth = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  );
+
+  // Create client with SERVICE ROLE for database operations
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
   );
 
   try {
@@ -33,9 +41,10 @@ serve(async (req) => {
     if (!authHeader) throw new Error("No authorization header provided");
     
     const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
+    if (userError || !user?.email) {
+      throw new Error(`Authentication error: ${userError?.message || 'User not found'}`);
+    }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Get request body if provided (for specifying price)
@@ -63,7 +72,7 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
     // Get user profile to determine redirect URL
-    const { data: profileData } = await supabaseClient
+    const { data: profileData } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
