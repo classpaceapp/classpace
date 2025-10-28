@@ -92,7 +92,9 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      // Convert Unix timestamp to ISO string for display, but store as timestamptz-compatible format
+      const periodEndDate = new Date(subscription.current_period_end * 1000);
+      subscriptionEnd = periodEndDate.toISOString();
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       productId = subscription.items.data[0].price.product as string;
       
@@ -120,7 +122,7 @@ serve(async (req) => {
       logStep("Determined subscription tier", { productId, tier, userRole: profileData?.role });
       
       // Update subscription record
-      await supabaseAdmin
+      const { error: upsertError } = await supabaseAdmin
         .from('subscriptions')
         .upsert({
           user_id: user.id,
@@ -130,6 +132,11 @@ serve(async (req) => {
           stripe_subscription_id: subscription.id,
           current_period_end: subscriptionEnd
         });
+      
+      if (upsertError) {
+        logStep("Database upsert error", { error: upsertError.message });
+        throw new Error(`Failed to update subscription: ${upsertError.message}`);
+      }
     } else {
       logStep("No active subscription found");
       
