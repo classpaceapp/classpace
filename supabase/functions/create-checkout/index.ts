@@ -51,12 +51,9 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { priceId, isStudent } = body;
 
-    // Price IDs - Teacher using $1/month for testing
-    const TEACHER_PREMIUM_PRICE_ID = "price_1SN0ySBm9rSu4II6Olw734Ke"; // Classpace Teach+ $1/month
-    const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
-    
-    const finalPriceId = priceId || (isStudent ? STUDENT_PREMIUM_PRICE_ID : TEACHER_PREMIUM_PRICE_ID);
-    logStep("Price ID determined", { finalPriceId, isStudent });
+    // Determine price ID: prefer request body, otherwise resolve dynamically later
+    let finalPriceId: string | undefined = priceId;
+    logStep("Initial price resolution", { providedPriceId: finalPriceId, isStudent });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -67,6 +64,25 @@ serve(async (req) => {
       logStep("Found existing customer", { customerId });
     } else {
       logStep("No existing customer, will create on checkout");
+    }
+
+    // Resolve price dynamically by product name if not provided
+    if (!finalPriceId) {
+      const targetName = isStudent ? "Classpace Learn+" : "Classpace Teach+";
+      // List products in test mode and find by exact name
+      const products = await stripe.products.list({ active: true, limit: 100 });
+      const product = products.data.find((p) => p.name === targetName);
+      if (!product) {
+        throw new Error(`Stripe product not found: ${targetName}. Ensure it exists in the same mode as the API key (test vs live).`);
+      }
+      // Prefer a monthly recurring price; otherwise take the first active price
+      const prices = await stripe.prices.list({ product: product.id, active: true, limit: 100 });
+      const recurringMonthly = prices.data.find((pr) => pr.type === "recurring" && pr.recurring?.interval === "month");
+      finalPriceId = (recurringMonthly || prices.data[0])?.id;
+      if (!finalPriceId) {
+        throw new Error(`No active price found for product ${targetName}. Create/activate a price in the same Stripe mode.`);
+      }
+      logStep("Resolved price dynamically", { productId: product.id, finalPriceId });
     }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
