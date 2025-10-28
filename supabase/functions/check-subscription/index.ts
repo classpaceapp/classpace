@@ -52,9 +52,34 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+
+    // Try to find Stripe customer by metadata (robust if email changed at checkout)
+    let customerId: string | null = null;
+    try {
+      // @ts-ignore - customers.search is available in Stripe API
+      const found = await stripe.customers.search({
+        // Search by our stored Supabase user id
+        query: `metadata['supabase_user_id']:'${user.id}'`,
+        limit: 1,
+      } as any);
+      if ((found as any)?.data?.length) {
+        customerId = (found as any).data[0].id as string;
+        logStep("Found Stripe customer via metadata", { customerId });
+      }
+    } catch (e) {
+      logStep("Customer search by metadata not available or failed");
+    }
+
+    // Fallback to email lookup
+    if (!customerId) {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Found Stripe customer via email", { customerId });
+      }
+    }
     
-    if (customers.data.length === 0) {
+    if (!customerId) {
       logStep("No customer found, returning free tier");
       
       // Update subscription record to free
@@ -77,21 +102,23 @@ serve(async (req) => {
       });
     }
 
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
-
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 1,
+      limit: 10,
     });
-    const hasActiveSub = subscriptions.data.length > 0;
+
+    // Consider active-like statuses
+    const eligibleStatuses = new Set(["active", "trialing"]);
+    const eligibleSubs = subscriptions.data.filter((s) => eligibleStatuses.has(s.status));
+
+    const selectedSub = eligibleSubs.sort((a, b) => b.current_period_end - a.current_period_end)[0];
+    const hasActiveSub = !!selectedSub;
     let productId = null;
     let subscriptionEnd = null;
     let tier = 'free';
 
     if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+      const subscription = selectedSub!;
       // Convert Unix timestamp to ISO string for display, but store as timestamptz-compatible format
       const periodEndDate = new Date(subscription.current_period_end * 1000);
       subscriptionEnd = periodEndDate.toISOString();

@@ -63,13 +63,19 @@ serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId;
+    let customerId: string | undefined;
     
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Found existing customer", { customerId });
     } else {
-      logStep("No existing customer, will create on checkout");
+      // Proactively create a customer tied to this Supabase user to avoid email edits breaking linkage
+      const created = await stripe.customers.create({
+        email: user.email,
+        metadata: { supabase_user_id: user.id }
+      });
+      customerId = created.id;
+      logStep("Created new customer", { customerId });
     }
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
