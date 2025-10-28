@@ -44,8 +44,15 @@ const WhiteboardView: React.FC = () => {
           .maybeSingle();
 
         if (error) throw error;
+        
         if (!data) {
-          throw new Error('Whiteboard not found or access denied');
+          toast({
+            title: 'Whiteboard not found',
+            description: 'This whiteboard may have been deleted or you do not have access to it.',
+            variant: 'destructive',
+          });
+          navigate(-1);
+          return;
         }
 
         setWhiteboard(data);
