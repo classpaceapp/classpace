@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, Boxes } from 'lucide-react';
 
 interface Pod {
   id: string;
@@ -98,7 +98,7 @@ const TeacherPodsPage: React.FC = () => {
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-white" />
+                  <Boxes className="h-8 w-8 text-white" />
                 </div>
                 <div>
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">

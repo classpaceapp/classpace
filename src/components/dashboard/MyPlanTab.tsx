@@ -232,40 +232,70 @@ export const MyPlanTab: React.FC = () => {
               </div>
             )}
             
-            <div className="space-y-4">
-              {isPremium && !(subscription as any)?.cancel_at_period_end ? (
-                <Button
-                  onClick={handleCancelSubscription}
-                  disabled={loading}
-                  variant="destructive"
-                  className="w-full py-6 font-bold text-base shadow-xl hover:shadow-2xl transition-all"
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : null}
-                  {loading ? 'Cancelling...' : 'Cancel Subscription'}
-                </Button>
-              ) : !isPremium ? (
-                <Button
-                  onClick={handleUpgrade}
-                  disabled={loading}
-                  className="w-full py-6 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all"
-                >
-                  {loading ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <Crown className="mr-2 h-5 w-5" />
-                  )}
-                  {loading ? 'Loading...' : `Upgrade to ${isStudent ? 'Learn' : 'Teach'} +`}
-                </Button>
-              ) : null}
-              
-              <Button
-                onClick={() => refreshSubscription()}
-                variant="outline"
-                disabled={checkingSubscription}
-                className="w-full py-4 border-2 font-semibold hover:bg-primary/5"
-              >
+             <div className="space-y-4">
+               {isPremium && !(subscription as any)?.cancel_at_period_end ? (
+                 <Button
+                   onClick={handleCancelSubscription}
+                   disabled={loading}
+                   variant="destructive"
+                   className="w-full py-6 font-bold text-base shadow-xl hover:shadow-2xl transition-all"
+                 >
+                   {loading ? (
+                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                   ) : null}
+                   {loading ? 'Cancelling...' : 'Cancel Subscription'}
+                 </Button>
+               ) : isPremium && (subscription as any)?.cancel_at_period_end ? (
+                 <Button
+                   onClick={async () => {
+                     setLoading(true);
+                     try {
+                       const { data, error } = await supabase.functions.invoke('resume-subscription');
+                       if (error) throw error;
+                       toast({
+                         title: 'Subscription resumed',
+                         description: data?.next_renewal ? `Next renewal on ${new Date(data.next_renewal).toLocaleDateString()}` : 'Resumed successfully',
+                       });
+                       setTimeout(async () => {
+                         await refreshSubscription?.();
+                       }, 300);
+                     } catch (error: any) {
+                       toast({ title: 'Error', description: error.message || 'Failed to resume subscription', variant: 'destructive' });
+                     } finally {
+                       setLoading(false);
+                     }
+                   }}
+                   disabled={loading}
+                   className="w-full py-6 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base shadow-xl hover:shadow-2xl transition-all"
+                 >
+                   {loading ? (
+                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                   ) : (
+                     <Crown className="mr-2 h-5 w-5" />
+                   )}
+                   {loading ? 'Processing...' : 'Re-Upgrade'}
+                 </Button>
+               ) : !isPremium ? (
+                 <Button
+                   onClick={handleUpgrade}
+                   disabled={loading}
+                   className="w-full py-6 bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base shadow-xl hover:shadow-2xl transition-all"
+                 >
+                   {loading ? (
+                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                   ) : (
+                     <Crown className="mr-2 h-5 w-5" />
+                   )}
+                   {loading ? 'Loading...' : `Upgrade to ${isStudent ? 'Learn' : 'Teach'} +`}
+                 </Button>
+               ) : null}
+               
+               <Button
+                 onClick={() => refreshSubscription()}
+                 variant="outline"
+                 disabled={checkingSubscription}
+                 className="w-full py-4 border-2 font-semibold hover:bg-primary/5"
+               >
                 {checkingSubscription ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

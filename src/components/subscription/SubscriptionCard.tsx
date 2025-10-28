@@ -103,12 +103,37 @@ const SubscriptionCard: React.FC = () => {
         description: `Access continues until ${new Date(data.cancel_at).toLocaleDateString()}`,
       });
       
-      await refreshSubscription?.();
+      setTimeout(async () => {
+        await refreshSubscription?.();
+      }, 300);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to cancel subscription",
         variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResumeSubscription = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('resume-subscription');
+      if (error) throw error;
+      toast({
+        title: 'Subscription resumed',
+        description: data?.next_renewal ? `Next renewal on ${new Date(data.next_renewal).toLocaleDateString()}` : 'Resumed successfully',
+      });
+      setTimeout(async () => {
+        await refreshSubscription?.();
+      }, 300);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to resume subscription',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
@@ -124,12 +149,11 @@ const SubscriptionCard: React.FC = () => {
           <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
       ) : (
-        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-pink-600/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-pink-500/20 border-2 border-blue-500/40 hover:border-blue-500/60 shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 backdrop-blur-sm">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 animate-pulse" />
+        <Card className="relative overflow-hidden bg-card/90 dark:bg-card/60 border border-border shadow-2xl transition-all duration-300 backdrop-blur-sm">
           <CardContent className="relative p-8">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/40 animate-pulse">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/40 to-accent/40 flex items-center justify-center shadow-lg">
                   <Crown className="w-8 h-8 text-white" />
                 </div>
                 <div>
@@ -140,7 +164,7 @@ const SubscriptionCard: React.FC = () => {
                 </div>
               </div>
               {isPremium ? (
-                <Badge className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white border-0 px-4 py-1.5 text-sm font-bold shadow-lg shadow-emerald-500/30 animate-pulse">
+                <Badge className="bg-primary text-primary-foreground border-0 px-4 py-1.5 text-sm font-bold shadow-lg">
                   ✓ Active
                 </Badge>
               ) : (
@@ -177,18 +201,31 @@ const SubscriptionCard: React.FC = () => {
                 onClick={handleCancelSubscription}
                 disabled={loading}
                 variant="destructive"
-                className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+                className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                 ) : null}
                 {loading ? 'Cancelling...' : 'Cancel Subscription'}
               </Button>
-            ) : !isPremium ? (
+            ) : isPremium && subscription?.cancel_at_period_end ? (
+              <Button 
+                onClick={handleResumeSubscription}
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Crown className="w-5 h-5 mr-2" />
+                )}
+                {loading ? 'Processing...' : 'Re-Upgrade'}
+              </Button>
+            ) : (
               <Button 
                 onClick={handleUpgrade}
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-xl hover:shadow-2xl hover:shadow-purple-500/30 transition-all py-6 text-base font-semibold"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -197,7 +234,7 @@ const SubscriptionCard: React.FC = () => {
                 )}
                 {loading ? 'Processing...' : 'Upgrade to Teach +'}
               </Button>
-            ) : null}
+            )
             
             {isPremium && subscription?.subscription_end && (
               <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${
