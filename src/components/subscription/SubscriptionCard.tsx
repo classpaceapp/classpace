@@ -16,6 +16,7 @@ const SubscriptionCard: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [justCancelledAt, setJustCancelledAt] = useState<string | null>(null);
+  const isCancelled = subscription?.cancel_at_period_end || !!justCancelledAt;
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -243,14 +244,14 @@ const SubscriptionCard: React.FC = () => {
             
             {isPremium && subscription?.subscription_end && (
               <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${
-                subscription?.cancel_at_period_end 
+                isCancelled 
                   ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 shadow-lg shadow-red-500/20' 
                   : 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/30'
               }`}>
                 <p className="text-sm font-medium text-foreground">
-                  {subscription?.cancel_at_period_end ? (
+                  {isCancelled ? (
                     <>Cancels on <span className="font-bold text-red-600 dark:text-red-400">
-                      {new Date(subscription.subscription_end).toLocaleDateString()}
+                      {new Date(justCancelledAt || subscription.subscription_end).toLocaleDateString()}
                     </span></>
                   ) : (
                     <>Renews on <span className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
@@ -259,7 +260,7 @@ const SubscriptionCard: React.FC = () => {
                   )}
                 </p>
               </div>
-            )}
+            )
           </CardContent>
         </Card>
       )}

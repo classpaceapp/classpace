@@ -88,14 +88,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setCheckingSubscription(true);
       const { data, error } = await supabase.functions.invoke('check-subscription');
-      
       if (error) {
         console.error('Error checking subscription:', error);
-        setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null });
+        setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null, cancel_at_period_end: false });
         return;
       }
-      
-      setSubscription(data as Subscription);
+      const normalized: Subscription = {
+        subscribed: Boolean((data as any)?.subscribed),
+        tier: (data as any)?.tier || 'free',
+        product_id: (data as any)?.product_id ?? null,
+        subscription_end: (data as any)?.subscription_end ?? null,
+        cancel_at_period_end: Boolean((data as any)?.cancel_at_period_end)
+      };
+      setSubscription(normalized);
     } catch (error) {
       console.error('Error checking subscription:', error);
       setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null });
