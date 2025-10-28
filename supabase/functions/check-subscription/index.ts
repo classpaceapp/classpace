@@ -107,64 +107,18 @@ serve(async (req) => {
       limit: 10,
     });
 
+    logStep("Fetched subscriptions", { 
+      count: subscriptions.data.length,
+      statuses: subscriptions.data.map(s => s.status)
+    });
+
     // Consider active-like statuses
     const eligibleStatuses = new Set(["active", "trialing"]);
     const eligibleSubs = subscriptions.data.filter((s) => eligibleStatuses.has(s.status));
 
-    const selectedSub = eligibleSubs.sort((a, b) => b.current_period_end - a.current_period_end)[0];
-    const hasActiveSub = !!selectedSub;
-    let productId = null;
-    let subscriptionEnd = null;
-    let tier = 'free';
+    logStep("Eligible subscriptions", { count: eligibleSubs.length });
 
-    if (hasActiveSub) {
-      const subscription = selectedSub!;
-      // Convert Unix timestamp to ISO string for display, but store as timestamptz-compatible format
-      const periodEndDate = new Date(subscription.current_period_end * 1000);
-      subscriptionEnd = periodEndDate.toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      productId = subscription.items.data[0].price.product as string;
-      
-      // Get user profile to determine if student or teacher
-      const { data: profileData } = await supabaseAdmin
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      
-      // Determine tier based on product ID and user role (TEST MODE)
-      const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJxkwOv1P5aKdZ';  // TEST MODE
-      const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJxlJpDbSJojMr';  // TEST MODE
-      
-      if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
-        tier = 'teacher_premium';
-      } else if (productId === STUDENT_PREMIUM_PRODUCT_ID) {
-        tier = 'student_premium';
-      } else if (profileData?.role === 'teacher') {
-        tier = 'teacher_premium';
-      } else {
-        tier = 'student_premium';
-      }
-      
-      logStep("Determined subscription tier", { productId, tier, userRole: profileData?.role });
-      
-      // Update subscription record
-      const { error: upsertError } = await supabaseAdmin
-        .from('subscriptions')
-        .upsert({
-          user_id: user.id,
-          tier: tier,
-          status: 'active',
-          stripe_customer_id: customerId,
-          stripe_subscription_id: subscription.id,
-          current_period_end: subscriptionEnd
-        });
-      
-      if (upsertError) {
-        logStep("Database upsert error", { error: upsertError.message });
-        throw new Error(`Failed to update subscription: ${upsertError.message}`);
-      }
-    } else {
+    if (eligibleSubs.length === 0) {
       logStep("No active subscription found");
       
       // Update to free tier
@@ -176,10 +130,103 @@ serve(async (req) => {
           status: 'active',
           stripe_customer_id: customerId
         });
+
+      return new Response(JSON.stringify({
+        subscribed: false,
+        tier: 'free',
+        product_id: null,
+        subscription_end: null
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    const selectedSub = eligibleSubs.sort((a, b) => b.current_period_end - a.current_period_end)[0];
+    const subscription = selectedSub;
+    
+    // Safely extract product ID
+    let productId: string | null = null;
+    try {
+      const priceObj = subscription.items.data[0]?.price;
+      if (priceObj && typeof priceObj === 'object') {
+        productId = (typeof priceObj.product === 'string') 
+          ? priceObj.product 
+          : (priceObj.product as any)?.id || null;
+      }
+    } catch (e) {
+      logStep("Error extracting product ID", { error: String(e) });
+    }
+
+    // Safely extract subscription end date
+    let subscriptionEnd: string;
+    try {
+      if (!subscription.current_period_end) {
+        throw new Error("current_period_end is undefined");
+      }
+      const periodEndDate = new Date(subscription.current_period_end * 1000);
+      if (isNaN(periodEndDate.getTime())) {
+        throw new Error(`Invalid date from timestamp: ${subscription.current_period_end}`);
+      }
+      subscriptionEnd = periodEndDate.toISOString();
+    } catch (e) {
+      logStep("Error converting subscription end date", { 
+        error: String(e), 
+        timestamp: subscription.current_period_end 
+      });
+      // Use a far future date as fallback
+      subscriptionEnd = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    }
+
+    logStep("Active subscription found", { 
+      subscriptionId: subscription.id, 
+      endDate: subscriptionEnd,
+      productId 
+    });
+    
+    // Get user profile to determine if student or teacher
+    const { data: profileData } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    // Determine tier based on product ID and user role (TEST MODE)
+    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJxkwOv1P5aKdZ';  // TEST MODE
+    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJxlJpDbSJojMr';  // TEST MODE
+    
+    let tier = 'free';
+    if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
+      tier = 'teacher_premium';
+    } else if (productId === STUDENT_PREMIUM_PRODUCT_ID) {
+      tier = 'student_premium';
+    } else if (profileData?.role === 'teacher') {
+      tier = 'teacher_premium';
+    } else {
+      tier = 'student_premium';
+    }
+    
+    logStep("Determined subscription tier", { productId, tier, userRole: profileData?.role });
+    
+    // Update subscription record
+    const { error: upsertError } = await supabaseAdmin
+      .from('subscriptions')
+      .upsert({
+        user_id: user.id,
+        tier: tier,
+        status: 'active',
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscription.id,
+        current_period_end: subscriptionEnd
+      });
+    
+    if (upsertError) {
+      logStep("Database upsert error", { error: upsertError.message });
+      throw new Error(`Failed to update subscription: ${upsertError.message}`);
     }
 
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
+      subscribed: true,
       tier: tier,
       product_id: productId,
       subscription_end: subscriptionEnd
