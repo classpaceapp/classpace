@@ -158,24 +158,21 @@ serve(async (req) => {
       logStep("Error extracting product ID", { error: String(e) });
     }
 
-    // Safely extract subscription end date
+    // Extract subscription end date and cancellation status
     let subscriptionEnd: string;
-    try {
-      if (!subscription.current_period_end) {
-        throw new Error("current_period_end is undefined");
-      }
+    let willCancelAtPeriodEnd = false;
+    
+    if (subscription.current_period_end) {
       const periodEndDate = new Date(subscription.current_period_end * 1000);
-      if (isNaN(periodEndDate.getTime())) {
-        throw new Error(`Invalid date from timestamp: ${subscription.current_period_end}`);
-      }
       subscriptionEnd = periodEndDate.toISOString();
-    } catch (e) {
-      logStep("Error converting subscription end date", { 
-        error: String(e), 
-        timestamp: subscription.current_period_end 
+      willCancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+      logStep("Subscription period", { 
+        current_period_end: subscriptionEnd,
+        cancel_at_period_end: willCancelAtPeriodEnd 
       });
-      // Use a far future date as fallback
-      subscriptionEnd = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    } else {
+      logStep("Warning: current_period_end is missing, using 30-day estimate");
+      subscriptionEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     }
 
     logStep("Active subscription found", { 
@@ -229,7 +226,8 @@ serve(async (req) => {
       subscribed: true,
       tier: tier,
       product_id: productId,
-      subscription_end: subscriptionEnd
+      subscription_end: subscriptionEnd,
+      cancel_at_period_end: willCancelAtPeriodEnd
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

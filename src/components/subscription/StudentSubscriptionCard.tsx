@@ -82,20 +82,27 @@ export const StudentSubscriptionCard = () => {
     }
   };
 
-  const handleManageSubscription = async () => {
+  const handleCancelSubscription = async () => {
+    if (!confirm('Cancel your Learn+ subscription? You\'ll keep access until your renewal date.')) {
+      return;
+    }
+    
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
+      const { data, error } = await supabase.functions.invoke('cancel-subscription');
 
       if (error) throw error;
 
-      if (data?.url) {
-        window.open(data.url, '_blank');
-      }
+      toast({
+        title: "Subscription cancelled",
+        description: `Access continues until ${new Date(data.cancel_at).toLocaleDateString()}`,
+      });
+      
+      await refreshSubscription();
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to open customer portal",
+        description: error.message || "Failed to cancel subscription",
         variant: "destructive"
       });
     } finally {
@@ -151,20 +158,52 @@ export const StudentSubscriptionCard = () => {
           </li>
         </ul>
 
-        <Button 
-          onClick={isStudentPremium ? handleManageSubscription : handleSubscribe}
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
-        >
-          {loading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          ) : isStudentPremium ? (
-            <CreditCard className="w-5 h-5 mr-2" />
-          ) : (
-            <Sparkles className="w-5 h-5 mr-2" />
-          )}
-          {loading ? 'Processing...' : isStudentPremium ? 'Manage Plan' : 'Upgrade to Learn +'}
-        </Button>
+        {isStudentPremium && !(subscription as any)?.cancel_at_period_end ? (
+          <Button 
+            onClick={handleCancelSubscription}
+            disabled={loading}
+            variant="destructive"
+            className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : null}
+            {loading ? 'Cancelling...' : 'Cancel Subscription'}
+          </Button>
+        ) : !isStudentPremium ? (
+          <Button 
+            onClick={handleSubscribe}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="w-5 h-5 mr-2" />
+            )}
+            {loading ? 'Processing...' : 'Upgrade to Learn +'}
+          </Button>
+        ) : null}
+        
+        {isStudentPremium && subscription?.subscription_end && (
+          <div className={`text-center py-3 px-4 rounded-xl border-2 ${
+            (subscription as any)?.cancel_at_period_end 
+              ? 'bg-red-500/10 border-red-500/30' 
+              : 'bg-muted/20 border-border/30'
+          }`}>
+            <p className="text-sm font-medium text-foreground/80">
+              {(subscription as any)?.cancel_at_period_end ? (
+                <>Cancels on <span className="font-bold text-red-600 dark:text-red-400">
+                  {new Date(subscription.subscription_end).toLocaleDateString()}
+                </span></>
+              ) : (
+                <>Renews on <span className="font-bold">
+                  {new Date(subscription.subscription_end).toLocaleDateString()}
+                </span></>
+              )}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

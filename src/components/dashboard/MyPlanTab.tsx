@@ -48,24 +48,27 @@ export const MyPlanTab: React.FC = () => {
     }
   };
 
-  const handleManageSubscription = async () => {
+  const handleCancelSubscription = async () => {
+    if (!confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.')) {
+      return;
+    }
+    
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('customer-portal');
+      const { data, error } = await supabase.functions.invoke('cancel-subscription');
       
       if (error) throw error;
       
-      if (data?.url) {
-        window.open(data.url, '_blank');
-        toast({
-          title: "Opening subscription portal",
-          description: "Manage your subscription in the new tab.",
-        });
-      }
-    } catch (error: any) {
-      console.error('Error opening customer portal:', error);
       toast({
-        title: "Failed to open portal",
+        title: "Subscription cancelled",
+        description: `Your subscription will end on ${new Date(data.cancel_at).toLocaleDateString()}. You'll retain access until then.`,
+      });
+      
+      await refreshSubscription();
+    } catch (error: any) {
+      console.error('Error cancelling subscription:', error);
+      toast({
+        title: "Failed to cancel",
         description: error.message || "Please try again later.",
         variant: "destructive",
       });
@@ -200,9 +203,19 @@ export const MyPlanTab: React.FC = () => {
             )}
 
             {subscription?.subscription_end && isPremium && (
-              <div className="py-6 mb-6 border-y border-border/30 bg-muted/10 rounded-xl px-4">
+              <div className={`py-6 mb-6 border-y border-border/30 rounded-xl px-4 ${
+                (subscription as any)?.cancel_at_period_end 
+                  ? 'bg-red-500/10 border-red-500/30' 
+                  : 'bg-muted/10'
+              }`}>
                 <p className="text-base text-foreground/80 font-medium">
-                  {isPremium ? 'Renews' : 'Ends'} on{' '}
+                  {(subscription as any)?.cancel_at_period_end ? (
+                    <>
+                      <span className="text-red-600 dark:text-red-400 font-bold">Cancels</span> on{' '}
+                    </>
+                  ) : (
+                    'Renews on '
+                  )}
                   <span className="font-bold text-foreground">
                     {new Date(subscription.subscription_end).toLocaleDateString('en-US', { 
                       year: 'numeric', 
@@ -211,24 +224,28 @@ export const MyPlanTab: React.FC = () => {
                     })}
                   </span>
                 </p>
+                {(subscription as any)?.cancel_at_period_end && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    You'll retain access to premium features until then.
+                  </p>
+                )}
               </div>
             )}
             
             <div className="space-y-4">
-              {isPremium ? (
+              {isPremium && !(subscription as any)?.cancel_at_period_end ? (
                 <Button
-                  onClick={handleManageSubscription}
+                  onClick={handleCancelSubscription}
                   disabled={loading}
-                  className="w-full py-6 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all"
+                  variant="destructive"
+                  className="w-full py-6 font-bold text-base shadow-xl hover:shadow-2xl transition-all"
                 >
                   {loading ? (
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  ) : (
-                    <CreditCard className="mr-2 h-5 w-5" />
-                  )}
-                  {loading ? 'Loading...' : 'Manage Subscription'}
+                  ) : null}
+                  {loading ? 'Cancelling...' : 'Cancel Subscription'}
                 </Button>
-              ) : (
+              ) : !isPremium ? (
                 <Button
                   onClick={handleUpgrade}
                   disabled={loading}
@@ -241,7 +258,7 @@ export const MyPlanTab: React.FC = () => {
                   )}
                   {loading ? 'Loading...' : `Upgrade to ${isStudent ? 'Learn' : 'Teach'} +`}
                 </Button>
-              )}
+              ) : null}
               
               <Button
                 onClick={() => refreshSubscription()}
