@@ -8,15 +8,52 @@ import { useToast } from '@/hooks/use-toast';
 import { Crown, CreditCard, Loader2, Sparkles, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const TEACHER_PREMIUM_PRICE_ID = "price_1SN0ySBm9rSu4II6Olw734Ke";
+
 const SubscriptionCard: React.FC = () => {
-  const { subscription, checkingSubscription } = useAuth();
+  const { subscription, checkingSubscription, refreshSubscription } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleUpgrade = async () => {
     setLoading(true);
+    let intervalId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const startPolling = () => {
+      const start = Date.now();
+      intervalId = window.setInterval(async () => {
+        try {
+          const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
+          if (!subError && subData?.subscribed) {
+            // If the backend returns a tier, verify it's teacher_premium; otherwise accept subscribed
+            if (!subData?.tier || subData.tier === 'teacher_premium') {
+              if (intervalId) window.clearInterval(intervalId);
+              if (timeoutId) window.clearTimeout(timeoutId);
+              toast({
+                title: 'Plan activated',
+                description: 'Teach + is now active. Enjoy premium features!',
+              });
+              // Refresh global auth state
+              try { await refreshSubscription?.(); } catch {}
+            }
+          }
+        } catch {}
+        // Stop after 5 minutes
+        if (Date.now() - start > 5 * 60 * 1000) {
+          if (intervalId) window.clearInterval(intervalId);
+        }
+      }, 4000);
+
+      timeoutId = window.setTimeout(() => {
+        if (intervalId) window.clearInterval(intervalId);
+      }, 5 * 60 * 1000);
+    };
+
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout');
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId: TEACHER_PREMIUM_PRICE_ID, isStudent: false }
+      });
       
       if (error) throw error;
       
@@ -27,16 +64,17 @@ const SubscriptionCard: React.FC = () => {
         } catch {}
         window.open(data.url, '_blank');
         toast({
-          title: "Redirecting to checkout",
+          title: 'Redirecting to checkout',
           description: "Complete your subscription in the new tab. We'll update your plan automatically.",
         });
+        startPolling();
       }
     } catch (error: any) {
       console.error('Error creating checkout:', error);
       toast({
-        title: "Failed to start checkout",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
+        title: 'Failed to start checkout',
+        description: error.message || 'Please try again later.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);

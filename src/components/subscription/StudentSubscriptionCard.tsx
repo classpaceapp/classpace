@@ -11,12 +11,42 @@ const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
 
 export const StudentSubscriptionCard = () => {
   const { toast } = useToast();
-  const { subscription } = useAuth();
+  const { subscription, refreshSubscription } = useAuth();
   const [loading, setLoading] = useState(false);
   const isStudentPremium = subscription?.tier === 'student_premium';
 
   const handleSubscribe = async () => {
     setLoading(true);
+    let intervalId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const startPolling = () => {
+      const start = Date.now();
+      intervalId = window.setInterval(async () => {
+        try {
+          const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
+          if (!subError && subData?.subscribed) {
+            if (!subData?.tier || subData.tier === 'student_premium') {
+              if (intervalId) window.clearInterval(intervalId);
+              if (timeoutId) window.clearTimeout(timeoutId);
+              toast({
+                title: 'Plan activated',
+                description: 'Learn + is now active. Enjoy premium features!',
+              });
+              try { await refreshSubscription?.(); } catch {}
+            }
+          }
+        } catch {}
+        if (Date.now() - start > 5 * 60 * 1000) {
+          if (intervalId) window.clearInterval(intervalId);
+        }
+      }, 4000);
+
+      timeoutId = window.setTimeout(() => {
+        if (intervalId) window.clearInterval(intervalId);
+      }, 5 * 60 * 1000);
+    };
+
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId: STUDENT_PREMIUM_PRICE_ID, isStudent: true }
@@ -30,12 +60,13 @@ export const StudentSubscriptionCard = () => {
           localStorage.setItem('checkout_role', 'student');
         } catch {}
         window.open(data.url, '_blank');
+        startPolling();
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to start checkout",
-        variant: "destructive"
+        title: 'Error',
+        description: error.message || 'Failed to start checkout',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
