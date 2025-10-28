@@ -229,7 +229,7 @@ export const StudentSubscriptionCard = () => {
             )}
             {loading ? 'Processing...' : 'Upgrade to Learn +'}
           </Button>
-        )
+        )}
         
         {isStudentPremium && subscription?.subscription_end && (
           <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${

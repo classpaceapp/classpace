@@ -234,7 +234,7 @@ const SubscriptionCard: React.FC = () => {
                 )}
                 {loading ? 'Processing...' : 'Upgrade to Teach +'}
               </Button>
-            )
+            )}
             
             {isPremium && subscription?.subscription_end && (
               <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${
