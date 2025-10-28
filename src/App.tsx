@@ -34,6 +34,7 @@ import NotFound from "./pages/NotFound";
 import FAQs from "./pages/FAQs";
 import SupportPage from "./pages/SupportPage";
 import MyPlan from "./pages/MyPlan";
+import SubscriptionReturnHandler from "@/components/subscription/SubscriptionReturnHandler";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
+          <SubscriptionReturnHandler />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />

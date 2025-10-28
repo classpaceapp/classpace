@@ -175,6 +175,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [user?.id]);
 
+  // Cross-tab subscription refresh: when checkout completes in another tab
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'checkout_completed' && e.newValue) {
+        refreshSubscription();
+        try {
+          localStorage.removeItem('checkout_in_progress');
+          localStorage.removeItem('checkout_completed');
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', onStorage);
+
+    // Initial check in case we loaded after completion
+    try {
+      if (localStorage.getItem('checkout_completed')) {
+        refreshSubscription();
+        localStorage.removeItem('checkout_in_progress');
+        localStorage.removeItem('checkout_completed');
+      }
+    } catch {}
+
+    return () => window.removeEventListener('storage', onStorage);
+  }, [refreshSubscription]);
+
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);

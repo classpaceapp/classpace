@@ -21,10 +21,14 @@ const SubscriptionCard: React.FC = () => {
       if (error) throw error;
       
       if (data?.url) {
+        try {
+          localStorage.setItem('checkout_in_progress', 'true');
+          localStorage.setItem('checkout_role', 'teacher');
+        } catch {}
         window.open(data.url, '_blank');
         toast({
           title: "Redirecting to checkout",
-          description: "Complete your subscription in the new tab.",
+          description: "Complete your subscription in the new tab. We'll update your plan automatically.",
         });
       }
     } catch (error: any) {

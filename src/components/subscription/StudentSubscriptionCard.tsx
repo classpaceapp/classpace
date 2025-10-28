@@ -25,6 +25,10 @@ export const StudentSubscriptionCard = () => {
       if (error) throw error;
 
       if (data?.url) {
+        try {
+          localStorage.setItem('checkout_in_progress', 'true');
+          localStorage.setItem('checkout_role', 'student');
+        } catch {}
         window.open(data.url, '_blank');
       }
     } catch (error: any) {

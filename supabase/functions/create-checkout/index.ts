@@ -79,6 +79,7 @@ serve(async (req) => {
       .single();
     
     const dashboardUrl = profileData?.role === 'teacher' ? '/dashboard' : '/student-dashboard';
+    const roleParam = (isStudent === true) || (profileData?.role === 'learner') ? 'student' : 'teacher';
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -90,8 +91,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}${dashboardUrl}?subscription=success`,
-      cancel_url: `${origin}${dashboardUrl}?subscription=cancelled`,
+      success_url: `${origin}${dashboardUrl}?subscription=success&role=${roleParam}`,
+      cancel_url: `${origin}${dashboardUrl}?subscription=cancelled&role=${roleParam}`,
       subscription_data: {
         metadata: {
           plan_name: isStudent ? "Classpace Learn+" : "Classpace Teach+"
