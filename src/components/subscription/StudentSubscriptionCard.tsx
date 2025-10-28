@@ -7,8 +7,8 @@ import { Crown, CreditCard, Loader2, Sparkles, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
-// Learn+ price ID from Stripe
-const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
+// Learn+ price ID from Stripe (TEST MODE)
+const STUDENT_PREMIUM_PRICE_ID = "price_1SNJpbBqopIR0Kr54nRPftUJ";
 
 export const StudentSubscriptionCard = () => {
   const { toast } = useToast();
@@ -23,28 +23,36 @@ export const StudentSubscriptionCard = () => {
 
     const startPolling = () => {
       const start = Date.now();
+      // Poll every 2 seconds instead of 4 for faster detection
       intervalId = window.setInterval(async () => {
         try {
           const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
-          if (!subError && subData?.subscribed) {
-            if (!subData?.tier || subData.tier === 'student_premium') {
-              if (intervalId) window.clearInterval(intervalId);
-              if (timeoutId) window.clearTimeout(timeoutId);
-              toast({
-                title: 'Plan activated',
-                description: 'Learn + is now active. Enjoy premium features!',
-              });
-              try { await refreshSubscription?.(); } catch {}
-            }
+          console.log('[SUBSCRIPTION-POLLING]', { subData, subError });
+          
+          if (!subError && subData?.subscribed && subData?.tier === 'student_premium') {
+            if (intervalId) window.clearInterval(intervalId);
+            if (timeoutId) window.clearTimeout(timeoutId);
+            toast({
+              title: 'Plan activated',
+              description: 'Learn + is now active. Enjoy premium features!',
+            });
+            // Force refresh subscription state
+            await refreshSubscription?.();
+            setLoading(false);
           }
-        } catch {}
+        } catch (err) {
+          console.error('[SUBSCRIPTION-POLLING] Error:', err);
+        }
+        // Stop after 5 minutes
         if (Date.now() - start > 5 * 60 * 1000) {
           if (intervalId) window.clearInterval(intervalId);
+          setLoading(false);
         }
-      }, 4000);
+      }, 2000);  // Poll every 2 seconds
 
       timeoutId = window.setTimeout(() => {
         if (intervalId) window.clearInterval(intervalId);
+        setLoading(false);
       }, 5 * 60 * 1000);
     };
 

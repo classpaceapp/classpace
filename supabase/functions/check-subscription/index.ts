@@ -105,9 +105,9 @@ serve(async (req) => {
         .eq('id', user.id)
         .single();
       
-      // Determine tier based on product ID and user role
-      const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TI64fNw74rXOQ4';
-      const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJS0AgYeVzi9Gv';
+      // Determine tier based on product ID and user role (TEST MODE)
+      const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJxkwOv1P5aKdZ';  // TEST MODE
+      const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJxlJpDbSJojMr';  // TEST MODE
       
       if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
         tier = 'teacher_premium';

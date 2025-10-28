@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Crown, CreditCard, Loader2, Sparkles, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Teach+ price ID from Stripe
-const TEACHER_PREMIUM_PRICE_ID = "price_1SN0ySBm9rSu4II6Olw734Ke";
+// Teach+ price ID from Stripe (TEST MODE)
+const TEACHER_PREMIUM_PRICE_ID = "price_1SNJpMBqopIR0Kr5boQJqYbG";
 
 const SubscriptionCard: React.FC = () => {
   const { subscription, checkingSubscription, refreshSubscription } = useAuth();
@@ -23,31 +23,36 @@ const SubscriptionCard: React.FC = () => {
 
     const startPolling = () => {
       const start = Date.now();
+      // Poll every 2 seconds instead of 4 for faster detection
       intervalId = window.setInterval(async () => {
         try {
           const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
-          if (!subError && subData?.subscribed) {
-            // If the backend returns a tier, verify it's teacher_premium; otherwise accept subscribed
-            if (!subData?.tier || subData.tier === 'teacher_premium') {
-              if (intervalId) window.clearInterval(intervalId);
-              if (timeoutId) window.clearTimeout(timeoutId);
-              toast({
-                title: 'Plan activated',
-                description: 'Teach + is now active. Enjoy premium features!',
-              });
-              // Refresh global auth state
-              try { await refreshSubscription?.(); } catch {}
-            }
+          console.log('[SUBSCRIPTION-POLLING]', { subData, subError });
+          
+          if (!subError && subData?.subscribed && subData?.tier === 'teacher_premium') {
+            if (intervalId) window.clearInterval(intervalId);
+            if (timeoutId) window.clearTimeout(timeoutId);
+            toast({
+              title: 'Plan activated',
+              description: 'Teach + is now active. Enjoy premium features!',
+            });
+            // Force refresh subscription state
+            await refreshSubscription?.();
+            setLoading(false);
           }
-        } catch {}
+        } catch (err) {
+          console.error('[SUBSCRIPTION-POLLING] Error:', err);
+        }
         // Stop after 5 minutes
         if (Date.now() - start > 5 * 60 * 1000) {
           if (intervalId) window.clearInterval(intervalId);
+          setLoading(false);
         }
-      }, 4000);
+      }, 2000);  // Poll every 2 seconds
 
       timeoutId = window.setTimeout(() => {
         if (intervalId) window.clearInterval(intervalId);
+        setLoading(false);
       }, 5 * 60 * 1000);
     };
 
