@@ -62,6 +62,15 @@ serve(async (req) => {
 
     const origin = req.headers.get("origin") || "http://localhost:3000";
     
+    // Get user profile to determine redirect URL
+    const { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    const dashboardUrl = profileData?.role === 'teacher' ? '/dashboard' : '/student-dashboard';
+    
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -72,8 +81,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${origin}/dashboard?subscription=success`,
-      cancel_url: `${origin}/dashboard?subscription=cancelled`,
+      success_url: `${origin}${dashboardUrl}?subscription=success`,
+      cancel_url: `${origin}${dashboardUrl}?subscription=cancelled`,
       subscription_data: {
         metadata: {
           plan_name: isStudent ? "Classpace Learn+" : "Classpace Teach+"

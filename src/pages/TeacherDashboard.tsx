@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -24,13 +25,16 @@ interface Pod {
 }
 
 const TeacherDashboard: React.FC = () => {
-  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, profile, refreshSubscription } = useAuth();
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateFlow, setShowCreateFlow] = useState(false);
   const isMounted = useRef(true);
   const requestIdRef = useRef(0);
+  const hasHandledSubscription = useRef(false);
 
   const fetchPods = async () => {
     const currentId = ++requestIdRef.current;
@@ -80,6 +84,43 @@ const TeacherDashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Handle subscription success/cancelled from Stripe redirect
+  useEffect(() => {
+    const subscriptionStatus = searchParams.get('subscription');
+    
+    if (subscriptionStatus && !hasHandledSubscription.current) {
+      hasHandledSubscription.current = true;
+      
+      if (subscriptionStatus === 'success') {
+        // Show success animation
+        toast({
+          title: '🎉 Subscription Active!',
+          description: 'Your Teach+ subscription is now active. Refreshing your plan...',
+          duration: 5000,
+        });
+        
+        // Wait a moment for Stripe to process, then refresh subscription
+        setTimeout(async () => {
+          await refreshSubscription();
+          toast({
+            title: '✓ Plan Updated',
+            description: 'Your subscription status has been refreshed.',
+          });
+        }, 2000);
+      } else if (subscriptionStatus === 'cancelled') {
+        toast({
+          title: 'Subscription Cancelled',
+          description: 'You cancelled the subscription process.',
+          variant: 'destructive',
+        });
+      }
+      
+      // Clean up URL
+      searchParams.delete('subscription');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, refreshSubscription, toast]);
 
    useEffect(() => {
      isMounted.current = true;

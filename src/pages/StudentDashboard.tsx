@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -27,13 +27,15 @@ interface Pod {
 
 const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, profile, refreshSubscription } = useAuth();
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
   const requestIdRef = useRef(0);
   const [joinCode, setJoinCode] = useState('');
+  const hasHandledSubscription = useRef(false);
 
   const fetchPods = async () => {
     const currentId = ++requestIdRef.current;
@@ -113,6 +115,43 @@ const StudentDashboard: React.FC = () => {
       toast({ title: 'Join failed', description: err.message === 'INVALID_CODE' ? 'Invalid code' : err.message, variant: 'destructive' });
     }
   };
+
+  // Handle subscription success/cancelled from Stripe redirect
+  useEffect(() => {
+    const subscriptionStatus = searchParams.get('subscription');
+    
+    if (subscriptionStatus && !hasHandledSubscription.current) {
+      hasHandledSubscription.current = true;
+      
+      if (subscriptionStatus === 'success') {
+        // Show success animation
+        toast({
+          title: '🎉 Subscription Active!',
+          description: 'Your Learn+ subscription is now active. Refreshing your plan...',
+          duration: 5000,
+        });
+        
+        // Wait a moment for Stripe to process, then refresh subscription
+        setTimeout(async () => {
+          await refreshSubscription();
+          toast({
+            title: '✓ Plan Updated',
+            description: 'Your subscription status has been refreshed.',
+          });
+        }, 2000);
+      } else if (subscriptionStatus === 'cancelled') {
+        toast({
+          title: 'Subscription Cancelled',
+          description: 'You cancelled the subscription process.',
+          variant: 'destructive',
+        });
+      }
+      
+      // Clean up URL
+      searchParams.delete('subscription');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, refreshSubscription, toast]);
 
   useEffect(() => {
     fetchPods();
