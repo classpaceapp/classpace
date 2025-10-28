@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, BookOpen, Activity, Sparkles } from 'lucide-react';
+import { Plus, Users, BookOpen, Activity, Sparkles, Boxes } from 'lucide-react';
 
 interface Pod {
   id: string;
@@ -247,9 +247,12 @@ const TeacherDashboard: React.FC = () => {
           {/* Pods Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                My Pods
-              </h2>
+              <div className="flex items-center gap-3">
+                <Boxes className="h-7 w-7 text-foreground/70" />
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  My Pods
+                </h2>
+              </div>
               <Button
                 onClick={() => setShowCreateFlow(true)}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl px-8 py-3 text-lg font-semibold shadow-xl"

@@ -8,7 +8,7 @@ import { StudentSubscriptionCard } from '@/components/subscription/StudentSubscr
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Users, BookOpen, Calendar, Sparkles, Search, KeyRound } from 'lucide-react';
+import { Users, BookOpen, Calendar, Sparkles, Search, KeyRound, Boxes } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -301,9 +301,12 @@ const StudentDashboard: React.FC = () => {
           {/* Classes Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                My Classes
-              </h2>
+              <div className="flex items-center gap-3">
+                <Boxes className="h-7 w-7 text-foreground/70" />
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  My Classes
+                </h2>
+              </div>
             </div>
 
             {pods.length === 0 ? (
