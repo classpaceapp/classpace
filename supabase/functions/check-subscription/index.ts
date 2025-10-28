@@ -142,7 +142,40 @@ serve(async (req) => {
       });
     }
 
-    const selectedSub = eligibleSubs.sort((a, b) => b.current_period_end - a.current_period_end)[0];
+    // Prefer the subscription that matches the user's role-specific product
+    // Fetch user role first (teacher or learner)
+    const { data: profileData } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJxkwOv1P5aKdZ';  // TEST MODE
+    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJxlJpDbSJojMr';  // TEST MODE
+
+    const getProductIdFromSub = (sub: any): string | null => {
+      try {
+        const priceObj = sub.items?.data?.[0]?.price;
+        if (priceObj && typeof priceObj === 'object') {
+          return (typeof priceObj.product === 'string') 
+            ? priceObj.product 
+            : (priceObj.product as any)?.id || null;
+        }
+      } catch {}
+      return null;
+    };
+
+    const preferredProductId = profileData?.role === 'teacher' 
+      ? TEACHER_PREMIUM_PRODUCT_ID 
+      : STUDENT_PREMIUM_PRODUCT_ID;
+
+    // Filter eligible subs by the preferred product id first
+    const roleMatchedSubs = eligibleSubs.filter((s) => getProductIdFromSub(s) === preferredProductId);
+
+    // Pick the most recent period_end among role-matched subs, otherwise any eligible sub
+    const selectedSub = (roleMatchedSubs.length > 0 ? roleMatchedSubs : eligibleSubs)
+      .sort((a, b) => b.current_period_end - a.current_period_end)[0];
+
     const subscription = selectedSub;
     
     // Safely extract product ID
@@ -181,17 +214,7 @@ serve(async (req) => {
       productId 
     });
     
-    // Get user profile to determine if student or teacher
-    const { data: profileData } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    
     // Determine tier based on product ID and user role (TEST MODE)
-    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJxkwOv1P5aKdZ';  // TEST MODE
-    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJxlJpDbSJojMr';  // TEST MODE
-    
     let tier = 'free';
     if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
       tier = 'teacher_premium';

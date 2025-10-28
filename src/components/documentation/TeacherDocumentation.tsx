@@ -8,12 +8,12 @@ const slides = [
   {
     icon: Home,
     title: "Getting Started",
-    description: "Welcome to LearnSpace for Teachers",
+    description: "Welcome to Classpace for Teachers",
     gradient: "from-blue-500/5 to-cyan-500/5 dark:from-blue-500/10 dark:to-cyan-500/10",
     content: (
       <div className="space-y-6">
         <p>
-          LearnSpace empowers educators with AI-assisted teaching tools and collaborative learning environments.
+          Classpace empowers educators with AI-assisted teaching tools and collaborative learning environments.
         </p>
         <div className="bg-muted/50 rounded-xl p-6 space-y-4">
           <h3 className="text-2xl font-bold">Key Features for Teachers:</h3>
@@ -321,12 +321,12 @@ const slides = [
   {
     icon: Bot,
     title: "AI Teaching Assistant",
-    description: "Learnspace AI for educators",
+    description: "AI Teaching Assistant for educators",
     gradient: "from-blue-500/5 to-purple-500/5 dark:from-blue-500/10 dark:to-purple-500/10",
     content: (
       <div className="space-y-6">
         <p>
-          Use Learnspace AI to enhance your teaching efficiency and create better learning experiences.
+          Use the AI Teaching Assistant to enhance your teaching efficiency and create better learning experiences.
         </p>
         <div className="space-y-4">
           <div className="bg-muted/50 rounded-xl p-5">

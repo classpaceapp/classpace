@@ -11,7 +11,7 @@ export const RoleSelector = ({ onSelectRole }: RoleSelectorProps) => {
       <div className="max-w-5xl w-full space-y-8">
         <div className="text-center space-y-4">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-            Welcome to LearnSpace Documentation
+            Welcome to Classpace
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Your comprehensive guide to mastering the platform. Select your role to get started.
@@ -20,7 +20,7 @@ export const RoleSelector = ({ onSelectRole }: RoleSelectorProps) => {
 
         <div className="grid md:grid-cols-2 gap-8">
           <Card 
-            className="cursor-pointer hover:scale-105 transition-all duration-300 border-2 hover:border-purple-500/50 bg-gradient-to-br from-purple-500/5 to-pink-500/5 dark:from-purple-500/10 dark:to-pink-500/10"
+            className="cursor-pointer hover:scale-[1.02] transition-all duration-300 border border-border/60 bg-card/70 dark:bg-card/40 backdrop-blur-sm shadow-2xl hover:shadow-xl"
             onClick={() => onSelectRole('student')}
           >
             <CardContent className="p-12 text-center space-y-6">
@@ -37,7 +37,7 @@ export const RoleSelector = ({ onSelectRole }: RoleSelectorProps) => {
           </Card>
 
           <Card 
-            className="cursor-pointer hover:scale-105 transition-all duration-300 border-2 hover:border-blue-500/50 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 dark:from-blue-500/10 dark:to-cyan-500/10"
+            className="cursor-pointer hover:scale-[1.02] transition-all duration-300 border border-border/60 bg-card/70 dark:bg-card/40 backdrop-blur-sm shadow-2xl hover:shadow-xl"
             onClick={() => onSelectRole('teacher')}
           >
             <CardContent className="p-12 text-center space-y-6">

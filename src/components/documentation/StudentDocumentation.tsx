@@ -8,12 +8,12 @@ const slides = [
   {
     icon: Home,
     title: "Getting Started",
-    description: "Welcome to LearnSpace - Your AI-Powered Learning Platform",
+    description: "Welcome to Classpace - Your AI-Powered Learning Platform",
     gradient: "from-blue-500/5 to-purple-500/5 dark:from-blue-500/10 dark:to-purple-500/10",
     content: (
       <div className="space-y-6">
         <p>
-          LearnSpace is designed to revolutionize your learning experience with AI-powered tools and collaborative features.
+          Classpace is designed to revolutionize your learning experience with AI-powered tools and collaborative features.
         </p>
         <div className="bg-muted/50 rounded-xl p-6 space-y-4">
           <h3 className="text-2xl font-bold">Key Features:</h3>
@@ -231,7 +231,7 @@ const slides = [
   },
   {
     icon: BookOpen,
-    title: "Learnspace Features",
+    title: "Class Tools & Collaboration",
     description: "Study materials, notes, and collaboration tools",
     gradient: "from-green-500/5 to-teal-500/5 dark:from-green-500/10 dark:to-teal-500/10",
     content: (

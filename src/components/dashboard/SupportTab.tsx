@@ -32,16 +32,15 @@ export const SupportTab: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-4">Live Chat</h3>
               <p className="text-muted-foreground mb-6">Get instant help from our support team</p>
-              <div className="flex items-center justify-center gap-2 bg-purple-500/10 text-purple-600 px-4 py-2 rounded-full mb-6">
-                <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                <span className="text-sm font-semibold">Coming Soon</span>
+              <div className="flex items-center justify-center gap-2 bg-green-500/10 text-green-600 px-4 py-2 rounded-full mb-6">
+                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                <span className="text-sm font-semibold">Live</span>
               </div>
               <Button 
-                disabled
-                variant="secondary"
-                className="w-full opacity-50"
+                onClick={() => (window as any)?.Tawk_API?.maximize?.()}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all"
               >
-                Coming Soon
+                Open Live Chat
               </Button>
             </CardContent>
           </Card>
