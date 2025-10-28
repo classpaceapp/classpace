@@ -22,6 +22,7 @@ interface Subscription {
   tier: string;
   product_id: string | null;
   subscription_end: string | null;
+  cancel_at_period_end?: boolean;
 }
 
 interface AuthContextType {

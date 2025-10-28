@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Crown, CreditCard, Loader2, Sparkles, Check } from "lucide-react";
@@ -12,7 +13,7 @@ const STUDENT_PREMIUM_PRICE_ID = "price_1SNJpbBqopIR0Kr54nRPftUJ";
 
 export const StudentSubscriptionCard = () => {
   const { toast } = useToast();
-  const { subscription, refreshSubscription } = useAuth();
+  const { subscription, checkingSubscription, refreshSubscription } = useAuth();
   const [loading, setLoading] = useState(false);
   const isStudentPremium = subscription?.tier === 'student_premium';
 
@@ -111,27 +112,34 @@ export const StudentSubscriptionCard = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-card/60 to-card/40 border-2 border-purple-500/30 hover:border-purple-500/50 shadow-2xl hover:shadow-purple-500/20 transition-all backdrop-blur-sm">
-      <CardContent className="p-8">
+    <>
+      {checkingSubscription ? (
+        <div className="space-y-3">
+          <Skeleton className="h-48 w-full rounded-2xl" />
+        </div>
+      ) : (
+        <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/10 via-pink-600/10 to-orange-600/10 dark:from-purple-500/20 dark:via-pink-500/20 dark:to-orange-500/20 border-2 border-purple-500/40 hover:border-purple-500/60 shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-pink-500/5 to-orange-500/5 animate-pulse" />
+          <CardContent className="relative p-8">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-              {isStudentPremium ? <Crown className="w-7 h-7 text-white" /> : <Sparkles className="w-7 h-7 text-white" />}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shadow-lg shadow-pink-500/40 animate-pulse">
+              {isStudentPremium ? <Crown className="w-8 h-8 text-white" /> : <Sparkles className="w-8 h-8 text-white" />}
             </div>
             <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 dark:from-purple-400 dark:via-pink-400 dark:to-orange-400 bg-clip-text text-transparent">
                 Learn +
               </h3>
               <p className="text-sm text-muted-foreground font-medium">Enhanced Learning</p>
             </div>
           </div>
           {isStudentPremium ? (
-            <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-600 hover:from-green-500/30 hover:to-emerald-500/30 border-2 border-green-500/30 px-3 py-1 text-sm">
-              Active
+            <Badge className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white border-0 px-4 py-1.5 text-sm font-bold shadow-lg shadow-emerald-500/30 animate-pulse">
+              ✓ Active
             </Badge>
           ) : (
-            <div className="text-right bg-gradient-to-br from-purple-500/10 to-pink-500/10 px-4 py-2 rounded-xl border border-purple-500/20">
-              <p className="text-3xl font-bold text-foreground">$7</p>
+            <div className="text-right bg-gradient-to-br from-purple-500/20 to-pink-500/20 px-5 py-3 rounded-xl border-2 border-purple-500/30 shadow-lg">
+              <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">$7</p>
               <p className="text-xs text-muted-foreground font-semibold">per month</p>
             </div>
           )}
@@ -158,12 +166,12 @@ export const StudentSubscriptionCard = () => {
           </li>
         </ul>
 
-        {isStudentPremium && !(subscription as any)?.cancel_at_period_end ? (
+        {isStudentPremium && !subscription?.cancel_at_period_end ? (
           <Button 
             onClick={handleCancelSubscription}
             disabled={loading}
             variant="destructive"
-            className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+            className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -174,7 +182,7 @@ export const StudentSubscriptionCard = () => {
           <Button 
             onClick={handleSubscribe}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-700 hover:via-pink-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+            className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 hover:from-purple-700 hover:via-pink-700 hover:to-orange-700 text-white shadow-xl hover:shadow-2xl hover:shadow-pink-500/30 transition-all py-6 text-base font-semibold"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -186,25 +194,27 @@ export const StudentSubscriptionCard = () => {
         ) : null}
         
         {isStudentPremium && subscription?.subscription_end && (
-          <div className={`text-center py-3 px-4 rounded-xl border-2 ${
-            (subscription as any)?.cancel_at_period_end 
-              ? 'bg-red-500/10 border-red-500/30' 
-              : 'bg-muted/20 border-border/30'
+          <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${
+            subscription?.cancel_at_period_end 
+              ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 shadow-lg shadow-red-500/20' 
+              : 'bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30'
           }`}>
-            <p className="text-sm font-medium text-foreground/80">
-              {(subscription as any)?.cancel_at_period_end ? (
+            <p className="text-sm font-medium text-foreground">
+              {subscription?.cancel_at_period_end ? (
                 <>Cancels on <span className="font-bold text-red-600 dark:text-red-400">
                   {new Date(subscription.subscription_end).toLocaleDateString()}
                 </span></>
               ) : (
-                <>Renews on <span className="font-bold">
+                <>Renews on <span className="font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
                   {new Date(subscription.subscription_end).toLocaleDateString()}
                 </span></>
               )}
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </>
   );
 };
