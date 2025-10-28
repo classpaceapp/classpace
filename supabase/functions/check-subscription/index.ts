@@ -172,9 +172,19 @@ serve(async (req) => {
     // Filter eligible subs by the preferred product id first
     const roleMatchedSubs = eligibleSubs.filter((s) => getProductIdFromSub(s) === preferredProductId);
 
-    // Pick the most recent period_end among role-matched subs, otherwise any eligible sub
-    const selectedSub = (roleMatchedSubs.length > 0 ? roleMatchedSubs : eligibleSubs)
-      .sort((a, b) => b.current_period_end - a.current_period_end)[0];
+    // Prefer subscriptions with cancel_at_period_end=true (if any), then by most recent period end
+    const pool = roleMatchedSubs.length > 0 ? roleMatchedSubs : eligibleSubs;
+    const selectedSub = pool
+      .sort((a, b) => {
+        const aCanceled = a.cancel_at_period_end ? 1 : 0;
+        const bCanceled = b.cancel_at_period_end ? 1 : 0;
+        // Prioritize canceled subs first
+        if (aCanceled !== bCanceled) return bCanceled - aCanceled;
+        // Then sort by current_period_end desc (handle undefined safely)
+        const aEnd = typeof a.current_period_end === 'number' ? a.current_period_end : 0;
+        const bEnd = typeof b.current_period_end === 'number' ? b.current_period_end : 0;
+        return bEnd - aEnd;
+      })[0];
 
     const subscription = selectedSub;
     

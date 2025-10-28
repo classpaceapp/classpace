@@ -15,6 +15,7 @@ export const StudentSubscriptionCard = () => {
   const { toast } = useToast();
   const { subscription, checkingSubscription, refreshSubscription } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [justCancelledAt, setJustCancelledAt] = useState<string | null>(null);
   const isStudentPremium = subscription?.tier === 'student_premium';
 
   const handleSubscribe = async () => {
@@ -94,15 +95,19 @@ export const StudentSubscriptionCard = () => {
 
       if (error) throw error;
 
+      const cancelAtIso = data?.cancel_at as string | undefined;
+      if (cancelAtIso) setJustCancelledAt(cancelAtIso);
+
       toast({
         title: "Subscription cancelled",
-        description: `Access continues until ${new Date(data.cancel_at).toLocaleDateString()}`,
+        description: `Access continues until ${new Date((cancelAtIso || data?.cancel_at)).toLocaleDateString()}`,
       });
       
-      // Small delay to avoid race conditions, then refresh
-      setTimeout(async () => {
-        await refreshSubscription();
-      }, 300);
+      // Force immediate refresh and again after a short delay to avoid Stripe propagation lag
+      await refreshSubscription();
+      setTimeout(() => {
+        refreshSubscription();
+      }, 1200);
     } catch (error: any) {
       toast({
         title: "Error",

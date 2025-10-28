@@ -15,6 +15,7 @@ const SubscriptionCard: React.FC = () => {
   const { subscription, checkingSubscription, refreshSubscription } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [justCancelledAt, setJustCancelledAt] = useState<string | null>(null);
 
   const handleUpgrade = async () => {
     setLoading(true);
@@ -98,14 +99,18 @@ const SubscriptionCard: React.FC = () => {
 
       if (error) throw error;
 
+      const cancelAtIso = data?.cancel_at as string | undefined;
+      if (cancelAtIso) setJustCancelledAt(cancelAtIso);
+
       toast({
         title: "Subscription cancelled",
-        description: `Access continues until ${new Date(data.cancel_at).toLocaleDateString()}`,
+        description: `Access continues until ${new Date((cancelAtIso || data?.cancel_at)).toLocaleDateString()}`,
       });
       
-      setTimeout(async () => {
-        await refreshSubscription?.();
-      }, 300);
+      await refreshSubscription?.();
+      setTimeout(() => {
+        refreshSubscription?.();
+      }, 1200);
     } catch (error: any) {
       toast({
         title: "Error",

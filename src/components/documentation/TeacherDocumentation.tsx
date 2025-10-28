@@ -110,7 +110,7 @@ const slides = [
               <Bot className="w-5 h-5 text-primary" />
               AI Teaching Assistant
             </h3>
-            <p>Access Learnspace AI to help create lesson plans, generate materials, and get teaching insights.</p>
+            <p>Access the AI Teaching Assistant to help create lesson plans, generate materials, and get teaching insights.</p>
           </div>
           <div className="bg-muted/50 rounded-xl p-5 space-y-2">
             <h3 className="text-xl font-bold flex items-center gap-2">
@@ -330,7 +330,7 @@ const slides = [
         </p>
         <div className="space-y-4">
           <div className="bg-muted/50 rounded-xl p-5">
-            <h3 className="text-xl font-bold mb-3">What Learnspace AI Can Do:</h3>
+            <h3 className="text-xl font-bold mb-3">What the AI Teaching Assistant Can Do:</h3>
             <ul className="space-y-2 ml-4">
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
