@@ -1,28 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Tldraw } from 'tldraw';
+import { useSyncDemo } from '@tldraw/sync';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import 'tldraw/tldraw.css';
 
 const TldrawWhiteboard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [miroBoardId, setMiroBoardId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  
+  // Use the tldraw sync demo with the whiteboard ID as the room ID
+  const roomId = `classpace-${id}`;
+  const store = useSyncDemo({ roomId });
 
   useEffect(() => {
-    const loadWhiteboard = async () => {
+    const verifyWhiteboardAccess = async () => {
       if (!id || !user?.id) return;
 
       try {
-        setLoading(true);
-        
-        // Fetch the whiteboard data to get the Miro board ID
+        // Verify user has access to this whiteboard
         const { data, error } = await supabase
           .from('whiteboards')
-          .select('whiteboard_data, pod_id')
+          .select('pod_id')
           .eq('id', id)
           .maybeSingle();
 
@@ -34,59 +37,26 @@ const TldrawWhiteboard: React.FC = () => {
             description: 'This whiteboard may have been deleted or you do not have access to it.',
             variant: 'destructive',
           });
+          navigate(-1);
           return;
         }
-
-        // Extract Miro board ID from whiteboard_data
-        const boardId = (data.whiteboard_data as any)?.miro_board_id;
-        if (!boardId) {
-          toast({
-            title: 'Invalid whiteboard',
-            description: 'This whiteboard does not have a valid Miro board.',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        setMiroBoardId(boardId);
       } catch (error: any) {
-        console.error('Error loading whiteboard:', error);
+        console.error('Error verifying whiteboard access:', error);
         toast({
-          title: 'Failed to load whiteboard',
+          title: 'Failed to verify access',
           description: error.message,
           variant: 'destructive',
         });
-      } finally {
-        setLoading(false);
+        navigate(-1);
       }
     };
 
-    loadWhiteboard();
-  }, [id, user?.id, toast]);
-
-  if (loading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!miroBoardId) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Unable to load whiteboard</p>
-      </div>
-    );
-  }
+    verifyWhiteboardAccess();
+  }, [id, user?.id, navigate, toast]);
 
   return (
-    <div className="fixed inset-0">
-      <iframe
-        src={`https://miro.com/app/live-embed/${miroBoardId}`}
-        className="w-full h-full border-0"
-        allow="fullscreen"
-      />
+    <div style={{ position: 'fixed', inset: 0 }}>
+      <Tldraw store={store} />
     </div>
   );
 };

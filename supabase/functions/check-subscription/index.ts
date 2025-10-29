@@ -150,9 +150,8 @@ serve(async (req) => {
       .eq('id', user.id)
       .single();
 
-// Product IDs from Stripe - MUST match create-checkout
-const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJeHNIEXymOooF';  // Classpace Teach+
-const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TK2C5qgNV85Jlc';  // Classpace Learn+
+const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TKAYgtgNv6CA1B';  // Teach+ ($7/month)
+const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TKAaovd6FnPPyq';  // Learn+ ($7/month)
 
     const getProductIdFromSub = (sub: any): string | null => {
       try {
