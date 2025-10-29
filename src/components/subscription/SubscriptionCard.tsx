@@ -260,7 +260,7 @@ const SubscriptionCard: React.FC = () => {
                   )}
                 </p>
               </div>
-            )
+            )}
           </CardContent>
         </Card>
       )}
