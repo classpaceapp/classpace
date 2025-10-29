@@ -59,7 +59,7 @@ const targetProductId = isStudent ? STUDENT_PREMIUM_PRODUCT_ID : TEACHER_PREMIUM
 
 const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-// Fetch product to derive its default price
+// Fetch product to derive its default price (fallback to first active recurring price)
 const product = await stripe.products.retrieve(targetProductId);
 let finalPriceId: string | undefined;
 
@@ -73,10 +73,20 @@ if (product.default_price) {
 }
 
 if (!finalPriceId) {
-  throw new Error(`Product '${targetProductId}' has no default price set in Stripe`);
+  // Fallback: find an active recurring price for the product
+  const prices = await stripe.prices.list({ product: targetProductId, active: true, limit: 10 });
+  const recurring = prices.data.find((p: any) => p.type === 'recurring' && p.active) || prices.data[0];
+  if (recurring?.id) {
+    finalPriceId = recurring.id;
+    logStep('Falling back to first active price', { priceId: finalPriceId });
+  }
 }
 
-logStep("Using product default price", { isStudent, targetProductId, finalPriceId });
+if (!finalPriceId) {
+  throw new Error(`No active price found for product '${targetProductId}' in Stripe`);
+}
+
+logStep("Resolved price for checkout", { isStudent, targetProductId, finalPriceId });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string | undefined;
