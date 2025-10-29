@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Phone, Save, Sparkles, Palette, Image as ImageIcon, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TeacherProfileForm } from '@/components/profile/TeacherProfileForm';
 
 const Profile: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
@@ -287,6 +288,12 @@ const Profile: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        {profile?.role === 'teacher' && (
+          <div className="mt-6">
+            <TeacherProfileForm />
+          </div>
+        )}
         </div>
       </div>
     </DashboardLayout>
