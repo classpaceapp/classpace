@@ -75,20 +75,65 @@ serve(async (req) => {
       logStep("Retrieved default price from product", { finalPriceId });
     } catch (priceError) {
       logStep("ERROR retrieving default price, attempting fallback", { error: priceError });
-      
-      // Fallback: List all prices for this product and use the first active one
-      const prices = await stripe.prices.list({ 
-        product: targetProductId, 
-        active: true,
-        limit: 1 
-      });
-      
-      if (prices.data.length === 0) {
-        throw new Error(`No active prices found for product ${targetProductId}`);
+
+      // Fallback A: Try searching products by name keywords within this Stripe account
+      try {
+        // Prefer specific product names but fall back to generic keywords
+        const queries = isStudent
+          ? ["name:'Classpace Learn+'", "name~'Learn'"]
+          : ["name:'Classpace Teach+'", "name~'Teach'"];
+
+        let foundProductId: string | null = null;
+        for (const q of queries) {
+          try {
+            // @ts-ignore - search may not be enabled in some accounts
+            const result = await (stripe.products as any).search({ query: q, limit: 1 });
+            if (result?.data?.length) {
+              foundProductId = result.data[0].id;
+              logStep("Found product via search", { q, foundProductId });
+              break;
+            }
+          } catch (_) {
+            // search not available; continue to next fallback
+          }
+        }
+
+        if (foundProductId) {
+          const product = await stripe.products.retrieve(foundProductId);
+          if (product.default_price) {
+            finalPriceId = typeof product.default_price === 'string'
+              ? product.default_price
+              : product.default_price.id;
+            logStep("Using default price from searched product", { finalPriceId });
+          } else {
+            const pricesForProduct = await stripe.prices.list({ product: foundProductId, active: true, limit: 1 });
+            if (pricesForProduct.data.length) {
+              finalPriceId = pricesForProduct.data[0].id;
+              logStep("Using first active price from searched product", { finalPriceId });
+            }
+          }
+        }
+      } catch (_) {}
+
+      // Fallback B: Global scan of active recurring monthly prices; pick best match by keyword, else first
+      if (!finalPriceId) {
+        const prices = await stripe.prices.list({ active: true, expand: ['data.product'], limit: 100 });
+        const recurring = prices.data.filter((p: any) => p.type === 'recurring' && p.recurring?.interval === 'month');
+        const keyword = isStudent ? 'learn' : 'teach';
+
+        // Prefer a price whose product name matches our intent
+        const preferred = recurring.find((p: any) => {
+          const name = (p.product as any)?.name?.toLowerCase?.() || '';
+          return name.includes(keyword) || name.includes('classpace');
+        });
+
+        const chosen = preferred || recurring[0] || prices.data[0];
+        if (!chosen) {
+          throw new Error('No suitable active prices found in this Stripe account. Please create one monthly recurring price.');
+        }
+        finalPriceId = chosen.id;
+        logStep("Using global fallback price", { finalPriceId, chosenProduct: (chosen.product as any)?.id });
       }
-      
-      finalPriceId = prices.data[0].id;
-      logStep("Using fallback price from price list", { finalPriceId });
     }
 
     logStep("Final price ID selected for checkout", { finalPriceId });

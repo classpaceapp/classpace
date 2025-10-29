@@ -85,9 +85,8 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
         description: 'Opening in a new tab...',
       });
 
-      // Open whiteboard in new tab (Tldraw read-write public room)
-      const roomId = `classpace-${data.id}`;
-      window.open(`https://www.tldraw.com/r/${roomId}`, '_blank');
+      // Open whiteboard in new tab (internal collaborative page)
+      window.open(`/whiteboard/${data.id}`, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
