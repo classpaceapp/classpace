@@ -135,6 +135,7 @@ logStep("Resolved price for checkout", { isStudent, targetProductId, finalPriceI
         },
       ],
       mode: "subscription",
+      allow_promotion_codes: true,
       success_url: `${origin}${dashboardUrl}?subscription=success&role=${roleParam}`,
       cancel_url: `${origin}${dashboardUrl}?subscription=cancelled&role=${roleParam}`,
       subscription_data: {

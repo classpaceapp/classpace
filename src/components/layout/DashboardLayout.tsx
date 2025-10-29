@@ -13,7 +13,8 @@ import {
   Home,
   Sparkles,
   Flame,
-  Boxes
+  Boxes,
+  GraduationCap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -39,6 +40,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const teacherNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-blue-500' },
     { name: 'Pods', href: '/teacher-pods', icon: Boxes, color: 'text-indigo-500' },
+    { name: 'Educators', href: '/educators', icon: GraduationCap, color: 'text-teal-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
     { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },
@@ -52,6 +54,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'Pods', href: '/student-pods', icon: Boxes, color: 'text-indigo-500' },
     { name: 'Learnspace', href: '/learnspace', icon: 'learnspace', color: '' },
     { name: 'Phoenix', href: '/phoenix', icon: 'phoenix', color: '' },
+    { name: 'Educators', href: '/educators', icon: GraduationCap, color: 'text-teal-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
     { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },

@@ -34,6 +34,8 @@ import NotFound from "./pages/NotFound";
 import FAQs from "./pages/FAQs";
 import SupportPage from "./pages/SupportPage";
 import MyPlan from "./pages/MyPlan";
+import Educators from "./pages/Educators";
+import EducatorProfile from "./pages/EducatorProfile";
 import SubscriptionReturnHandler from "@/components/subscription/SubscriptionReturnHandler";
 
 const queryClient = new QueryClient();
@@ -180,6 +182,16 @@ const App = () => (
             <Route path="/my-plan" element={
               <ProtectedRoute>
                 <MyPlan />
+              </ProtectedRoute>
+            } />
+            <Route path="/educators" element={
+              <ProtectedRoute>
+                <Educators />
+              </ProtectedRoute>
+            } />
+            <Route path="/educator/:userId" element={
+              <ProtectedRoute>
+                <EducatorProfile />
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />

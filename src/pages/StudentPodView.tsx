@@ -200,34 +200,49 @@ const StudentPodView: React.FC = () => {
 
         {/* Pod Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5">
-            <TabsTrigger value="overview" className="gap-2">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 p-1.5 rounded-xl shadow-sm border border-primary/20">
+            <TabsTrigger 
+              value="overview" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+            >
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="chat" className="gap-2">
+            <TabsTrigger 
+              value="chat" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+            >
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Chat</span>
             </TabsTrigger>
-            <TabsTrigger value="notes" className="gap-2">
+            <TabsTrigger 
+              value="notes" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+            >
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Notes</span>
             </TabsTrigger>
-            <TabsTrigger value="materials" className="gap-2">
+            <TabsTrigger 
+              value="materials" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+            >
               <Upload className="h-4 w-4" />
               <span className="hidden sm:inline">Materials</span>
             </TabsTrigger>
-            <TabsTrigger value="whiteboard" className="gap-2">
+            <TabsTrigger 
+              value="whiteboard" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+            >
               <Palette className="h-4 w-4" />
               <span className="hidden sm:inline">Whiteboard</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <Card className="border-primary/20">
-              <CardHeader>
+            <Card className="border-2 border-blue-500/30 shadow-xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20">
+              <CardHeader className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-b border-blue-500/20">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Pod Information</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Pod Information</CardTitle>
                   <Button 
                     variant="outline"
                     className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
