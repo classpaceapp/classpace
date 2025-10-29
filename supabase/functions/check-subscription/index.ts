@@ -203,20 +203,30 @@ serve(async (req) => {
 
     // Extract subscription end date and cancellation status
     let subscriptionEnd: string;
-    let willCancelAtPeriodEnd = false;
-    
-    if (subscription.current_period_end) {
-      const periodEndDate = new Date(subscription.current_period_end * 1000);
+    // Determine cancellation flag regardless of current_period_end presence
+    const willCancelAtPeriodEnd = Boolean((subscription as any).cancel_at_period_end);
+
+    const hasPeriodEnd = typeof (subscription as any).current_period_end === 'number';
+    const hasCancelAt = typeof (subscription as any).cancel_at === 'number';
+
+    if (hasPeriodEnd) {
+      const periodEndDate = new Date((subscription as any).current_period_end * 1000);
       subscriptionEnd = periodEndDate.toISOString();
-      willCancelAtPeriodEnd = subscription.cancel_at_period_end || false;
-      logStep("Subscription period", { 
-        current_period_end: subscriptionEnd,
-        cancel_at_period_end: willCancelAtPeriodEnd 
-      });
+    } else if (hasCancelAt) {
+      // Fallback to cancel_at timestamp if present
+      const cancelAtDate = new Date((subscription as any).cancel_at * 1000);
+      subscriptionEnd = cancelAtDate.toISOString();
+      logStep("Warning: current_period_end is missing, using cancel_at timestamp");
     } else {
+      // Last resort: estimate 30 days from now (should rarely happen)
       logStep("Warning: current_period_end is missing, using 30-day estimate");
       subscriptionEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     }
+
+    logStep("Subscription period", {
+      current_period_end: hasPeriodEnd ? subscriptionEnd : null,
+      cancel_at_period_end: willCancelAtPeriodEnd
+    });
 
     logStep("Active subscription found", { 
       subscriptionId: subscription.id, 
