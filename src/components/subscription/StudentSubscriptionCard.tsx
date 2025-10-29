@@ -8,8 +8,8 @@ import { Crown, CreditCard, Loader2, Sparkles, Check } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
-// Learn+ price ID from Stripe (LIVE MODE)
-const STUDENT_PREMIUM_PRICE_ID = "price_1SMp6qBm9rSu4II6dNW4WBj8";
+// Learn+ price ID from Stripe (newly created $7/month)
+const STUDENT_PREMIUM_PRICE_ID = "price_1SNO7cBm9rSu4II6V8UW7ABI";
 
 export const StudentSubscriptionCard = () => {
   const { toast } = useToast();

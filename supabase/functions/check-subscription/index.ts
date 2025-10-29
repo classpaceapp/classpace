@@ -150,8 +150,8 @@ serve(async (req) => {
       .eq('id', user.id)
       .single();
 
-    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJeHNIEXymOooF';  // LIVE MODE - Teach+
-    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJS0AgYeVzi9Gv';  // LIVE MODE - Learn+
+    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TK2BbAduG7IYdL';  // Newly created Teach+ ($7/month)
+    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TK2C5qgNV85Jlc';  // Newly created Learn+ ($7/month)
 
     const getProductIdFromSub = (sub: any): string | null => {
       try {

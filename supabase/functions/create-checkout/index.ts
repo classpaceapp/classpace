@@ -51,12 +51,12 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { isStudent } = body;
 
-    // LIVE MODE price IDs for Stripe products
-    // Teach+ (Classpace Teach+): price_1SNNwsBm9rSu4II6Oz0TDnvZ
-    // Learn+ (Classpace Learn+): price_1SMp6qBm9rSu4II6dNW4WBj8
+    // Newly created price IDs for Stripe products
+    // Teach+ (Classpace Teach+): price_1SNO6xBqopIR0Kr5ARdg91Ak
+    // Learn+ (Classpace Learn+): price_1SNO7cBm9rSu4II6V8UW7ABI
     const finalPriceId = isStudent 
-      ? "price_1SMp6qBm9rSu4II6dNW4WBj8"  // Learn+ LIVE MODE
-      : "price_1SNNwsBm9rSu4II6Oz0TDnvZ";  // Teach+ LIVE MODE
+      ? "price_1SNO7cBm9rSu4II6V8UW7ABI"  // Learn+ ($7/month)
+      : "price_1SNO6xBqopIR0Kr5ARdg91Ak";  // Teach+ ($7/month)
     
     logStep("Using hardcoded price ID", { isStudent, finalPriceId });
 
