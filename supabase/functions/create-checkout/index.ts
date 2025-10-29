@@ -52,16 +52,32 @@ serve(async (req) => {
     const { isStudent } = body;
 
     // Newly created price IDs for Stripe products
-// Price IDs for Stripe products (LIVE)
-// Teach+ (Classpace Teach+): price_1SNOI1Bm9rSu4II68BA9Jwj0
-// Learn+ (Classpace Learn+): price_1SNO7cBm9rSu4II6V8UW7ABI
-const finalPriceId = isStudent 
-  ? "price_1SNO7cBm9rSu4II6V8UW7ABI"  // Learn+ ($7/month)
-  : "price_1SNOI1Bm9rSu4II68BA9Jwj0";  // Teach+ ($7/month)
-    
-    logStep("Using hardcoded price ID", { isStudent, finalPriceId });
+// Resolve price via product's default price to avoid mismatches between environments/accounts
+const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJeHNIEXymOooF';
+const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TK2C5qgNV85Jlc';
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+const targetProductId = isStudent ? STUDENT_PREMIUM_PRODUCT_ID : TEACHER_PREMIUM_PRODUCT_ID;
+
+const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+
+// Fetch product to derive its default price
+const product = await stripe.products.retrieve(targetProductId);
+let finalPriceId: string | undefined;
+
+if (product.default_price) {
+  if (typeof product.default_price === 'string') {
+    finalPriceId = product.default_price;
+  } else {
+    // default_price expanded object
+    finalPriceId = (product.default_price as any).id as string | undefined;
+  }
+}
+
+if (!finalPriceId) {
+  throw new Error(`Product '${targetProductId}' has no default price set in Stripe`);
+}
+
+logStep("Using product default price", { isStudent, targetProductId, finalPriceId });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string | undefined;
@@ -91,6 +107,15 @@ const finalPriceId = isStudent
     const dashboardUrl = profileData?.role === 'teacher' ? '/dashboard' : '/student-dashboard';
     const roleParam = (isStudent === true) || (profileData?.role === 'learner') ? 'student' : 'teacher';
     
+    // Verify price exists before creating session
+    try {
+      const priceObj = await stripe.prices.retrieve(finalPriceId);
+      logStep("Verified price", { priceId: priceObj.id, active: priceObj.active, currency: priceObj.currency });
+    } catch (e) {
+      logStep("Price verification failed", { finalPriceId, error: String(e) });
+      throw e;
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
