@@ -150,8 +150,8 @@ serve(async (req) => {
       .eq('id', user.id)
       .single();
 
-    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJxkwOv1P5aKdZ';  // TEST MODE
-    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJxlJpDbSJojMr';  // TEST MODE
+    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJeHNIEXymOooF';  // LIVE MODE - Teach+
+    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TJS0AgYeVzi9Gv';  // LIVE MODE - Learn+
 
     const getProductIdFromSub = (sub: any): string | null => {
       try {
@@ -234,7 +234,7 @@ serve(async (req) => {
       productId 
     });
     
-    // Determine tier based on product ID and user role (TEST MODE)
+    // Determine tier based on product ID and user role (LIVE MODE)
     let tier = 'free';
     if (productId === TEACHER_PREMIUM_PRODUCT_ID) {
       tier = 'teacher_premium';

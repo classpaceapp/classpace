@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Crown, CreditCard, Loader2, Sparkles, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Teach+ price ID from Stripe (TEST MODE)
-const TEACHER_PREMIUM_PRICE_ID = "price_1SNJpMBqopIR0Kr5boQJqYbG";
+// Teach+ price ID from Stripe (LIVE MODE)
+const TEACHER_PREMIUM_PRICE_ID = "price_1SNNwsBm9rSu4II6Oz0TDnvZ";
 
 const SubscriptionCard: React.FC = () => {
   const { subscription, checkingSubscription, refreshSubscription } = useAuth();
