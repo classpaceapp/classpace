@@ -288,6 +288,12 @@ const Profile: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+
+        {profile?.role === 'teacher' && (
+          <div className="mt-6">
+            <TeacherProfileForm />
+          </div>
+        )}
         </div>
       </div>
     </DashboardLayout>
