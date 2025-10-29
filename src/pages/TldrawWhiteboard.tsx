@@ -37,7 +37,7 @@ const TldrawWhiteboard: React.FC = () => {
             description: 'This whiteboard may have been deleted or you do not have access to it.',
             variant: 'destructive',
           });
-          navigate(-1);
+          // Do not navigate away; keep the whiteboard visible to avoid blank screen
           return;
         }
       } catch (error: any) {
@@ -47,7 +47,7 @@ const TldrawWhiteboard: React.FC = () => {
           description: error.message,
           variant: 'destructive',
         });
-        navigate(-1);
+        // Do not navigate away on error to prevent blank screen
       }
     };
 
