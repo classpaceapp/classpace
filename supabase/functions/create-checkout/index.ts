@@ -52,11 +52,12 @@ serve(async (req) => {
     const { isStudent } = body;
 
     // Newly created price IDs for Stripe products
-    // Teach+ (Classpace Teach+): price_1SNO6xBqopIR0Kr5ARdg91Ak
-    // Learn+ (Classpace Learn+): price_1SNO7cBm9rSu4II6V8UW7ABI
-    const finalPriceId = isStudent 
-      ? "price_1SNO7cBm9rSu4II6V8UW7ABI"  // Learn+ ($7/month)
-      : "price_1SNO6xBqopIR0Kr5ARdg91Ak";  // Teach+ ($7/month)
+// Price IDs for Stripe products (LIVE)
+// Teach+ (Classpace Teach+): price_1SNOI1Bm9rSu4II68BA9Jwj0
+// Learn+ (Classpace Learn+): price_1SNO7cBm9rSu4II6V8UW7ABI
+const finalPriceId = isStudent 
+  ? "price_1SNO7cBm9rSu4II6V8UW7ABI"  // Learn+ ($7/month)
+  : "price_1SNOI1Bm9rSu4II68BA9Jwj0";  // Teach+ ($7/month)
     
     logStep("Using hardcoded price ID", { isStudent, finalPriceId });
 
