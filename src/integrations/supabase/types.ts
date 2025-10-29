@@ -690,42 +690,6 @@ export type Database = {
         }
         Relationships: []
       }
-      teacher_profiles: {
-        Row: {
-          created_at: string
-          id: string
-          is_public: boolean
-          qualifications: Json | null
-          subjects_expertise: string[] | null
-          teaching_experience: string | null
-          updated_at: string
-          user_id: string
-          years_experience: number
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_public?: boolean
-          qualifications?: Json | null
-          subjects_expertise?: string[] | null
-          teaching_experience?: string | null
-          updated_at?: string
-          user_id: string
-          years_experience?: number
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_public?: boolean
-          qualifications?: Json | null
-          subjects_expertise?: string[] | null
-          teaching_experience?: string | null
-          updated_at?: string
-          user_id?: string
-          years_experience?: number
-        }
-        Relationships: []
-      }
       whiteboards: {
         Row: {
           created_at: string
