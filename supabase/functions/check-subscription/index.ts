@@ -33,9 +33,14 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    const rawKey = Deno.env.get("STRIPE_SECRET_KEY_LIVE") || Deno.env.get("STRIPE_SECRET_KEY");
+    if (!rawKey) throw new Error("STRIPE_SECRET_KEY_LIVE/STRIPE_SECRET_KEY is not set");
+    const isTest = /(^rk_test_|^sk_test_)/.test(rawKey);
+    if (isTest) {
+      throw new Error("Stripe key is a TEST key (rk_test_/sk_test_). Please set STRIPE_SECRET_KEY_LIVE with your live key (sk_live_...).");
+    }
+    const stripeKey = rawKey;
+    logStep("Stripe key verified (live)");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");

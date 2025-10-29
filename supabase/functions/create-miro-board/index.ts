@@ -35,11 +35,13 @@ serve(async (req) => {
     const { title, podId } = await req.json();
     if (!title || !podId) throw new Error("Title and podId are required");
 
-    const MIRO_ACCESS_TOKEN = Deno.env.get("MIRO_ACCESS_TOKEN");
+    const RAW_MIRO_TOKEN = (Deno.env.get("MIRO_ACCESS_TOKEN") ?? "").trim();
+    // Allow users to paste token with or without the "Bearer " prefix
+    const MIRO_ACCESS_TOKEN = RAW_MIRO_TOKEN.replace(/^Bearer\s+/i, "");
     if (!MIRO_ACCESS_TOKEN) throw new Error("MIRO_ACCESS_TOKEN not configured");
-
+ 
     logStep("Creating Miro board", { title });
-
+ 
     // Create a new Miro board using the API
     const miroResponse = await fetch("https://api.miro.com/v2/boards", {
       method: "POST",
