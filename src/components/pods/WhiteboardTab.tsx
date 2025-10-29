@@ -85,9 +85,9 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
         description: 'Opening in a new tab...',
       });
 
-      // Open whiteboard in new tab (Tldraw public room)
+      // Open whiteboard in new tab (Tldraw read-write public room)
       const roomId = `classpace-${data.id}`;
-      window.open(`https://www.tldraw.com/ro/${roomId}`, '_blank');
+      window.open(`https://www.tldraw.com/r/${roomId}`, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
@@ -103,13 +103,22 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
     }
   };
 
-  const deleteWhiteboard = async (whiteboardId: string) => {
+  const deleteWhiteboard = async (whiteboardId: string, createdBy: string) => {
+    // Check authorization: both teachers and students can delete whiteboards
+    if (!isTeacher && createdBy !== user?.id) {
+      toast({
+        title: 'Permission denied',
+        description: 'You can only delete whiteboards you created',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('whiteboards')
         .delete()
-        .eq('id', whiteboardId)
-        .eq('created_by', user?.id);
+        .eq('id', whiteboardId);
 
       if (error) throw error;
 
@@ -129,7 +138,7 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
   const openWhiteboard = (whiteboardId: string) => {
     const roomId = `classpace-${whiteboardId}`;
-    window.open(`https://www.tldraw.com/ro/${roomId}`, '_blank');
+    window.open(`https://www.tldraw.com/r/${roomId}`, '_blank');
   };
 
   useEffect(() => {
@@ -272,16 +281,14 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Open
                       </Button>
-                      {(isTeacher || whiteboard.created_by === user?.id) && (
-                        <Button
-                          onClick={() => deleteWhiteboard(whiteboard.id)}
-                          variant="outline"
-                          size="sm"
-                          className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <Button
+                        onClick={() => deleteWhiteboard(whiteboard.id, whiteboard.created_by)}
+                        variant="outline"
+                        size="sm"
+                        className="border-destructive/50 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

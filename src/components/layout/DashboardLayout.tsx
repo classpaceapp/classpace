@@ -123,7 +123,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
+        <nav className={`p-4 space-y-2 ${userRole === 'learner' ? 'space-y-1' : ''}`}>
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.href;
             
@@ -131,7 +131,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
               <button
                 key={item.name}
                 onClick={() => handleNavigation(item.href)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 w-full text-left ${
+                className={`flex items-center gap-3 px-4 rounded-xl transition-all duration-200 w-full text-left ${
+                  userRole === 'learner' ? 'py-2.5 text-sm' : 'py-3'
+                } ${
                   isActive 
                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' 
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -139,18 +141,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
               >
                 {typeof item.icon === 'string' ? (
                   item.icon === 'learnspace' ? (
-                    <img src={learnspaceLogo} alt="Learnspace" className="h-5 w-5" />
+                    <img src={learnspaceLogo} alt="Learnspace" className={userRole === 'learner' ? 'h-4 w-4' : 'h-5 w-5'} />
                   ) : item.icon === 'phoenix' ? (
-                    <img src={phoenixLogo} alt="Phoenix" className="h-5 w-5" />
+                    <img src={phoenixLogo} alt="Phoenix" className={userRole === 'learner' ? 'h-4 w-4' : 'h-5 w-5'} />
                   ) : null
                 ) : (
                   React.createElement(item.icon, { 
-                    className: `h-5 w-5 ${!isActive && item.color ? item.color : ''}` 
+                    className: `${userRole === 'learner' ? 'h-4 w-4' : 'h-5 w-5'} ${!isActive && item.color ? item.color : ''}` 
                   })
                 )}
                 <span className="font-medium">{item.name}</span>
                 {userRole === 'learner' && item.icon === 'phoenix' && PHOENIX_COMING_SOON && (
-                  <Badge variant="secondary" className="ml-auto">Coming soon</Badge>
+                  <Badge variant="secondary" className="ml-auto text-xs">Coming soon</Badge>
                 )}
               </button>
             );

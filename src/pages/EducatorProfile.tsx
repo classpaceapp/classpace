@@ -125,8 +125,8 @@ const EducatorProfile: React.FC = () => {
         description: 'You can now access this pod from your dashboard',
       });
 
-      // Navigate to student pod view
-      navigate(`/student-pod/${podId}`);
+      // Navigate to student pod view (correct route)
+      navigate(`/student/pod/${podId}`);
     } catch (error: any) {
       toast({
         title: 'Failed to join pod',

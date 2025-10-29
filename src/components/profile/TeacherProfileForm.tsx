@@ -95,14 +95,19 @@ export const TeacherProfileForm: React.FC = () => {
       setSaving(true);
       const { error } = await supabase
         .from('teacher_profiles')
-        .upsert({
-          user_id: user.id,
-          years_experience: profile.years_experience,
-          teaching_experience: profile.teaching_experience,
-          qualifications: profile.qualifications,
-          subjects_expertise: profile.subjects_expertise,
-          is_public: profile.is_public,
-        });
+        .upsert(
+          {
+            user_id: user.id,
+            years_experience: profile.years_experience,
+            teaching_experience: profile.teaching_experience,
+            qualifications: profile.qualifications,
+            subjects_expertise: profile.subjects_expertise,
+            is_public: profile.is_public,
+          },
+          {
+            onConflict: 'user_id', // Specify the unique constraint column
+          }
+        );
 
       if (error) throw error;
 
