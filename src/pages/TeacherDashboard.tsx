@@ -27,7 +27,7 @@ interface Pod {
 const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, profile, refreshSubscription } = useAuth();
+  const { user, profile, subscription, refreshSubscription } = useAuth();
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
@@ -285,9 +285,22 @@ const TeacherDashboard: React.FC = () => {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {pods.map((pod) => (
-                  <PodCard key={pod.id} pod={pod} userRole="teacher" basePath="/dashboard" />
-                ))}
+                {pods.map((pod, index) => {
+                  // Lock extra pods for free tier teachers
+                  const isLocked = profile?.role === 'teacher' 
+                    && (subscription?.tier === 'free' || !subscription?.tier)
+                    && index > 0;
+                  
+                  return (
+                    <PodCard 
+                      key={pod.id} 
+                      pod={pod} 
+                      userRole="teacher" 
+                      basePath="/dashboard"
+                      isLocked={isLocked}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
