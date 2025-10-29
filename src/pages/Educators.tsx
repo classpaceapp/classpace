@@ -57,26 +57,30 @@ const Educators: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('teacher_profiles')
-        .select(`
-          id,
-          user_id,
-          years_experience,
-          teaching_experience,
-          qualifications,
-          subjects_expertise,
-          profiles:user_id (
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('is_public', true)
         .order('years_experience', { ascending: false });
 
       if (error) throw error;
 
-      setEducators(data as any);
-      setFilteredEducators(data as any);
+      // Fetch profiles separately for each teacher
+      const enrichedData = await Promise.all(
+        (data || []).map(async (teacher) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, avatar_url')
+            .eq('id', teacher.user_id)
+            .single();
+          
+          return {
+            ...teacher,
+            profiles: profileData || { first_name: '', last_name: '', avatar_url: null }
+          };
+        })
+      );
+
+      setEducators(enrichedData as any);
+      setFilteredEducators(enrichedData as any);
     } catch (error: any) {
       console.error('Error fetching educators:', error);
       toast({

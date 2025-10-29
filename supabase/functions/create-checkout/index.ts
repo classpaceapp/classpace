@@ -51,42 +51,42 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { isStudent } = body;
 
-    // Newly created Stripe products
-const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TKAYgtgNv6CA1B'; // Teach+ ($7/month)
-const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TKAaovd6FnPPyq'; // Learn+ ($7/month)
+    // New Stripe products
+    const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TKBZsvdPVU2Rma'; // Teach+ ($7/month)
+    const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TKBYv2phqmMuxz'; // Learn+ ($7/month)
 
-const targetProductId = isStudent ? STUDENT_PREMIUM_PRODUCT_ID : TEACHER_PREMIUM_PRODUCT_ID;
+    const targetProductId = isStudent ? STUDENT_PREMIUM_PRODUCT_ID : TEACHER_PREMIUM_PRODUCT_ID;
 
-const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-// Fetch product to derive its default price (fallback to first active recurring price)
-const product = await stripe.products.retrieve(targetProductId);
-let finalPriceId: string | undefined;
+    // Fetch product to derive its default price (fallback to first active recurring price)
+    const product = await stripe.products.retrieve(targetProductId);
+    let finalPriceId: string | undefined;
 
-if (product.default_price) {
-  if (typeof product.default_price === 'string') {
-    finalPriceId = product.default_price;
-  } else {
-    // default_price expanded object
-    finalPriceId = (product.default_price as any).id as string | undefined;
-  }
-}
+    if (product.default_price) {
+      if (typeof product.default_price === 'string') {
+        finalPriceId = product.default_price;
+      } else {
+        // default_price expanded object
+        finalPriceId = (product.default_price as any).id as string | undefined;
+      }
+    }
 
-if (!finalPriceId) {
-  // Fallback: find an active recurring price for the product
-  const prices = await stripe.prices.list({ product: targetProductId, active: true, limit: 10 });
-  const recurring = prices.data.find((p: any) => p.type === 'recurring' && p.active) || prices.data[0];
-  if (recurring?.id) {
-    finalPriceId = recurring.id;
-    logStep('Falling back to first active price', { priceId: finalPriceId });
-  }
-}
+    if (!finalPriceId) {
+      // Fallback: find an active recurring price for the product
+      const prices = await stripe.prices.list({ product: targetProductId, active: true, limit: 10 });
+      const recurring = prices.data.find((p: any) => p.type === 'recurring' && p.active) || prices.data[0];
+      if (recurring?.id) {
+        finalPriceId = recurring.id;
+        logStep('Falling back to first active price', { priceId: finalPriceId });
+      }
+    }
 
-if (!finalPriceId) {
-  throw new Error(`No active price found for product '${targetProductId}' in Stripe`);
-}
+    if (!finalPriceId) {
+      throw new Error(`No active price found for product '${targetProductId}' in Stripe`);
+    }
 
-logStep("Resolved price for checkout", { isStudent, targetProductId, finalPriceId });
+    logStep("Resolved price for checkout", { isStudent, targetProductId, finalPriceId });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string | undefined;
@@ -135,7 +135,6 @@ logStep("Resolved price for checkout", { isStudent, targetProductId, finalPriceI
         },
       ],
       mode: "subscription",
-      allow_promotion_codes: true,
       success_url: `${origin}${dashboardUrl}?subscription=success&role=${roleParam}`,
       cancel_url: `${origin}${dashboardUrl}?subscription=cancelled&role=${roleParam}`,
       subscription_data: {

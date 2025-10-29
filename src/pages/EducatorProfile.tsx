@@ -25,13 +25,23 @@ interface EducatorData {
   };
 }
 
+interface PublicPod {
+  id: string;
+  title: string;
+  description: string | null;
+  subject: string;
+  pod_code: string;
+}
+
 const EducatorProfile: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const [educator, setEducator] = useState<EducatorData | null>(null);
+  const [publicPods, setPublicPods] = useState<PublicPod[]>([]);
   const [loading, setLoading] = useState(true);
+  const [joiningPod, setJoiningPod] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEducator();
@@ -42,29 +52,38 @@ const EducatorProfile: React.FC = () => {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data: teacherData, error: teacherError } = await supabase
         .from('teacher_profiles')
-        .select(`
-          id,
-          user_id,
-          years_experience,
-          teaching_experience,
-          qualifications,
-          subjects_expertise,
-          profiles:user_id (
-            first_name,
-            last_name,
-            avatar_url,
-            bio
-          )
-        `)
+        .select('*')
         .eq('user_id', userId)
         .eq('is_public', true)
         .single();
 
-      if (error) throw error;
+      if (teacherError) throw teacherError;
 
-      setEducator(data as any);
+      // Fetch profile separately
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, avatar_url, bio')
+        .eq('id', userId)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Fetch public pods for this teacher
+      const { data: podsData } = await supabase
+        .from('pods')
+        .select('id, title, description, subject, pod_code')
+        .eq('teacher_id', userId)
+        .eq('is_public', true)
+        .order('created_at', { ascending: false });
+
+      setEducator({
+        ...teacherData,
+        profiles: profileData
+      } as any);
+      
+      setPublicPods(podsData || []);
     } catch (error: any) {
       console.error('Error fetching educator:', error);
       toast({
@@ -80,6 +99,43 @@ const EducatorProfile: React.FC = () => {
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  const handleJoinPod = async (podId: string, podCode: string) => {
+    if (!user) {
+      toast({
+        title: 'Login required',
+        description: 'Please log in to join pods',
+        variant: 'destructive',
+      });
+      navigate('/login');
+      return;
+    }
+
+    setJoiningPod(podId);
+    try {
+      const { data, error } = await supabase.rpc('join_pod_with_code', {
+        code: podCode,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Successfully joined pod!',
+        description: 'You can now access this pod from your dashboard',
+      });
+
+      // Navigate to student pod view
+      navigate(`/student-pod/${podId}`);
+    } catch (error: any) {
+      toast({
+        title: 'Failed to join pod',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setJoiningPod(null);
+    }
   };
 
   if (loading) {
@@ -229,6 +285,54 @@ const EducatorProfile: React.FC = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Public Pods Section */}
+          {publicPods.length > 0 && (
+            <Card className="border-2 border-teal-500/30 shadow-xl bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-950/20 dark:to-cyan-950/20">
+              <CardHeader className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border-b border-teal-500/20">
+                <CardTitle className="text-2xl bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
+                  Active Public Pods
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  {publicPods.map((pod) => (
+                    <Card
+                      key={pod.id}
+                      className="border-2 border-teal-200 dark:border-teal-800 shadow-md hover:shadow-lg transition-shadow"
+                    >
+                      <CardHeader>
+                        <CardTitle className="text-lg text-teal-900 dark:text-teal-100">
+                          {pod.title}
+                        </CardTitle>
+                        {pod.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {pod.description}
+                          </p>
+                        )}
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="bg-teal-100 dark:bg-teal-900 text-teal-700 dark:text-teal-300">
+                            {pod.subject}
+                          </Badge>
+                        </div>
+                        {profile?.role === 'learner' && (
+                          <Button
+                            onClick={() => handleJoinPod(pod.id, pod.pod_code)}
+                            disabled={joiningPod === pod.id}
+                            className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white"
+                          >
+                            {joiningPod === pod.id ? 'Joining...' : 'Join Pod'}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </DashboardLayout>

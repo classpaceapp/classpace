@@ -203,9 +203,9 @@ export const TeacherProfileForm: React.FC = () => {
             id="years-experience"
             type="number"
             min="0"
-            value={profile.years_experience}
+            value={profile.years_experience === 0 ? '' : profile.years_experience}
             onChange={(e) =>
-              setProfile({ ...profile, years_experience: parseInt(e.target.value) || 0 })
+              setProfile({ ...profile, years_experience: e.target.value === '' ? 0 : parseInt(e.target.value) || 0 })
             }
             className="border-purple-300 focus:border-purple-500 focus:ring-purple-500"
           />

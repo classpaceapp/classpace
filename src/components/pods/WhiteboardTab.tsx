@@ -85,9 +85,9 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
         description: 'Opening in a new tab...',
       });
 
-      // Open whiteboard in new tab (Tldraw external provider)
+      // Open whiteboard in new tab (Tldraw public room)
       const roomId = `classpace-${data.id}`;
-      window.open(`https://www.tldraw.com/r/${roomId}?embed=1`, '_blank');
+      window.open(`https://www.tldraw.com/ro/${roomId}`, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
@@ -129,7 +129,7 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
   const openWhiteboard = (whiteboardId: string) => {
     const roomId = `classpace-${whiteboardId}`;
-    window.open(`https://www.tldraw.com/r/${roomId}?embed=1`, '_blank');
+    window.open(`https://www.tldraw.com/ro/${roomId}`, '_blank');
   };
 
   useEffect(() => {

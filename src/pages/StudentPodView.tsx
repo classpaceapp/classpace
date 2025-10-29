@@ -203,35 +203,35 @@ const StudentPodView: React.FC = () => {
           <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 p-1.5 rounded-xl shadow-sm border border-primary/20">
             <TabsTrigger 
               value="overview" 
-              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
             >
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
             <TabsTrigger 
               value="chat" 
-              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
             >
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Chat</span>
             </TabsTrigger>
             <TabsTrigger 
               value="notes" 
-              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
             >
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Notes</span>
             </TabsTrigger>
             <TabsTrigger 
               value="materials" 
-              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
             >
               <Upload className="h-4 w-4" />
               <span className="hidden sm:inline">Materials</span>
             </TabsTrigger>
             <TabsTrigger 
               value="whiteboard" 
-              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200"
+              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
             >
               <Palette className="h-4 w-4" />
               <span className="hidden sm:inline">Whiteboard</span>
