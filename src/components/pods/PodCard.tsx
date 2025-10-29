@@ -29,9 +29,10 @@ interface PodCardProps {
   pod: Pod;
   userRole: 'teacher' | 'learner';
   basePath: string;
+  isLocked?: boolean;
 }
 
-const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath }) => {
+const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath, isLocked = false }) => {
   const truncatedDescription = pod.description && pod.description.length > 120 
     ? `${pod.description.substring(0, 120)}...` 
     : pod.description;
@@ -63,7 +64,25 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath }) => {
   const bgGradient = bgGradients[gradientIndex];
 
   return (
-    <Card className={`group hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-0 overflow-hidden bg-gradient-to-br ${bgGradient} backdrop-blur-xl`}>
+    <Card className={`group hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-0 overflow-hidden bg-gradient-to-br ${bgGradient} backdrop-blur-xl ${isLocked ? 'opacity-60 relative' : ''}`}>
+      {/* Locked Overlay */}
+      {isLocked && (
+        <div className="absolute inset-0 z-10 bg-gray-900/20 backdrop-blur-[2px] flex items-center justify-center">
+          <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-gray-200 text-center max-w-xs">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Pod Locked</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Upgrade to <span className="font-bold text-blue-600">Teach+</span> to unlock this pod
+            </p>
+            <p className="text-xs text-gray-500">Free plan includes 1 active pod</p>
+          </div>
+        </div>
+      )}
+      
       {/* Gradient Header */}
       <div className={`h-2 bg-gradient-to-r ${headerGradient}`} />
       
@@ -103,15 +122,25 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath }) => {
       </CardContent>
 
       <CardFooter className="pt-2 pb-5">
-        <Link to={userRole === 'teacher' ? `/pod/${pod.id}` : `/student/pod/${pod.id}`} className="w-full">
+        {isLocked ? (
           <Button 
-            className={`w-full bg-gradient-to-r ${headerGradient} text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 font-semibold`}
+            disabled
+            className={`w-full bg-gray-400 text-white border-0 shadow-lg font-semibold cursor-not-allowed opacity-50`}
             size="sm"
           >
-            {userRole === 'teacher' ? 'Manage Pod' : 'Enter Pod'}
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            Locked - Upgrade Required
           </Button>
-        </Link>
+        ) : (
+          <Link to={userRole === 'teacher' ? `/pod/${pod.id}` : `/student/pod/${pod.id}`} className="w-full">
+            <Button 
+              className={`w-full bg-gradient-to-r ${headerGradient} text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 font-semibold`}
+              size="sm"
+            >
+              {userRole === 'teacher' ? 'Manage Pod' : 'Enter Pod'}
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
+        )}
       </CardFooter>
     </Card>
   );

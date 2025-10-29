@@ -99,6 +99,22 @@ const Learnspace: React.FC = () => {
 
   const createNewChat = async () => {
     if (!user?.id) return;
+    
+    // Check subscription tier and chat limit for free students
+    const { data: subscriptionData } = await supabase.functions.invoke('check-subscription');
+    const isSubscribed = Boolean(subscriptionData?.subscribed);
+    const currentChatCount = chats.length;
+    
+    // Free tier: limit to 3 chats
+    if (!isSubscribed && currentChatCount >= 3) {
+      toast({
+        title: '🎓 Free tier limit reached',
+        description: 'You can have up to 3 chats on the free plan. Upgrade to Learn+ for unlimited chats!',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     try {
       const { data, error } = await supabase
         .from('learning_chats')

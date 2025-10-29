@@ -20,7 +20,7 @@ interface Pod {
 }
 
 const TeacherPodsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, subscription } = useAuth();
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,9 +122,19 @@ const TeacherPodsPage: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {pods.map((pod) => (
-                <PodCard key={pod.id} pod={pod} userRole="teacher" basePath="/dashboard" />
-              ))}
+              {pods.map((pod, index) => {
+                // If teacher is on free tier and has multiple pods, lock all except the first one
+                const isLocked = !subscription?.subscribed && index > 0;
+                return (
+                  <PodCard 
+                    key={pod.id} 
+                    pod={pod} 
+                    userRole="teacher" 
+                    basePath="/dashboard"
+                    isLocked={isLocked}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

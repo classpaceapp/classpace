@@ -96,11 +96,26 @@ const CreatePodFlow: React.FC<CreatePodFlowProps> = ({ onComplete, onCancel }) =
       console.error('Error creating pod:', error);
       const msg = error?.message || '';
       const isLimit = /check_pod_limit|RLS|policy/i.test(msg);
-      toast({
-        title: isLimit ? 'Limit reached on Free plan' : 'Failed to create pod',
-        description: isLimit ? 'Free plan allows 1 pod. Upgrade to Premium for unlimited pods.' : (msg || 'Please try again later.'),
-        variant: 'destructive',
-      });
+      
+      if (isLimit) {
+        // Beautiful custom toast for pod limit
+        toast({
+          title: '✨ You\'ve hit your pod limit!',
+          description: (
+            <div className="space-y-2">
+              <p className="text-sm">Free plan includes <strong>1 pod</strong>.</p>
+              <p className="text-sm">Upgrade to <strong>Teach+</strong> for unlimited pods and premium features! 🚀</p>
+            </div>
+          ),
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Failed to create pod',
+          description: msg || 'Please try again later.',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }

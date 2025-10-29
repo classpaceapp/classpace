@@ -37,7 +37,7 @@ export const SupportTab: React.FC = () => {
                 <span className="text-sm font-semibold">Live</span>
               </div>
               <Button 
-                onClick={() => (window as any)?.Tawk_API?.maximize?.()}
+                onClick={() => (window as any)?.openTawkChat?.()}
                 className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all"
               >
                 Open Live Chat
