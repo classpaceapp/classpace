@@ -68,12 +68,25 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
     setCreating(true);
     try {
+      // Create Miro board via edge function
+      const { data: miroData, error: miroError } = await supabase.functions.invoke('create-miro-board', {
+        body: {
+          title: newWhiteboardTitle.trim(),
+          podId: podId,
+        }
+      });
+
+      if (miroError) throw miroError;
+      if (!miroData?.boardId) throw new Error('Failed to get board ID from Miro');
+
+      // Store the Miro board ID in our database
       const { data, error } = await supabase
         .from('whiteboards')
         .insert({
           pod_id: podId,
           title: newWhiteboardTitle.trim(),
           created_by: user.id,
+          whiteboard_data: { miro_board_id: miroData.boardId }
         })
         .select()
         .single();

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -49,17 +50,37 @@ const AIChat = () => {
     setInputMessage('');
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual OpenAI API call later)
-    setTimeout(() => {
+    try {
+      const chatMessages = [...messages, userMessage].map((m) => ({
+        role: m.sender === 'ai' ? 'assistant' : 'user',
+        content: m.content,
+      }));
+
+      const { data, error } = await supabase.functions.invoke('teacher-assistant', {
+        body: { messages: chatMessages },
+      });
+
+      if (error) throw error;
+
+      const aiText = data?.response || 'Sorry, I could not generate a response right now.';
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'Thanks for your message! I\'m currently in demo mode. Once the OpenAI API is connected, I\'ll be able to provide intelligent responses to help with your teaching and learning needs.',
+        content: aiText,
         sender: 'ai',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (err: any) {
+      const fallback: Message = {
+        id: (Date.now() + 2).toString(),
+        content: err?.message || 'Unexpected error. Please try again.',
+        sender: 'ai',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, fallback]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
