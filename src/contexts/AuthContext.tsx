@@ -87,12 +87,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       setCheckingSubscription(true);
-      const { data, error } = await supabase.functions.invoke('check-subscription');
+      
+      // Get current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        console.error('No access token available');
+        setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null, cancel_at_period_end: false });
+        return;
+      }
+      
+      // Call edge function with explicit auth header
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
       if (error) {
         console.error('Error checking subscription:', error);
         setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null, cancel_at_period_end: false });
         return;
       }
+      
       const normalized: Subscription = {
         subscribed: Boolean((data as any)?.subscribed),
         tier: (data as any)?.tier || 'free',
@@ -103,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSubscription(normalized);
     } catch (error) {
       console.error('Error checking subscription:', error);
-      setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null });
+      setSubscription({ subscribed: false, tier: 'free', product_id: null, subscription_end: null, cancel_at_period_end: false });
     } finally {
       setCheckingSubscription(false);
       isCheckingRef.current = false;

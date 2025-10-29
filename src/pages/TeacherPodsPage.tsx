@@ -3,7 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
+import CreatePodModal from '@/components/pods/CreatePodModal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Boxes } from 'lucide-react';
 
@@ -24,6 +26,7 @@ const TeacherPodsPage: React.FC = () => {
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const isMounted = useRef(true);
   const requestIdRef = useRef(0);
 
@@ -112,6 +115,16 @@ const TeacherPodsPage: React.FC = () => {
             </div>
           </div>
 
+          <div className="mb-8 flex justify-end">
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl px-8 py-3 text-lg font-semibold shadow-xl"
+            >
+              <BookOpen className="mr-3 h-6 w-6" />
+              Create Pod
+            </Button>
+          </div>
+
           {pods.length === 0 ? (
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-16 text-center shadow-2xl">
               <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center mb-8 mx-auto">
@@ -137,6 +150,12 @@ const TeacherPodsPage: React.FC = () => {
               })}
             </div>
           )}
+          
+          <CreatePodModal 
+            open={showCreateModal}
+            onOpenChange={setShowCreateModal}
+            onPodCreated={fetchPods}
+          />
         </div>
       )}
     </DashboardLayout>

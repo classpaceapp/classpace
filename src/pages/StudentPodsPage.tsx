@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Boxes } from 'lucide-react';
+import { BookOpen, Boxes, Search, KeyRound } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Pod {
   id: string;
@@ -21,10 +25,12 @@ interface Pod {
 }
 
 const StudentPodsPage: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
+  const [joinCode, setJoinCode] = useState('');
   const isMounted = useRef(true);
   const requestIdRef = useRef(0);
 
@@ -89,6 +95,20 @@ const StudentPodsPage: React.FC = () => {
     }
   };
 
+  const joinByCode = async () => {
+    try {
+      const code = joinCode.trim().toUpperCase();
+      if (!code) return;
+      const { data, error } = await supabase.rpc('join_pod_with_code', { code });
+      if (error) throw error;
+      toast({ title: 'Joined pod', description: 'You have been added to the pod.' });
+      setJoinCode('');
+      await fetchPods();
+    } catch (err: any) {
+      toast({ title: 'Join failed', description: err.message === 'INVALID_CODE' ? 'Invalid code' : err.message, variant: 'destructive' });
+    }
+  };
+
   useEffect(() => {
     fetchPods();
     return () => {
@@ -144,6 +164,51 @@ const StudentPodsPage: React.FC = () => {
               ))}
             </div>
           )}
+
+          {/* Discovery and Join Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Discover Public Classes</CardTitle>
+                  <Search className="h-6 w-6" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <p className="text-gray-600 mb-4">
+                  Search for public classes and join them instantly
+                </p>
+                <Button 
+                  onClick={() => navigate('/discover-pods')} 
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
+                  size="lg"
+                >
+                  <Search className="w-5 h-5 mr-2" />
+                  Browse Public Classes
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-bold">Join with a Code</CardTitle>
+                  <KeyRound className="h-6 w-6" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <Input 
+                  value={joinCode} 
+                  onChange={(e) => setJoinCode(e.target.value)} 
+                  placeholder="Enter pod code (e.g., ABC123)" 
+                  className="h-12"
+                />
+                <Button onClick={joinByCode} className="w-full h-12" size="lg">
+                  Join Class
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
     </DashboardLayout>
