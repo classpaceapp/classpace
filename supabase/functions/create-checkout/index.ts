@@ -53,14 +53,45 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Direct price IDs for subscriptions (verified in Stripe dashboard)
-    const TEACHER_PREMIUM_PRICE_ID = 'price_1SNXCkBm9rSu4II6UpqZQo8F'; // Teach+ $7/month
-    const STUDENT_PREMIUM_PRICE_ID = 'price_1SNXB4Bm9rSu4II6PkbvuBQa'; // Learn+ $7/month
+    // Product IDs from Stripe (verified)
+    const TEACHER_PRODUCT_ID = 'prod_TJeHNIEXymOooF'; // Classpace Teach+
+    const STUDENT_PRODUCT_ID = 'prod_TK2C5qgNV85Jlc'; // Classpace Learn+
     
-    const finalPriceId = isStudent ? STUDENT_PREMIUM_PRICE_ID : TEACHER_PREMIUM_PRICE_ID;
+    const targetProductId = isStudent ? STUDENT_PRODUCT_ID : TEACHER_PRODUCT_ID;
     const planName = isStudent ? "Classpace Learn+" : "Classpace Teach+";
 
-    logStep("Using direct price ID for checkout", { isStudent, finalPriceId, planName });
+    logStep("Fetching default price for product", { isStudent, targetProductId, planName });
+
+    // Get the product to retrieve its default price
+    let finalPriceId: string;
+    try {
+      const product = await stripe.products.retrieve(targetProductId);
+      if (!product.default_price) {
+        throw new Error(`No default price set for product ${targetProductId}`);
+      }
+      finalPriceId = typeof product.default_price === 'string' 
+        ? product.default_price 
+        : product.default_price.id;
+      logStep("Retrieved default price from product", { finalPriceId });
+    } catch (priceError) {
+      logStep("ERROR retrieving default price, attempting fallback", { error: priceError });
+      
+      // Fallback: List all prices for this product and use the first active one
+      const prices = await stripe.prices.list({ 
+        product: targetProductId, 
+        active: true,
+        limit: 1 
+      });
+      
+      if (prices.data.length === 0) {
+        throw new Error(`No active prices found for product ${targetProductId}`);
+      }
+      
+      finalPriceId = prices.data[0].id;
+      logStep("Using fallback price from price list", { finalPriceId });
+    }
+
+    logStep("Final price ID selected for checkout", { finalPriceId });
 
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId: string | undefined;

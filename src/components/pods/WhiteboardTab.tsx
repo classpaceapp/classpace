@@ -137,8 +137,7 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
   };
 
   const openWhiteboard = (whiteboardId: string) => {
-    const roomId = `classpace-${whiteboardId}`;
-    window.open(`https://www.tldraw.com/r/${roomId}`, '_blank');
+    window.open(`/whiteboard/${whiteboardId}`, '_blank');
   };
 
   useEffect(() => {

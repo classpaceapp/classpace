@@ -17,6 +17,7 @@ import PodView from "./pages/PodView";
 import StudentPodView from "./pages/StudentPodView";
 import SessionView from "./pages/SessionView";
 import WhiteboardView from "./pages/WhiteboardView";
+import TldrawWhiteboard from "./pages/TldrawWhiteboard";
 import PublicPodsDiscovery from "./pages/PublicPodsDiscovery";
 import TeacherPodsPage from "./pages/TeacherPodsPage";
 import StudentPodsPage from "./pages/StudentPodsPage";
@@ -139,7 +140,7 @@ const App = () => (
               path="/whiteboard/:id" 
               element={
                 <ProtectedRoute>
-                  <WhiteboardView />
+                  <TldrawWhiteboard />
                 </ProtectedRoute>
               } 
             />
