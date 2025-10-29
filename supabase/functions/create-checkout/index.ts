@@ -51,10 +51,9 @@ serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { isStudent } = body;
 
-    // Newly created price IDs for Stripe products
-// Resolve price via product's default price to avoid mismatches between environments/accounts
-const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TJeHNIEXymOooF';
-const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TK2C5qgNV85Jlc';
+    // Newly created Stripe products
+const TEACHER_PREMIUM_PRODUCT_ID = 'prod_TKAYgtgNv6CA1B'; // Teach+ ($7/month)
+const STUDENT_PREMIUM_PRODUCT_ID = 'prod_TKAaovd6FnPPyq'; // Learn+ ($7/month)
 
 const targetProductId = isStudent ? STUDENT_PREMIUM_PRODUCT_ID : TEACHER_PREMIUM_PRODUCT_ID;
 
