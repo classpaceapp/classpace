@@ -34,6 +34,8 @@ interface AuthContextType {
   checkingSubscription: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, role: 'teacher' | 'learner', firstName?: string, lastName?: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
+  completeGoogleSignUp: (role: 'teacher' | 'learner') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -318,6 +320,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      setLoading(true);
+      
+      const redirectUrl = `${window.location.origin}/login`;
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUrl,
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Google Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Google Sign In Failed",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const completeGoogleSignUp = async (role: 'teacher' | 'learner') => {
+    if (!user?.id) {
+      return { error: new Error('No user found') };
+    }
+
+    try {
+      // Update the profile with the selected role
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role })
+        .eq('id', user.id);
+
+      if (error) {
+        toast({
+          title: "Failed to set role",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      // Refresh profile to get the updated role
+      await fetchProfile(user.id);
+
+      toast({
+        title: "Welcome to Classpace!",
+        description: `Your ${role} account is ready.`,
+      });
+
+      return { error: null };
+    } catch (error: any) {
+      toast({
+        title: "Failed to set role",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     try {
       setLoading(true);
@@ -378,6 +455,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkingSubscription,
     signIn,
     signUp,
+    signInWithGoogle,
+    completeGoogleSignUp,
     signOut,
     refreshSubscription,
     refreshProfile,

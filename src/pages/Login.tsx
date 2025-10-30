@@ -1,18 +1,18 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BookOpen, Users, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, signUp, user, profile, loading } = useAuth();
+  const { signIn, signUp, signInWithGoogle, completeGoogleSignUp, user, profile, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -20,12 +20,20 @@ const Login = () => {
   const [role, setRole] = useState<"teacher" | "learner">("teacher");
   const [isSignUp, setIsSignUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"teacher" | "learner">("teacher");
 
-  // Redirect if already authenticated
+  // Handle authentication state and role selection for Google OAuth
   useEffect(() => {
-    if (user && profile && !loading) {
-      const dashboardPath = profile.role === 'learner' ? '/student-dashboard' : '/dashboard';
-      navigate(dashboardPath);
+    if (user && !loading) {
+      if (profile) {
+        // User has a profile, redirect to dashboard
+        const dashboardPath = profile.role === 'learner' ? '/student-dashboard' : '/dashboard';
+        navigate(dashboardPath);
+      } else {
+        // User authenticated but no profile (new Google user), show role selection
+        setShowRoleDialog(true);
+      }
     }
   }, [user, profile, loading, navigate]);
 
@@ -54,9 +62,26 @@ const Login = () => {
     }
   };
 
-  const handleGoogleAuth = () => {
-    // TODO: Implement Google OAuth later
-    console.log("Google auth not implemented yet");
+  const handleGoogleAuth = async () => {
+    setIsSubmitting(true);
+    try {
+      await signInWithGoogle();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRoleSelection = async () => {
+    setIsSubmitting(true);
+    try {
+      const { error } = await completeGoogleSignUp(selectedRole);
+      if (!error) {
+        setShowRoleDialog(false);
+        // Navigation will be handled by useEffect when profile loads
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -138,13 +163,13 @@ const Login = () => {
 
           {isSignUp && <Separator className="bg-gray-600" />}
 
-          {/* Google Sign In - Commented out for now */}
-          {/* <Button
+          {/* Google Sign In */}
+          <Button
             type="button"
             variant="outline"
             onClick={handleGoogleAuth}
+            disabled={isSubmitting}
             className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
-            disabled
           >
             <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -152,7 +177,7 @@ const Login = () => {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Continue with Google (Coming Soon)
+            Continue with Google
           </Button>
 
           <div className="relative">
@@ -164,7 +189,7 @@ const Login = () => {
                 Or continue with email
               </span>
             </div>
-          </div> */}
+          </div>
 
           {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -260,6 +285,55 @@ const Login = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Role Selection Dialog for Google OAuth */}
+      <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+        <DialogContent className="bg-gray-800 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white text-2xl">Welcome to Classpace!</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Please select your role to complete your registration
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant={selectedRole === "teacher" ? "default" : "outline"}
+                onClick={() => setSelectedRole("teacher")}
+                className={`flex items-center space-x-2 h-16 transition-all ${
+                  selectedRole === "teacher" 
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
+                    : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
+                }`}
+              >
+                <BookOpen className="w-5 h-5" />
+                <span>Teacher</span>
+              </Button>
+              <Button
+                type="button"
+                variant={selectedRole === "learner" ? "default" : "outline"}
+                onClick={() => setSelectedRole("learner")}
+                className={`flex items-center space-x-2 h-16 transition-all ${
+                  selectedRole === "learner" 
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
+                    : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
+                }`}
+              >
+                <Users className="w-5 h-5" />
+                <span>Learner</span>
+              </Button>
+            </div>
+            <Button 
+              onClick={handleRoleSelection}
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              {isSubmitting ? "Setting up..." : "Continue"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
