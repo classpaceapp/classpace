@@ -65,15 +65,15 @@ const Support = () => {
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">Live Chat</h3>
               <p className="text-gray-300 mb-6">Get instant help from our support team</p>
-              <div className="flex items-center justify-center space-x-2 text-purple-400 mb-6">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium">Coming Soon</span>
+              <div className="flex items-center justify-center space-x-2 text-green-400 mb-6">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-sm font-medium">Live</span>
               </div>
               <Button 
-                disabled
-                className="w-full bg-gray-700 text-gray-400 cursor-not-allowed"
+                onClick={() => (window as any)?.openTawkChat?.()}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
               >
-                Coming Soon
+                Open Live Chat
               </Button>
             </CardContent>
           </Card>
