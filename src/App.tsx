@@ -37,6 +37,7 @@ import SupportPage from "./pages/SupportPage";
 import MyPlan from "./pages/MyPlan";
 import Educators from "./pages/Educators";
 import EducatorProfile from "./pages/EducatorProfile";
+import QuizView from "./pages/QuizView";
 import SubscriptionReturnHandler from "@/components/subscription/SubscriptionReturnHandler";
 
 const queryClient = new QueryClient();
@@ -195,6 +196,14 @@ const App = () => (
                 <EducatorProfile />
               </ProtectedRoute>
             } />
+            <Route 
+              path="/quiz/:quizId" 
+              element={
+                <ProtectedRoute>
+                  <QuizView />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
