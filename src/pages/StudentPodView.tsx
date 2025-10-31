@@ -11,7 +11,7 @@ import { PodChat } from '@/components/pods/PodChat';
 import { PodNotes } from '@/components/pods/PodNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
 import PodMeetings from '@/components/pods/PodMeetings';
-import PodQuizzes from '@/components/pods/PodQuizzes';
+import PodQuizzesWithArchive from '@/components/pods/PodQuizzesWithArchive';
 import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
 import { 
   ArrowLeft, 
@@ -321,7 +321,7 @@ const StudentPodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="quizzes" className="mt-6">
-            <PodQuizzes podId={id!} isTeacher={false} />
+            <PodQuizzesWithArchive podId={id!} isTeacher={false} />
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">

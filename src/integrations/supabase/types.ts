@@ -105,6 +105,38 @@ export type Database = {
           },
         ]
       }
+      live_meetings: {
+        Row: {
+          ended_at: string | null
+          id: string
+          pod_id: string
+          started_at: string
+          started_by: string
+        }
+        Insert: {
+          ended_at?: string | null
+          id?: string
+          pod_id: string
+          started_at?: string
+          started_by: string
+        }
+        Update: {
+          ended_at?: string | null
+          id?: string
+          pod_id?: string
+          started_at?: string
+          started_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_meetings_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       material_submissions: {
         Row: {
           file_name: string
@@ -397,6 +429,7 @@ export type Database = {
       }
       pod_quizzes: {
         Row: {
+          archived: boolean
           created_at: string
           created_by: string
           curriculum: string | null
@@ -411,6 +444,7 @@ export type Database = {
           year_level: string | null
         }
         Insert: {
+          archived?: boolean
           created_at?: string
           created_by: string
           curriculum?: string | null
@@ -425,6 +459,7 @@ export type Database = {
           year_level?: string | null
         }
         Update: {
+          archived?: boolean
           created_at?: string
           created_by?: string
           curriculum?: string | null

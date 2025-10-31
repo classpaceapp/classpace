@@ -224,18 +224,20 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
           audio: false,
         });
 
-        if (screenVideoRef.current) {
-          screenVideoRef.current.srcObject = screenStream;
-        }
-
-        // Replace video track in all peer connections
         const screenTrack = screenStream.getVideoTracks()[0];
+
+        // Replace video track in all peer connections with screen
         peerConnections.forEach((pc) => {
           const sender = pc.getSenders().find((s) => s.track?.kind === 'video');
           if (sender) {
             sender.replaceTrack(screenTrack);
           }
         });
+
+        // Show screen in local preview (replace camera)
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = screenStream;
+        }
 
         screenTrack.onended = () => {
           toggleScreenShare();
@@ -252,10 +254,9 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
       }
     } else {
       // Stop screen sharing and restore camera
-      if (screenVideoRef.current && screenVideoRef.current.srcObject) {
-        const tracks = (screenVideoRef.current.srcObject as MediaStream).getTracks();
+      if (localVideoRef.current && localVideoRef.current.srcObject) {
+        const tracks = (localVideoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach((track) => track.stop());
-        screenVideoRef.current.srcObject = null;
       }
 
       // Restore camera track in all peer connections
@@ -267,6 +268,11 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
             sender.replaceTrack(videoTrack);
           }
         });
+
+        // Restore camera in local preview
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = localStream;
+        }
       }
 
       setScreenSharing(false);
@@ -293,7 +299,7 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex flex-col">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-slate-900/80 backdrop-blur-xl border-b border-white/10 p-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">

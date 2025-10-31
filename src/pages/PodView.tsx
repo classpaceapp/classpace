@@ -15,7 +15,7 @@ import { PodChat } from '@/components/pods/PodChat';
 import { PodNotes } from '@/components/pods/PodNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
 import PodMeetings from '@/components/pods/PodMeetings';
-import PodQuizzes from '@/components/pods/PodQuizzes';
+import PodQuizzesWithArchive from '@/components/pods/PodQuizzesWithArchive';
 import { DeletePodDialog } from '@/components/pods/DeletePodDialog';
 import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
 import { EditPodDialog } from '@/components/pods/EditPodDialog';
@@ -346,7 +346,7 @@ const PodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="quizzes" className="mt-6">
-            <PodQuizzes podId={id!} isTeacher={true} />
+            <PodQuizzesWithArchive podId={id!} isTeacher={true} />
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">
