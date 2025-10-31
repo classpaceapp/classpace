@@ -181,6 +181,44 @@ export type Database = {
           },
         ]
       }
+      meetings: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_pinned: boolean
+          meeting_link: string
+          pod_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_pinned?: boolean
+          meeting_link: string
+          pod_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_pinned?: boolean
+          meeting_link?: string
+          pod_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meetings_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       phoenix_sessions: {
         Row: {
           created_at: string | null
@@ -350,6 +388,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "pod_notes_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pod_quizzes: {
+        Row: {
+          created_at: string
+          created_by: string
+          curriculum: string | null
+          id: string
+          pod_id: string
+          questions: Json
+          quiz_type: string
+          subject: string | null
+          subtopic: string | null
+          title: string
+          topic: string | null
+          year_level: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          curriculum?: string | null
+          id?: string
+          pod_id: string
+          questions?: Json
+          quiz_type: string
+          subject?: string | null
+          subtopic?: string | null
+          title: string
+          topic?: string | null
+          year_level?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          curriculum?: string | null
+          id?: string
+          pod_id?: string
+          questions?: Json
+          quiz_type?: string
+          subject?: string | null
+          subtopic?: string | null
+          title?: string
+          topic?: string | null
+          year_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pod_quizzes_pod_id_fkey"
             columns: ["pod_id"]
             isOneToOne: false
             referencedRelation: "pods"
@@ -539,6 +630,41 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_responses: {
+        Row: {
+          answers: Json
+          id: string
+          quiz_id: string
+          score: number | null
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          id?: string
+          quiz_id: string
+          score?: number | null
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          id?: string
+          quiz_id?: string
+          score?: number | null
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_responses_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "pod_quizzes"
             referencedColumns: ["id"]
           },
         ]
@@ -777,6 +903,10 @@ export type Database = {
     }
     Functions: {
       check_pod_limit: { Args: { _user_id: string }; Returns: boolean }
+      check_quiz_limit: {
+        Args: { pod_id: string; teacher_id: string }
+        Returns: boolean
+      }
       has_pod_access: {
         Args: { _pod_id: string; _user_id: string }
         Returns: boolean

@@ -1,0 +1,159 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { curriculum, yearLevel, subject, topic, subtopic, quizType, podId } = await req.json();
+    
+    const authHeader = req.headers.get('Authorization')!;
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Check quiz limit for free tier
+    const { data: limitCheck, error: limitError } = await supabaseClient
+      .rpc('check_quiz_limit', { teacher_id: user.id, pod_id: podId });
+
+    if (limitError || !limitCheck) {
+      return new Response(JSON.stringify({ 
+        error: 'quiz_limit_reached',
+        message: 'You have reached the quiz creation limit. Upgrade to Teach+ for unlimited quizzes.' 
+      }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Construct web search query
+    const searchParts = [curriculum, yearLevel, subject, topic, subtopic, 'past papers', 'examination questions']
+      .filter(Boolean);
+    const searchQuery = searchParts.join(' ');
+
+    console.log('Searching for:', searchQuery);
+
+    // Perform web search using Lovable's web search capability
+    const searchResponse = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('TAVILY_API_KEY')}`,
+      },
+      body: JSON.stringify({
+        query: searchQuery,
+        search_depth: 'advanced',
+        max_results: 10,
+      }),
+    });
+
+    const searchResults = await searchResponse.json();
+    console.log('Search results obtained:', searchResults.results?.length || 0);
+
+    // Use Lovable AI to generate quiz from search results
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+
+    const contextText = searchResults.results?.map((r: any) => 
+      `Source: ${r.url}\n${r.content}`
+    ).join('\n\n') || 'No search results found';
+
+    const systemPrompt = `You are an expert educator creating ${quizType === 'mcq' ? 'multiple choice' : 'essay-type'} quiz questions.
+    
+Based on the provided curriculum information and web search results, create a comprehensive quiz with 10 high-quality questions.
+The questions should be tailored to the specific curriculum, year level, subject, and topic provided.
+
+Curriculum: ${curriculum || 'Not specified'}
+Year Level: ${yearLevel || 'Not specified'}
+Subject: ${subject || 'Not specified'}
+Topic: ${topic || 'Not specified'}
+Subtopic: ${subtopic || 'Not specified'}
+
+${quizType === 'mcq' ? `
+For MCQ questions, provide:
+- Clear, concise question text
+- Four options (A, B, C, D)
+- Correct answer
+- Brief explanation
+
+Return JSON format:
+{
+  "questions": [
+    {
+      "question": "Question text",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": 0,
+      "explanation": "Why this is correct"
+    }
+  ]
+}
+` : `
+For essay questions, provide:
+- Thought-provoking question
+- Expected key points for a good answer
+- Suggested word count
+
+Return JSON format:
+{
+  "questions": [
+    {
+      "question": "Essay question text",
+      "keyPoints": ["Point 1", "Point 2", "Point 3"],
+      "suggestedWordCount": 300
+    }
+  ]
+}
+`}
+
+Use the web search results below to inform your questions and ensure they align with the actual curriculum standards and examination patterns.`;
+
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Web search context:\n\n${contextText}\n\nPlease generate the quiz questions in JSON format.` }
+        ],
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error('AI API error:', aiResponse.status, errorText);
+      throw new Error(`AI generation failed: ${errorText}`);
+    }
+
+    const aiData = await aiResponse.json();
+    const generatedQuiz = JSON.parse(aiData.choices[0].message.content);
+
+    console.log('Quiz generated successfully with', generatedQuiz.questions.length, 'questions');
+
+    return new Response(JSON.stringify(generatedQuiz), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('Error generating quiz:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});

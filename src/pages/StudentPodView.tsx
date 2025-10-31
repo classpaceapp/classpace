@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { PodChat } from '@/components/pods/PodChat';
 import { PodNotes } from '@/components/pods/PodNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
+import { PodMeetings } from '@/components/pods/PodMeetings';
+import { PodQuizzes } from '@/components/pods/PodQuizzes';
 import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
 import { 
   ArrowLeft, 
@@ -17,7 +19,9 @@ import {
   MessageSquare, 
   FileText, 
   Upload, 
-  Palette
+  Palette,
+  Video,
+  BookOpen
 } from 'lucide-react';
 
 interface Pod {
@@ -171,70 +175,88 @@ const StudentPodView: React.FC = () => {
     <DashboardLayout userRole="learner">
       <div className="container mx-auto px-4 py-8 mt-6">
         <div className="space-y-6 pl-8">
-        {/* Header */}
-        <div className="flex items-center gap-4">
+        {/* Header - Enhanced Styling */}
+        <div className="flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border-2 border-indigo-500/20 shadow-lg hover:shadow-xl transition-all duration-300">
           <Button 
             variant="outline" 
             size="icon"
             onClick={() => navigate('/student-dashboard')}
-            className="shrink-0"
+            className="shrink-0 border-2 border-indigo-500/50 hover:bg-indigo-500 hover:text-white hover:scale-110 transition-all duration-300 shadow-md"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{pod.title}</h1>
-            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+            <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
+              {pod.title}
+            </h1>
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground font-medium">
               {pod.profiles && (
                 <>
                   <span>Teacher: {pod.profiles.first_name} {pod.profiles.last_name}</span>
                   <span>•</span>
                 </>
               )}
-              <span>{pod.subject}</span>
+              <span className="px-3 py-1 bg-indigo-500 text-white text-sm font-semibold rounded-full shadow-sm">
+                {pod.subject}
+              </span>
             </div>
             {pod.description && (
-              <p className="text-muted-foreground mt-2">{pod.description}</p>
+              <p className="text-muted-foreground mt-2 text-lg font-medium">{pod.description}</p>
             )}
           </div>
         </div>
 
-        {/* Pod Navigation Tabs */}
+        {/* Pod Navigation Tabs - Enhanced Styling */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit lg:grid-cols-5 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 p-1.5 rounded-xl shadow-sm border border-primary/20">
+          <TabsList className="grid w-full grid-cols-7 lg:w-fit lg:grid-cols-7 h-auto p-2 gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl border-2 border-white/10">
             <TabsTrigger 
               value="overview" 
-              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-blue-300"
             >
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Overview</span>
+              <Users className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Overview</span>
             </TabsTrigger>
             <TabsTrigger 
               value="chat" 
-              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-green-300"
             >
-              <MessageSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Chat</span>
+              <MessageSquare className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Chat</span>
             </TabsTrigger>
             <TabsTrigger 
               value="notes" 
-              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-amber-300"
             >
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Notes</span>
+              <FileText className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Notes</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="meetings" 
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-teal-300"
+            >
+              <Video className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Meetings</span>
             </TabsTrigger>
             <TabsTrigger 
               value="materials" 
-              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-purple-300"
             >
-              <Upload className="h-4 w-4" />
-              <span className="hidden sm:inline">Materials</span>
+              <Upload className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Materials</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="quizzes" 
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-indigo-300"
+            >
+              <BookOpen className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Quizzes</span>
             </TabsTrigger>
             <TabsTrigger 
               value="whiteboard" 
-              className="gap-2 data-[state=active]:font-bold data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=active]:border-0 transition-all duration-200"
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-pink-300"
             >
-              <Palette className="h-4 w-4" />
-              <span className="hidden sm:inline">Whiteboard</span>
+              <Palette className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Whiteboard</span>
             </TabsTrigger>
           </TabsList>
 
@@ -290,8 +312,16 @@ const StudentPodView: React.FC = () => {
             <PodNotes podId={id!} isTeacher={false} />
           </TabsContent>
 
+          <TabsContent value="meetings" className="mt-6">
+            <PodMeetings podId={id!} />
+          </TabsContent>
+
           <TabsContent value="materials" className="mt-6">
             <PodMaterials podId={id!} isTeacher={false} />
+          </TabsContent>
+
+          <TabsContent value="quizzes" className="mt-6">
+            <PodQuizzes podId={id!} isTeacher={false} />
           </TabsContent>
 
           <TabsContent value="whiteboard" className="mt-6">
