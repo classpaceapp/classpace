@@ -14,8 +14,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { PodChat } from '@/components/pods/PodChat';
 import { PodNotes } from '@/components/pods/PodNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
-import { PodMeetings } from '@/components/pods/PodMeetings';
-import { PodQuizzes } from '@/components/pods/PodQuizzes';
+import PodMeetings from '@/components/pods/PodMeetings';
+import PodQuizzes from '@/components/pods/PodQuizzes';
 import { DeletePodDialog } from '@/components/pods/DeletePodDialog';
 import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
 import { EditPodDialog } from '@/components/pods/EditPodDialog';

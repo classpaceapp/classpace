@@ -260,14 +260,26 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={generateQuiz} 
-                  disabled={generating}
-                  className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {generating ? 'Generating with AI...' : 'Generate Quiz'}
-                </Button>
+              <Button 
+                onClick={generateQuiz} 
+                disabled={generating}
+                className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 relative overflow-hidden"
+              >
+                {generating ? (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-500 to-indigo-400 animate-pulse" />
+                    <div className="relative flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 animate-spin" />
+                      <span className="animate-pulse">Generating with AI...</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Generate Quiz
+                  </>
+                )}
+              </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -336,7 +348,7 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
             <Card 
               key={quiz.id} 
               className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50/30 to-purple-50/30 dark:from-indigo-950/10 dark:to-purple-950/10 hover:shadow-lg transition-all duration-300 cursor-pointer"
-              onClick={() => navigate(`/quiz/${quiz.id}`)}
+              onClick={() => window.open(`/quiz/${quiz.id}`, '_blank')}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -378,3 +390,5 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
     </div>
   );
 };
+
+export default PodQuizzes;

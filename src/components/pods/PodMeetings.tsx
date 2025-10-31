@@ -6,8 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Video, Plus, Pin, Trash2, ExternalLink, X } from 'lucide-react';
+import { Video, Plus, Pin, Trash2, ExternalLink, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import LiveMeeting from './LiveMeeting';
 
 interface Meeting {
   id: string;
@@ -31,6 +32,8 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
   const [creating, setCreating] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newMeeting, setNewMeeting] = useState({ title: '', meeting_link: '' });
+  const [liveMeeting, setLiveMeeting] = useState(false);
+  const [activeMeeting, setActiveMeeting] = useState<any>(null);
 
   const fetchMeetings = async () => {
     try {
@@ -135,7 +138,30 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
 
   useEffect(() => {
     fetchMeetings();
+    checkActiveMeeting();
   }, [podId]);
+
+  const checkActiveMeeting = async () => {
+    const channel = supabase.channel(`meeting:${podId}`);
+    
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const hasActiveParticipants = Object.keys(state).length > 0;
+      setActiveMeeting(hasActiveParticipants ? { podId } : null);
+    }).subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const startLiveMeeting = () => {
+    setLiveMeeting(true);
+  };
+
+  if (liveMeeting) {
+    return <LiveMeeting podId={podId} onClose={() => setLiveMeeting(false)} />;
+  }
 
   if (loading) {
     return <div className="animate-pulse space-y-4">
@@ -146,12 +172,63 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
 
   return (
     <div className="space-y-6">
+      {/* Live Meeting Section */}
+      <Card className="border-3 border-purple-500/40 bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-purple-50/50 dark:from-purple-950/30 dark:via-pink-950/20 dark:to-purple-950/30 shadow-xl shadow-purple-500/10">
+        <CardHeader>
+          <CardTitle className="text-2xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-3">
+            <Users className="h-6 w-6 text-purple-500" />
+            Live Meeting Room
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {activeMeeting ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-2 border-green-500/30">
+                <div className="relative">
+                  <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse" />
+                  <div className="absolute inset-0 h-3 w-3 bg-green-500 rounded-full animate-ping" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">Meeting in Progress</p>
+                  <p className="text-sm text-muted-foreground">Other participants are in the meeting</p>
+                </div>
+                <Button
+                  onClick={startLiveMeeting}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                >
+                  <Video className="h-4 w-4 mr-2" />
+                  Join Meeting
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6 space-y-4">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                <Video className="h-8 w-8 text-purple-500" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground mb-2">No active meeting</p>
+                <p className="text-sm text-muted-foreground mb-4">Start a live video call with your pod members</p>
+                <Button
+                  onClick={startLiveMeeting}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/30"
+                >
+                  <Video className="h-5 w-5 mr-2" />
+                  Start Live Meeting
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
             Meeting Links
           </h2>
-          <p className="text-muted-foreground">Create and manage Google Meet links for online lessons</p>
+          <p className="text-muted-foreground">Save and pin recurring meeting links</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -292,3 +369,5 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
     </div>
   );
 };
+
+export default PodMeetings;

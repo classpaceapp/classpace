@@ -12,7 +12,7 @@ import { ArrowLeft, Send, RotateCcw, CheckCircle2 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default function QuizView() {
-  const { id } = useParams();
+  const { quizId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -23,21 +23,21 @@ export default function QuizView() {
 
   useEffect(() => {
     const fetchQuiz = async () => {
-      const { data: quizData } = await supabase.from('pod_quizzes').select('*').eq('id', id).single();
-      const { data: responseData } = await supabase.from('quiz_responses').select('*').eq('quiz_id', id).eq('user_id', user?.id).maybeSingle();
+      const { data: quizData } = await supabase.from('pod_quizzes').select('*').eq('id', quizId).single();
+      const { data: responseData } = await supabase.from('quiz_responses').select('*').eq('quiz_id', quizId).eq('user_id', user?.id).maybeSingle();
       
       setQuiz(quizData);
       setResponse(responseData);
       if (responseData) setAnswers(responseData.answers);
     };
     fetchQuiz();
-  }, [id]);
+  }, [quizId, user?.id]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
       const { error } = await supabase.from('quiz_responses').upsert({
-        quiz_id: id,
+        quiz_id: quizId,
         user_id: user!.id,
         answers,
         score: null,
