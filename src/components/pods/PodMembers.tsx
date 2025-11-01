@@ -42,19 +42,19 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
       // Fetch pod members (students)
       const { data: podMembers, error: membersError } = await supabase
         .from('pod_members')
-        .select(`
-          user_id,
-          profiles!inner (
-            id,
-            first_name,
-            last_name,
-            avatar_url,
-            role
-          )
-        `)
+        .select('user_id')
         .eq('pod_id', podId);
 
       if (membersError) throw membersError;
+
+      // Fetch profiles for all members
+      const memberIds = podMembers?.map(m => m.user_id) || [];
+      const { data: memberProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url, role')
+        .in('id', memberIds);
+
+      if (profilesError) throw profilesError;
 
       // Combine teacher and students
       const teacher: Member = {
@@ -67,13 +67,13 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
         is_teacher: true,
       };
 
-      const students: Member[] = (podMembers || []).map((m: any) => ({
-        id: m.profiles.id,
-        user_id: m.user_id,
-        first_name: m.profiles.first_name,
-        last_name: m.profiles.last_name,
-        avatar_url: m.profiles.avatar_url,
-        role: m.profiles.role as 'teacher' | 'learner',
+      const students: Member[] = (memberProfiles || []).map((profile) => ({
+        id: profile.id,
+        user_id: profile.id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        avatar_url: profile.avatar_url,
+        role: profile.role as 'teacher' | 'learner',
         is_teacher: false,
       }));
 
