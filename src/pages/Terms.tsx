@@ -67,28 +67,29 @@ const Terms = () => {
           </div>
         </div>
 
-        <div className="relative bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-3xl shadow-2xl p-8 md:p-16 border-2 border-purple-200/50 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.08),transparent_70%)]"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(236,72,153,0.08),transparent_70%)]"></div>
+        <div className="relative bg-gradient-to-br from-purple-900/90 via-pink-900/80 to-purple-900/90 rounded-3xl shadow-2xl p-8 md:p-16 border-2 border-purple-400/50 overflow-hidden transform perspective-1000 hover:scale-[1.02] transition-transform duration-300" style={{ boxShadow: '0 25px 50px -12px rgba(168, 85, 247, 0.5), 0 0 0 1px rgba(168, 85, 247, 0.3)' }}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.3),transparent_70%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(236,72,153,0.3),transparent_70%)]"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
           <div className="relative prose prose-lg max-w-none">
-            <p className="text-gray-500 mb-8 md:mb-12 text-base md:text-lg text-center">
-              Last updated: January 1, 2025
+            <p className="text-purple-200 mb-8 md:mb-12 text-base md:text-lg text-center font-semibold">
+              Last updated: November 1, 2025
             </p>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">1. Acceptance of Terms</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">1. Acceptance of Terms</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 By accessing and using Classpace, you accept and agree to be bound by the terms and provision of this agreement. 
                 If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">2. Use License</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">2. Use License</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 Permission is granted to use Classpace for educational purposes. This is the grant of a license, not a transfer of title, and under this license you may not:
               </p>
-              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-3 text-lg md:text-xl ml-4">
+              <ul className="list-disc list-inside text-purple-100 mb-4 space-y-3 text-lg md:text-xl ml-4">
                 <li>Modify or reverse engineer any part of the platform</li>
                 <li>Use the service for any illegal or unauthorized purpose</li>
                 <li>Attempt to gain unauthorized access to other users' accounts</li>
@@ -97,50 +98,50 @@ const Terms = () => {
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">3. User Accounts</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">3. User Accounts</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 When you create an account with us, you must provide information that is accurate, complete, and current at all times. 
                 You are responsible for safeguarding your password and maintaining the security of your account.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">4. Content and Conduct</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">4. Content and Conduct</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 You retain ownership of all educational content you create and share through Classpace. 
                 You are responsible for ensuring your content complies with applicable laws and our community guidelines.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">5. AI-Generated Content</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">5. AI-Generated Content</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 Classpace uses artificial intelligence to generate summaries, quizzes, and other educational content. 
                 While we strive for accuracy, all AI-generated content should be reviewed and verified before use in educational settings.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">6. Privacy and Data Protection</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">6. Privacy and Data Protection</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 Your privacy is fundamental to our service. Please review our Privacy Policy to understand how we collect, 
                 use, and protect your personal information and educational data.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">7. Service Availability</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">7. Service Availability</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 We strive to maintain 99.9% uptime, but like all online services, Classpace may occasionally be unavailable 
                 due to maintenance, updates, or unforeseen technical issues. We'll always notify users in advance when possible.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">8. Contact Information</h2>
-              <p className="text-gray-700 leading-relaxed text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">8. Contact Information</h2>
+              <p className="text-purple-100 leading-relaxed text-lg md:text-xl">
                 If you have any questions about these Terms & Conditions, please contact us at: 
-                <a href="mailto:social@classpace.co" className="text-purple-600 hover:text-purple-800 ml-2 font-semibold">
+                <a href="mailto:social@classpace.co" className="text-pink-300 hover:text-pink-200 ml-2 font-semibold underline">
                   social@classpace.co
                 </a>
               </p>
@@ -267,6 +268,14 @@ const Terms = () => {
                     className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Privacy Policy
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => navigate("/investors")}
+                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Investors
                   </button>
                 </li>
               </ul>

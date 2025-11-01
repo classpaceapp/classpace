@@ -418,6 +418,14 @@ const Pricing = () => {
                     Privacy Policy
                   </button>
                 </li>
+                <li>
+                  <button 
+                    onClick={() => navigate("/investors")}
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Investors
+                  </button>
+                </li>
               </ul>
             </div>
           </div>

@@ -69,21 +69,22 @@ const Privacy = () => {
           </div>
         </div>
 
-        <div className="relative bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-3xl shadow-2xl p-8 md:p-16 border-2 border-purple-200/50 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.08),transparent_70%)]"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(236,72,153,0.08),transparent_70%)]"></div>
+        <div className="relative bg-gradient-to-br from-purple-900/90 via-pink-900/80 to-purple-900/90 rounded-3xl shadow-2xl p-8 md:p-16 border-2 border-purple-400/50 overflow-hidden transform perspective-1000 hover:scale-[1.02] transition-transform duration-300" style={{ boxShadow: '0 25px 50px -12px rgba(168, 85, 247, 0.5), 0 0 0 1px rgba(168, 85, 247, 0.3)' }}>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.3),transparent_70%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(236,72,153,0.3),transparent_70%)]"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
           <div className="relative prose prose-lg max-w-none">
-            <p className="text-gray-500 mb-8 md:mb-12 text-base md:text-lg text-center">
-              Last updated: January 1, 2025
+            <p className="text-purple-200 mb-8 md:mb-12 text-base md:text-lg text-center font-semibold">
+              Last updated: November 1, 2025
             </p>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Information We Collect</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">Information We Collect</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 We collect information you provide directly to us, such as when you create an account, 
                 participate in AI Pods, or contact us for support.
               </p>
-              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-3 text-lg md:text-xl ml-4">
+              <ul className="list-disc list-inside text-purple-100 mb-4 space-y-3 text-lg md:text-xl ml-4">
                 <li>Account information (name, email, role as teacher or learner)</li>
                 <li>Educational content shared in AI Pods</li>
                 <li>Usage data to improve our AI recommendations</li>
@@ -92,11 +93,11 @@ const Privacy = () => {
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">How We Use Your Information</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">How We Use Your Information</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 We use the information we collect to provide, maintain, and improve Classpace:
               </p>
-              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-3 text-lg md:text-xl ml-4">
+              <ul className="list-disc list-inside text-purple-100 mb-4 space-y-3 text-lg md:text-xl ml-4">
                 <li>Generate AI-powered summaries, quizzes, and educational content</li>
                 <li>Facilitate communication between teachers and learners</li>
                 <li>Track learning progress and provide personalized recommendations</li>
@@ -106,11 +107,11 @@ const Privacy = () => {
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Data Sharing and Disclosure</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">Data Sharing and Disclosure</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 We do not sell, rent, or share your personal information with third parties except in these specific circumstances:
               </p>
-              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-3 text-lg md:text-xl ml-4">
+              <ul className="list-disc list-inside text-purple-100 mb-4 space-y-3 text-lg md:text-xl ml-4">
                 <li>With your explicit consent</li>
                 <li>With AI service providers (OpenAI) to generate educational content</li>
                 <li>To comply with legal obligations or protect our rights</li>
@@ -119,11 +120,11 @@ const Privacy = () => {
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">AI and Machine Learning</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">AI and Machine Learning</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 Classpace uses AI to enhance the learning experience. Here's what you should know:
               </p>
-              <ul className="list-disc list-inside text-gray-700 mb-4 space-y-3 text-lg md:text-xl ml-4">
+              <ul className="list-disc list-inside text-purple-100 mb-4 space-y-3 text-lg md:text-xl ml-4">
                 <li>AI models process your educational content to generate summaries and quizzes</li>
                 <li>We use anonymized usage patterns to improve AI recommendations</li>
                 <li>Your personal conversations remain private and are not used to train general AI models</li>
@@ -132,26 +133,26 @@ const Privacy = () => {
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Data Security</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">Data Security</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 We implement industry-standard security measures to protect your information, including 
                 encryption in transit and at rest, regular security audits, and strict access controls.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Your Rights</h2>
-              <p className="text-gray-700 leading-relaxed mb-4 text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">Your Rights</h2>
+              <p className="text-purple-100 leading-relaxed mb-4 text-lg md:text-xl">
                 You have the right to access, update, or delete your personal information. 
                 You can also export your data or request account deletion at any time through your account settings.
               </p>
             </section>
 
             <section className="mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Contact Us</h2>
-              <p className="text-gray-700 leading-relaxed text-lg md:text-xl">
+              <h2 className="text-2xl md:text-4xl font-bold text-white mb-6 md:mb-8 drop-shadow-lg">Contact Us</h2>
+              <p className="text-purple-100 leading-relaxed text-lg md:text-xl">
                 If you have questions about this Privacy Policy, please contact us at: 
-                <a href="mailto:social@classpace.co" className="text-purple-600 hover:text-purple-800 ml-2 font-semibold">
+                <a href="mailto:social@classpace.co" className="text-pink-300 hover:text-pink-200 ml-2 font-semibold underline">
                   social@classpace.co
                 </a>
               </p>
@@ -276,6 +277,14 @@ const Privacy = () => {
                     className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Privacy Policy
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => navigate("/investors")}
+                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Investors
                   </button>
                 </li>
               </ul>

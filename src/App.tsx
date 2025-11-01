@@ -41,6 +41,7 @@ import QuizView from "./pages/QuizView";
 import SubscriptionReturnHandler from "@/components/subscription/SubscriptionReturnHandler";
 import Careers from "./pages/Careers";
 import ExcalidrawWhiteboard from "./pages/ExcalidrawWhiteboard";
+import Investors from "./pages/Investors";
 
 const queryClient = new QueryClient();
 
@@ -153,6 +154,7 @@ const App = () => (
             <Route path="/refunds" element={<Refunds />} />
             <Route path="/our-journey" element={<OurJourney />} />
             <Route path="/careers" element={<Careers />} />
+            <Route path="/investors" element={<Investors />} />
             <Route 
               path="/excalidraw/:whiteboardId" 
               element={

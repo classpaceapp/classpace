@@ -388,6 +388,14 @@ const Careers = () => {
                     Privacy Policy
                   </button>
                 </li>
+                <li>
+                  <button 
+                    onClick={() => navigate("/investors")}
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors"
+                  >
+                    Investors
+                  </button>
+                </li>
               </ul>
             </div>
           </div>
