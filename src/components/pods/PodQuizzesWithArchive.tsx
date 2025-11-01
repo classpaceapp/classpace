@@ -106,13 +106,33 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
         },
       });
 
-      if (error) {
-        if (data?.error === 'quiz_limit_reached' || error.message.includes('quiz_limit_reached')) {
-          setDialogOpen(false);
-          setUpgradeDialogOpen(true);
-          return;
-        }
-        throw error;
+      // Check for specific error responses in data
+      if (data?.error === 'quiz_limit_reached') {
+        setDialogOpen(false);
+        setUpgradeDialogOpen(true);
+        return;
+      }
+
+      if (data?.error === 'rate_limited') {
+        toast({
+          title: 'Rate limit exceeded',
+          description: 'Too many requests. Please wait a moment and try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (data?.error === 'payment_required') {
+        toast({
+          title: 'Credits required',
+          description: 'AI credits depleted. Please contact support.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (error || !data?.questions) {
+        throw new Error(data?.message || error?.message || 'Failed to generate quiz');
       }
 
       const { error: insertError } = await supabase

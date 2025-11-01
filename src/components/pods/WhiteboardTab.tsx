@@ -18,6 +18,7 @@ interface Whiteboard {
   created_by: string;
   created_at: string;
   updated_at: string;
+  whiteboard_data?: any;
   profiles?: {
     first_name: string;
     last_name: string;
@@ -68,25 +69,20 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
     setCreating(true);
     try {
-      // Create Miro board via edge function
-      const { data: miroData, error: miroError } = await supabase.functions.invoke('create-miro-board', {
-        body: {
-          title: newWhiteboardTitle.trim(),
-          podId: podId,
-        }
-      });
-
-      if (miroError) throw miroError;
-      if (!miroData?.boardId) throw new Error('Failed to get board ID from Miro');
-
-      // Store the Miro board ID in our database
+      // Generate a unique Excalidraw room ID
+      const roomId = `${podId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      
+      // Store the whiteboard with Excalidraw room ID
       const { data, error } = await supabase
         .from('whiteboards')
         .insert({
           pod_id: podId,
           title: newWhiteboardTitle.trim(),
           created_by: user.id,
-          whiteboard_data: { miro_board_id: miroData.boardId }
+          whiteboard_data: { 
+            type: 'excalidraw',
+            room_id: roomId 
+          }
         })
         .select()
         .single();
@@ -98,8 +94,9 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
         description: 'Opening in a new tab...',
       });
 
-      // Open whiteboard in new tab (internal collaborative page)
-      window.open(`/whiteboard/${data.id}`, '_blank');
+      // Open Excalidraw with room collaboration
+      const excalidrawUrl = `https://excalidraw.com/#room=${roomId},${encodeURIComponent(newWhiteboardTitle.trim())}`;
+      window.open(excalidrawUrl, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
@@ -148,8 +145,15 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
     }
   };
 
-  const openWhiteboard = (whiteboardId: string) => {
-    window.open(`/whiteboard/${whiteboardId}`, '_blank');
+  const openWhiteboard = (whiteboard: Whiteboard) => {
+    const data = whiteboard.whiteboard_data as any;
+    if (data?.type === 'excalidraw' && data?.room_id) {
+      const excalidrawUrl = `https://excalidraw.com/#room=${data.room_id},${encodeURIComponent(whiteboard.title)}`;
+      window.open(excalidrawUrl, '_blank');
+    } else {
+      // Fallback for old whiteboards
+      window.open(`/whiteboard/${whiteboard.id}`, '_blank');
+    }
   };
 
   useEffect(() => {
@@ -285,7 +289,7 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
                   <CardContent className="relative pt-0">
                     <div className="flex gap-2">
                       <Button
-                        onClick={() => openWhiteboard(whiteboard.id)}
+                        onClick={() => openWhiteboard(whiteboard)}
                         className="flex-1 bg-primary/90 hover:bg-primary shadow-md"
                         size="sm"
                       >

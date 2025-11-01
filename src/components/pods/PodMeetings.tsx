@@ -139,20 +139,43 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
   useEffect(() => {
     fetchMeetings();
     checkActiveMeeting();
-  }, [podId]);
 
-  const checkActiveMeeting = async () => {
-    const channel = supabase.channel(`meeting:${podId}`);
-    
-    channel.on('presence', { event: 'sync' }, () => {
-      const state = channel.presenceState();
-      const hasActiveParticipants = Object.keys(state).length > 0;
-      setActiveMeeting(hasActiveParticipants ? { podId } : null);
-    }).subscribe();
+    // Subscribe to live_meetings changes
+    const channel = supabase
+      .channel('live-meetings-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'live_meetings',
+          filter: `pod_id=eq.${podId}`,
+        },
+        () => {
+          checkActiveMeeting();
+        }
+      )
+      .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
+  }, [podId]);
+
+  const checkActiveMeeting = async () => {
+    try {
+      // Check database for active meeting
+      const { data: meeting } = await supabase
+        .from('live_meetings')
+        .select('*')
+        .eq('pod_id', podId)
+        .is('ended_at', null)
+        .single();
+
+      setActiveMeeting(meeting || null);
+    } catch (error) {
+      setActiveMeeting(null);
+    }
   };
 
   const startLiveMeeting = () => {

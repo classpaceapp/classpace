@@ -35,11 +35,68 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
   useEffect(() => {
     initializeMedia();
     setupRealtimeChannel();
+    createLiveMeetingRecord();
 
     return () => {
       cleanup();
+      endLiveMeetingIfLast();
     };
   }, []);
+
+  const createLiveMeetingRecord = async () => {
+    try {
+      // Check if there's already an active meeting
+      const { data: existing } = await supabase
+        .from('live_meetings')
+        .select('*')
+        .eq('pod_id', podId)
+        .is('ended_at', null)
+        .single();
+
+      if (existing) {
+        // Meeting already exists, just join
+        return;
+      }
+
+      // Create new meeting record
+      await supabase.from('live_meetings').insert({
+        pod_id: podId,
+        started_by: user?.id,
+      });
+    } catch (error) {
+      console.error('Error creating meeting record:', error);
+    }
+  };
+
+  const endLiveMeetingIfLast = async () => {
+    // Check if we're the last one in the presence channel
+    const channel = channelRef.current;
+    if (!channel) return;
+
+    const state = channel.presenceState();
+    const participantCount = Object.keys(state).length;
+
+    // If we're the last one (or only one), end the meeting
+    if (participantCount <= 1) {
+      try {
+        const { data: meeting } = await supabase
+          .from('live_meetings')
+          .select('*')
+          .eq('pod_id', podId)
+          .is('ended_at', null)
+          .single();
+
+        if (meeting) {
+          await supabase
+            .from('live_meetings')
+            .update({ ended_at: new Date().toISOString() })
+            .eq('id', meeting.id);
+        }
+      } catch (error) {
+        console.error('Error ending meeting:', error);
+      }
+    }
+  };
 
   const initializeMedia = async () => {
     try {
@@ -220,24 +277,25 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
     if (!screenSharing) {
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: true,
+          video: { displaySurface: 'monitor' },
           audio: false,
         });
 
         const screenTrack = screenStream.getVideoTracks()[0];
 
-        // Replace video track in all peer connections with screen
+        // DON'T replace the local camera feed - keep both streams
+        // Display screen in separate video element
+        if (screenVideoRef.current) {
+          screenVideoRef.current.srcObject = screenStream;
+        }
+
+        // Send screen track to all peers as an additional track
         peerConnections.forEach((pc) => {
           const sender = pc.getSenders().find((s) => s.track?.kind === 'video');
           if (sender) {
             sender.replaceTrack(screenTrack);
           }
         });
-
-        // Show screen in local preview (replace camera)
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = screenStream;
-        }
 
         screenTrack.onended = () => {
           toggleScreenShare();
@@ -253,10 +311,11 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
         });
       }
     } else {
-      // Stop screen sharing and restore camera
-      if (localVideoRef.current && localVideoRef.current.srcObject) {
-        const tracks = (localVideoRef.current.srcObject as MediaStream).getTracks();
+      // Stop screen sharing
+      if (screenVideoRef.current && screenVideoRef.current.srcObject) {
+        const tracks = (screenVideoRef.current.srcObject as MediaStream).getTracks();
         tracks.forEach((track) => track.stop());
+        screenVideoRef.current.srcObject = null;
       }
 
       // Restore camera track in all peer connections
@@ -268,11 +327,6 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
             sender.replaceTrack(videoTrack);
           }
         });
-
-        // Restore camera in local preview
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = localStream;
-        }
       }
 
       setScreenSharing(false);
@@ -322,25 +376,16 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
           <Card className="relative overflow-hidden border-2 border-purple-500/30 bg-slate-900/50 backdrop-blur-xl">
             <CardContent className="p-0">
               <div className="relative aspect-video bg-slate-800">
-                {screenSharing ? (
-                  <video
-                    ref={screenVideoRef}
-                    autoPlay
-                    muted
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <video
-                    ref={localVideoRef}
-                    autoPlay
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover mirror"
-                    style={{ transform: 'scaleX(-1)' }}
-                  />
-                )}
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover mirror"
+                  style={{ transform: 'scaleX(-1)' }}
+                />
                 <div className="absolute bottom-3 left-3 px-3 py-1 bg-gradient-to-r from-purple-500/90 to-pink-500/90 rounded-full">
-                  <span className="text-sm font-medium text-white">You</span>
+                  <span className="text-sm font-medium text-white">You {screenSharing && '(Screen)'}</span>
                 </div>
                 {!videoEnabled && (
                   <div className="absolute inset-0 flex items-center justify-center bg-slate-900/90">
@@ -350,6 +395,28 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Screen Share Video (when active) */}
+          {screenSharing && (
+            <Card className="relative overflow-hidden border-2 border-green-500/50 bg-slate-900/50 backdrop-blur-xl">
+              <CardContent className="p-0">
+                <div className="relative aspect-video bg-slate-800">
+                  <video
+                    ref={screenVideoRef}
+                    autoPlay
+                    muted
+                    className="w-full h-full object-contain bg-black"
+                  />
+                  <div className="absolute bottom-3 left-3 px-3 py-1 bg-gradient-to-r from-green-500/90 to-emerald-500/90 rounded-full">
+                    <span className="text-sm font-medium text-white flex items-center gap-2">
+                      <Monitor className="h-4 w-4" />
+                      Your Screen
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Remote Videos */}
           {participants.map((participant) => (
