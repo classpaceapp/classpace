@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Users, 
   Calendar, 
   BookOpen, 
-  GraduationCap,
-  ArrowRight
+  ArrowRight,
+  Sparkles,
+  Crown
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -40,104 +40,158 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath, isLocked = f
   const lastActivityDate = pod.updated_at;
   const timeAgo = formatDistanceToNow(new Date(lastActivityDate), { addSuffix: true });
 
-  // Generate vibrant gradient colors based on pod subject
-  const gradients = [
-    'from-violet-500 via-purple-500 to-fuchsia-500',
-    'from-cyan-500 via-blue-500 to-indigo-500',
-    'from-emerald-500 via-teal-500 to-cyan-500',
-    'from-rose-500 via-pink-500 to-purple-500',
-    'from-amber-500 via-orange-500 to-red-500',
-    'from-lime-500 via-green-500 to-emerald-500',
-  ];
-  
-  const bgGradients = [
-    'from-violet-50 via-purple-50 to-fuchsia-50',
-    'from-cyan-50 via-blue-50 to-indigo-50',
-    'from-emerald-50 via-teal-50 to-cyan-50',
-    'from-rose-50 via-pink-50 to-purple-50',
-    'from-amber-50 via-orange-50 to-red-50',
-    'from-lime-50 via-green-50 to-emerald-50',
+  // Generate unique color schemes based on pod title
+  const colorSchemes = [
+    {
+      gradient: 'from-violet-600 via-fuchsia-600 to-pink-600',
+      glow: 'shadow-violet-500/50',
+      bg: 'from-violet-500/10 via-fuchsia-500/10 to-pink-500/10',
+      badge: 'from-violet-500 to-fuchsia-600',
+      iconBg: 'from-violet-500 to-fuchsia-600',
+      accent: 'violet',
+    },
+    {
+      gradient: 'from-cyan-600 via-blue-600 to-indigo-600',
+      glow: 'shadow-blue-500/50',
+      bg: 'from-cyan-500/10 via-blue-500/10 to-indigo-500/10',
+      badge: 'from-cyan-500 to-blue-600',
+      iconBg: 'from-cyan-500 to-blue-600',
+      accent: 'blue',
+    },
+    {
+      gradient: 'from-emerald-600 via-teal-600 to-cyan-600',
+      glow: 'shadow-emerald-500/50',
+      bg: 'from-emerald-500/10 via-teal-500/10 to-cyan-500/10',
+      badge: 'from-emerald-500 to-teal-600',
+      iconBg: 'from-emerald-500 to-teal-600',
+      accent: 'emerald',
+    },
+    {
+      gradient: 'from-rose-600 via-pink-600 to-fuchsia-600',
+      glow: 'shadow-rose-500/50',
+      bg: 'from-rose-500/10 via-pink-500/10 to-fuchsia-500/10',
+      badge: 'from-rose-500 to-pink-600',
+      iconBg: 'from-rose-500 to-pink-600',
+      accent: 'rose',
+    },
+    {
+      gradient: 'from-amber-600 via-orange-600 to-red-600',
+      glow: 'shadow-orange-500/50',
+      bg: 'from-amber-500/10 via-orange-500/10 to-red-500/10',
+      badge: 'from-amber-500 to-orange-600',
+      iconBg: 'from-amber-500 to-orange-600',
+      accent: 'orange',
+    },
+    {
+      gradient: 'from-lime-600 via-green-600 to-emerald-600',
+      glow: 'shadow-lime-500/50',
+      bg: 'from-lime-500/10 via-green-500/10 to-emerald-500/10',
+      badge: 'from-lime-500 to-green-600',
+      iconBg: 'from-lime-500 to-green-600',
+      accent: 'lime',
+    },
   ];
 
-  const gradientIndex = Math.abs(pod.title.charCodeAt(0) % gradients.length);
-  const headerGradient = gradients[gradientIndex];
-  const bgGradient = bgGradients[gradientIndex];
+  const schemeIndex = Math.abs(pod.title.charCodeAt(0) % colorSchemes.length);
+  const scheme = colorSchemes[schemeIndex];
 
   return (
-    <Card className={`group hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 border-0 overflow-hidden bg-gradient-to-br ${bgGradient} backdrop-blur-xl ${isLocked ? 'opacity-60 relative' : ''}`}>
+    <Card className={`group relative hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 border-0 overflow-hidden bg-card backdrop-blur-xl ${isLocked ? 'opacity-75' : ''}`}>
+      {/* Animated Background Gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${scheme.bg} opacity-50 group-hover:opacity-70 transition-opacity duration-500`} />
+      
+      {/* Glow Effect on Hover */}
+      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl ${scheme.glow}`} />
+      
+      {/* Top Accent Bar with Animated Shimmer */}
+      <div className="relative h-1.5 overflow-hidden">
+        <div className={`absolute inset-0 bg-gradient-to-r ${scheme.gradient}`} />
+        <div className={`absolute inset-0 bg-gradient-to-r ${scheme.gradient} opacity-0 group-hover:opacity-100 animate-shimmer transition-opacity`} />
+      </div>
+
       {/* Locked Overlay */}
       {isLocked && (
-        <div className="absolute inset-0 z-10 bg-gray-900/20 backdrop-blur-[2px] flex items-center justify-center">
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-gray-200 text-center max-w-xs">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+        <div className="absolute inset-0 z-10 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-card border-2 border-amber-500/50 rounded-3xl p-8 shadow-2xl text-center max-w-xs">
+            <div className="relative mb-4 mx-auto w-20 h-20">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-xl opacity-60" />
+              <div className="relative w-full h-full bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl flex items-center justify-center shadow-xl">
+                <Crown className="h-10 w-10 text-white" />
+              </div>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Pod Locked</h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Upgrade to <span className="font-bold text-blue-600">Teach+</span> to unlock this pod
+            <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              Pod Locked
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Upgrade to <span className="font-bold text-amber-600">Teach+</span> to unlock this pod
             </p>
-            <p className="text-xs text-gray-500">Free plan includes 1 active pod</p>
+            <p className="text-xs text-muted-foreground/70">Free plan includes 1 active pod</p>
           </div>
         </div>
       )}
       
-      {/* Gradient Header */}
-      <div className={`h-2 bg-gradient-to-r ${headerGradient}`} />
-      
-      <CardHeader className="pb-3 pt-5">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-violet-600 group-hover:to-fuchsia-600 transition-all">
+      <CardHeader className="relative pb-4 pt-6">
+        <div className="flex items-start gap-4">
+          {/* Gradient Icon */}
+          <div className="relative flex-shrink-0">
+            <div className={`absolute inset-0 bg-gradient-to-br ${scheme.iconBg} blur-lg opacity-60 group-hover:opacity-80 transition-opacity`} />
+            <div className={`relative w-14 h-14 bg-gradient-to-br ${scheme.iconBg} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+              <BookOpen className="w-7 h-7 text-white" />
+              <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <h3 className={`text-xl font-bold mb-2 line-clamp-2 bg-gradient-to-r ${scheme.gradient} bg-clip-text text-transparent group-hover:scale-[1.02] transition-transform origin-left`}>
               {pod.title}
             </h3>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge className={`bg-gradient-to-r ${headerGradient} text-white border-0 shadow-md text-xs px-3 py-1`}>
-                <BookOpen className="w-3 h-3 mr-1" />
-                {pod.subject}
-              </Badge>
-            </div>
+            <Badge className={`bg-gradient-to-r ${scheme.badge} text-white border-0 shadow-md hover:shadow-lg transition-shadow`}>
+              {pod.subject}
+            </Badge>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pb-4">
+      <CardContent className="relative pb-4 space-y-4">
         {truncatedDescription && (
-          <p className="text-gray-700 text-sm mb-4 line-clamp-3 leading-relaxed">
+          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
             {truncatedDescription}
           </p>
         )}
 
-        <div className="flex items-center justify-between text-xs font-medium">
-          <div className="flex items-center gap-1.5 text-gray-600 bg-white/60 px-3 py-1.5 rounded-full">
-            <Users className="w-3.5 h-3.5" />
-            <span>{pod.student_count || 0} student{(pod.student_count || 0) !== 1 ? 's' : ''}</span>
+        {/* Stats Row with Glass Morphism */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center gap-2 bg-background/60 backdrop-blur-sm border border-border/50 rounded-xl px-3 py-2 group-hover:border-border transition-colors">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium">
+              {pod.student_count || 0} student{(pod.student_count || 0) !== 1 ? 's' : ''}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-gray-600 bg-white/60 px-3 py-1.5 rounded-full">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{timeAgo}</span>
+          <div className="flex-1 flex items-center gap-2 bg-background/60 backdrop-blur-sm border border-border/50 rounded-xl px-3 py-2 group-hover:border-border transition-colors">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium">{timeAgo}</span>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="pt-2 pb-5">
+      <CardFooter className="relative pt-2 pb-6">
         {isLocked ? (
           <Button 
             disabled
-            className={`w-full bg-gray-400 text-white border-0 shadow-lg font-semibold cursor-not-allowed opacity-50`}
-            size="sm"
+            className="w-full bg-muted text-muted-foreground cursor-not-allowed"
           >
             Locked - Upgrade Required
           </Button>
         ) : (
           <Link to={userRole === 'teacher' ? `/pod/${pod.id}` : `/student/pod/${pod.id}`} className="w-full">
             <Button 
-              className={`w-full bg-gradient-to-r ${headerGradient} text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 font-semibold`}
-              size="sm"
+              className={`w-full bg-gradient-to-r ${scheme.gradient} text-white border-0 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 font-semibold group/btn relative overflow-hidden`}
             >
-              {userRole === 'teacher' ? 'Manage Pod' : 'Enter Pod'}
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {userRole === 'teacher' ? 'Manage Pod' : 'Enter Pod'}
+                <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+              </span>
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" />
             </Button>
           </Link>
         )}

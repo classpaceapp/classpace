@@ -72,7 +72,13 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
       // Generate a unique Excalidraw room ID
       const roomId = `${podId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
       
-      // Store the whiteboard with Excalidraw room ID
+      // Generate a 22-character encryption key for Excalidraw collaboration
+      // This is required for live collaboration to work properly
+      const encryptionKey = Math.random().toString(36).substring(2, 15) + 
+                           Math.random().toString(36).substring(2, 15);
+      const trimmedKey = encryptionKey.substring(0, 22); // Exactly 22 characters
+      
+      // Store the whiteboard with Excalidraw room ID and encryption key
       const { data, error } = await supabase
         .from('whiteboards')
         .insert({
@@ -81,7 +87,8 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
           created_by: user.id,
           whiteboard_data: { 
             type: 'excalidraw',
-            room_id: roomId 
+            room_id: roomId,
+            encryption_key: trimmedKey
           }
         })
         .select()
@@ -94,8 +101,8 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
         description: 'Opening in a new tab...',
       });
 
-      // Open Excalidraw with room collaboration
-      const excalidrawUrl = `https://excalidraw.com/#room=${roomId},${encodeURIComponent(newWhiteboardTitle.trim())}`;
+      // Open Excalidraw with room collaboration and encryption key
+      const excalidrawUrl = `https://excalidraw.com/#room=${roomId},${trimmedKey}`;
       window.open(excalidrawUrl, '_blank');
 
       setNewWhiteboardTitle('');
@@ -148,7 +155,9 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
   const openWhiteboard = (whiteboard: Whiteboard) => {
     const data = whiteboard.whiteboard_data as any;
     if (data?.type === 'excalidraw' && data?.room_id) {
-      const excalidrawUrl = `https://excalidraw.com/#room=${data.room_id},${encodeURIComponent(whiteboard.title)}`;
+      // Use the stored encryption key for proper collaboration
+      const encryptionKey = data?.encryption_key || '';
+      const excalidrawUrl = `https://excalidraw.com/#room=${data.room_id},${encryptionKey}`;
       window.open(excalidrawUrl, '_blank');
     } else {
       // Fallback for old whiteboards

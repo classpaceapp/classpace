@@ -35,9 +35,9 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [showArchived, setShowArchived] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [showGenerateForm, setShowGenerateForm] = useState(false);
+  const [quizLimitReached, setQuizLimitReached] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     curriculum: '',
@@ -108,8 +108,8 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
 
       // Check for specific error responses in data
       if (data?.error === 'quiz_limit_reached') {
-        setDialogOpen(false);
-        setUpgradeDialogOpen(true);
+        setShowGenerateForm(false);
+        setQuizLimitReached(true);
         return;
       }
 
@@ -167,7 +167,7 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
         subtopic: '',
         quizType: 'mcq',
       });
-      setDialogOpen(false);
+      setShowGenerateForm(false);
       fetchQuizzes();
     } catch (error: any) {
       console.error('Quiz generation error:', error);
@@ -215,164 +215,224 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
             {showArchived ? 'View Active' : 'View Archived'}
           </Button>
           {isTeacher && !showArchived && (
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700">
-                  <Sparkles className="h-4 w-4" />
-                  Generate Quiz
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 border-2 border-indigo-500/30 max-h-[90vh] overflow-y-auto">
-                
-                <DialogHeader>
-                  <DialogTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-                    <Sparkles className="h-6 w-6 text-indigo-600" />
-                    Generate AI Quiz with Web Search
-                  </DialogTitle>
-                  <DialogDescription>
-                    Our AI will search the web for authentic past papers and examination questions tailored to your specifications
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Quiz Title *</Label>
-                    <Input
-                      id="title"
-                      placeholder="e.g., Trigonometry Practice Quiz"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="border-indigo-500/30"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="curriculum">Curriculum</Label>
-                      <Input
-                        id="curriculum"
-                        placeholder="e.g., IB, AP, A-Level"
-                        value={formData.curriculum}
-                        onChange={(e) => setFormData({ ...formData, curriculum: e.target.value })}
-                        className="border-indigo-500/30"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="yearLevel">Year Level</Label>
-                      <Input
-                        id="yearLevel"
-                        placeholder="e.g., Year 12, Grade 11"
-                        value={formData.yearLevel}
-                        onChange={(e) => setFormData({ ...formData, yearLevel: e.target.value })}
-                        className="border-indigo-500/30"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <Input
-                      id="subject"
-                      placeholder="e.g., Mathematics HL, Physics"
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="border-indigo-500/30"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="topic">Topic</Label>
-                      <Input
-                        id="topic"
-                        placeholder="e.g., Trigonometry"
-                        value={formData.topic}
-                        onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                        className="border-indigo-500/30"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="subtopic">Subtopic</Label>
-                      <Input
-                        id="subtopic"
-                        placeholder="e.g., Trig Identities"
-                        value={formData.subtopic}
-                        onChange={(e) => setFormData({ ...formData, subtopic: e.target.value })}
-                        className="border-indigo-500/30"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Quiz Type</Label>
-                    <Select value={formData.quizType} onValueChange={(value: 'mcq' | 'essay') => setFormData({ ...formData, quizType: value })}>
-                      <SelectTrigger className="border-indigo-500/30">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mcq">Multiple Choice (MCQ)</SelectItem>
-                        <SelectItem value="essay">Essay Type</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={generateQuiz} 
-                    disabled={generating}
-                    className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 relative overflow-hidden"
-                  >
-                    {generating ? (
-                      <>
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-500 to-indigo-400 animate-pulse" />
-                        <div className="relative flex items-center gap-2">
-                          <Sparkles className="h-4 w-4 animate-spin" />
-                          <span className="animate-pulse">Generating with AI...</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        Generate Quiz
-                      </>
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={() => {
+                setShowGenerateForm(!showGenerateForm);
+                setQuizLimitReached(false);
+              }}
+              className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            >
+              <Sparkles className="h-4 w-4" />
+              {showGenerateForm ? 'Hide Form' : 'Generate Quiz'}
+            </Button>
           )}
         </div>
       </div>
 
-      {/* Upgrade Dialog */}
-      <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>
-        <DialogContent className="sm:max-w-md bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-2 border-amber-500/50">
-          <DialogHeader>
-            <DialogTitle className="text-2xl bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent flex items-center gap-2">
-              <Crown className="h-6 w-6 text-amber-500" />
-              Upgrade to Teach+
-            </DialogTitle>
-            <DialogDescription>
-              You've reached the limit of 2 quizzes total (including archived quizzes) on the free plan
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-6 space-y-4">
-            <p className="text-center text-muted-foreground">
-              Upgrade to <span className="font-bold text-amber-600">Teach+</span> to create unlimited AI-generated quizzes!
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setUpgradeDialogOpen(false)}>
-              Maybe Later
-            </Button>
-            <Button 
-              onClick={() => navigate('/my-plan')}
-              className="gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
-            >
-              <Crown className="h-4 w-4" />
-              Upgrade Now
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Quiz Limit Reached - Beautiful Inline Message */}
+      {quizLimitReached && (
+        <Card className="border-2 border-amber-500/50 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-50 dark:from-amber-950/20 dark:to-orange-950/20 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(251,191,36,0.1),transparent_50%)]" />
+          <CardContent className="relative py-8">
+            <div className="flex flex-col items-center text-center space-y-4 max-w-md mx-auto">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 blur-xl opacity-50" />
+                <div className="relative w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl flex items-center justify-center shadow-2xl">
+                  <Crown className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                  Quiz Limit Reached
+                </h3>
+                <p className="text-muted-foreground">
+                  You've reached the limit of <span className="font-semibold text-amber-600">2 quizzes</span> (including archived quizzes) on the free plan
+                </p>
+              </div>
+              <div className="bg-white/60 dark:bg-gray-900/40 backdrop-blur-sm rounded-2xl p-6 space-y-3 w-full">
+                <p className="text-sm text-muted-foreground">
+                  Upgrade to <span className="font-bold text-amber-600">Teach+</span> to unlock:
+                </p>
+                <ul className="text-sm space-y-2 text-left">
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600" />
+                    <span>Unlimited AI-generated quizzes</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600" />
+                    <span>Advanced quiz analytics</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600" />
+                    <span>Priority AI generation</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="flex gap-3 w-full">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setQuizLimitReached(false)}
+                  className="flex-1"
+                >
+                  Maybe Later
+                </Button>
+                <Button 
+                  onClick={() => navigate('/my-plan')}
+                  className="flex-1 gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-lg"
+                >
+                  <Crown className="h-4 w-4" />
+                  Upgrade Now
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Inline Quiz Generation Form */}
+      {isTeacher && !showArchived && showGenerateForm && !quizLimitReached && (
+        <Card className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50 dark:from-indigo-950/20 dark:to-purple-950/20 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(99,102,241,0.1),transparent_50%)]" />
+          <CardHeader className="relative border-b border-indigo-500/20 bg-gradient-to-r from-indigo-500/5 to-purple-500/5">
+            <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-indigo-600" />
+              Generate AI Quiz with Web Search
+            </CardTitle>
+            <CardDescription>
+              Our AI will search the web for authentic past papers and examination questions tailored to your specifications
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="relative pt-6 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Quiz Title *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Trigonometry Practice Quiz"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="border-indigo-500/30 bg-white/50"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="curriculum">Curriculum</Label>
+                <Input
+                  id="curriculum"
+                  placeholder="e.g., IB, AP, A-Level"
+                  value={formData.curriculum}
+                  onChange={(e) => setFormData({ ...formData, curriculum: e.target.value })}
+                  className="border-indigo-500/30 bg-white/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yearLevel">Year Level</Label>
+                <Input
+                  id="yearLevel"
+                  placeholder="e.g., Year 12, Grade 11"
+                  value={formData.yearLevel}
+                  onChange={(e) => setFormData({ ...formData, yearLevel: e.target.value })}
+                  className="border-indigo-500/30 bg-white/50"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                placeholder="e.g., Mathematics HL, Physics"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                className="border-indigo-500/30 bg-white/50"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="topic">Topic</Label>
+                <Input
+                  id="topic"
+                  placeholder="e.g., Trigonometry"
+                  value={formData.topic}
+                  onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                  className="border-indigo-500/30 bg-white/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="subtopic">Subtopic</Label>
+                <Input
+                  id="subtopic"
+                  placeholder="e.g., Trig Identities"
+                  value={formData.subtopic}
+                  onChange={(e) => setFormData({ ...formData, subtopic: e.target.value })}
+                  className="border-indigo-500/30 bg-white/50"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Quiz Type</Label>
+              <Select value={formData.quizType} onValueChange={(value: 'mcq' | 'essay') => setFormData({ ...formData, quizType: value })}>
+                <SelectTrigger className="border-indigo-500/30 bg-white/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcq">Multiple Choice (MCQ)</SelectItem>
+                  <SelectItem value="essay">Essay Type</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowGenerateForm(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={async () => {
+                  // Check if quiz limit reached before generation
+                  const { data, error } = await supabase.functions.invoke('generate-quiz', {
+                    body: {
+                      curriculum: formData.curriculum,
+                      yearLevel: formData.yearLevel,
+                      subject: formData.subject,
+                      topic: formData.topic,
+                      subtopic: formData.subtopic,
+                      quizType: formData.quizType,
+                      podId,
+                    },
+                  });
+                  
+                  if (data?.error === 'quiz_limit_reached') {
+                    setShowGenerateForm(false);
+                    setQuizLimitReached(true);
+                    return;
+                  }
+                  
+                  // Otherwise proceed with normal generation
+                  generateQuiz();
+                }} 
+                disabled={generating}
+                className="flex-1 gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 relative overflow-hidden shadow-lg"
+              >
+                {generating ? (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 via-purple-500 to-indigo-400 animate-pulse" />
+                    <div className="relative flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 animate-spin" />
+                      <span className="animate-pulse">Generating with AI...</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Generate Quiz
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4">
         {displayQuizzes.length === 0 ? (
