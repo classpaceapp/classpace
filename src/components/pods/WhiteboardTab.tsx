@@ -69,17 +69,23 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
     setCreating(true);
     try {
-      // Store the whiteboard for Excalidraw-based collaborative whiteboard
+      // Generate a unique room ID and encryption key for Excalidraw.com
+      const roomId = crypto.randomUUID();
+      const encryptionKey = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+      
+      // Create the Excalidraw.com collaboration URL
+      const excalidrawUrl = `https://excalidraw.com/#room=${roomId},${encryptionKey}`;
+      
+      // Store only the URL link in the database
       const { data, error } = await supabase
         .from('whiteboards')
         .insert({
           pod_id: podId,
           title: newWhiteboardTitle.trim(),
           created_by: user.id,
-          whiteboard_data: {
-            elements: [],
-            appState: {}
-          }
+          whiteboard_data: { url: excalidrawUrl }
         })
         .select()
         .single();
@@ -88,11 +94,11 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
       toast({
         title: 'Whiteboard created!',
-        description: 'Opening Excalidraw whiteboard...',
+        description: 'Opening Excalidraw in a new tab...',
       });
 
-      // Open Excalidraw whiteboard in our app
-      window.open(`/excalidraw/${data.id}`, '_blank');
+      // Open Excalidraw.com with the collaboration room
+      window.open(excalidrawUrl, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
@@ -142,8 +148,17 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
   };
 
   const openWhiteboard = (whiteboard: Whiteboard) => {
-    // Open Excalidraw whiteboard in our app
-    window.open(`/excalidraw/${whiteboard.id}`, '_blank');
+    // Open the stored Excalidraw.com URL
+    const url = whiteboard.whiteboard_data?.url;
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      toast({
+        title: 'Invalid whiteboard',
+        description: 'This whiteboard link is missing or corrupted',
+        variant: 'destructive',
+      });
+    }
   };
 
   useEffect(() => {
@@ -195,7 +210,7 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
               Collaborative Whiteboards
             </CardTitle>
             <CardDescription className="mt-2">
-              Interactive whiteboards for visual learning - real-time collaboration
+              Create collaborative whiteboards powered by Excalidraw - opens in a new tab
             </CardDescription>
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>

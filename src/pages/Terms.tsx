@@ -67,8 +67,10 @@ const Terms = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl shadow-2xl p-8 md:p-16 border border-gray-200">
-          <div className="prose prose-lg max-w-none">
+        <div className="relative bg-gradient-to-br from-white via-purple-50/30 to-pink-50/30 rounded-3xl shadow-2xl p-8 md:p-16 border-2 border-purple-200/50 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.08),transparent_70%)]"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(236,72,153,0.08),transparent_70%)]"></div>
+          <div className="relative prose prose-lg max-w-none">
             <p className="text-gray-500 mb-8 md:mb-12 text-base md:text-lg text-center">
               Last updated: January 1, 2025
             </p>

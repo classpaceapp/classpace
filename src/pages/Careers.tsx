@@ -57,52 +57,67 @@ const Careers = () => {
       return;
     }
 
+    setSubmitting(true);
+    
     try {
-      setSubmitting(true);
-      
       // Convert CV to base64
       const reader = new FileReader();
       reader.readAsDataURL(cvFile);
       
       reader.onload = async () => {
-        const base64 = reader.result?.toString().split(',')[1];
-        
-        const { data, error } = await supabase.functions.invoke('send-career-application', {
-          body: {
-            name: formData.name,
-            email: formData.email,
-            division: formData.division,
-            coverNote: formData.coverNote,
-            cvBase64: base64,
-            cvFilename: cvFile.name,
-          },
-        });
+        try {
+          const base64 = reader.result?.toString().split(',')[1];
+          
+          const { data, error } = await supabase.functions.invoke('send-career-application', {
+            body: {
+              name: formData.name,
+              email: formData.email,
+              division: formData.division,
+              coverNote: formData.coverNote,
+              cvBase64: base64,
+              cvFilename: cvFile.name,
+            },
+          });
 
-        if (error) throw error;
+          if (error) throw error;
 
-        toast({
-          title: 'Application submitted!',
-          description: "We've received your application and will be in touch soon.",
-        });
+          toast({
+            title: 'Application submitted!',
+            description: "We've received your application and will be in touch soon.",
+          });
 
-        // Reset form
-        setFormData({ name: '', email: '', division: '', coverNote: '' });
-        setCvFile(null);
-        (document.getElementById('cv-upload') as HTMLInputElement).value = '';
+          // Reset form
+          setFormData({ name: '', email: '', division: '', coverNote: '' });
+          setCvFile(null);
+          (document.getElementById('cv-upload') as HTMLInputElement).value = '';
+        } catch (error: any) {
+          console.error('Error submitting application:', error);
+          toast({
+            title: 'Submission failed',
+            description: error.message || 'Please try again later',
+            variant: 'destructive',
+          });
+        } finally {
+          setSubmitting(false);
+        }
       };
 
       reader.onerror = () => {
-        throw new Error('Failed to read file');
+        setSubmitting(false);
+        toast({
+          title: 'Failed to read file',
+          description: 'Please try again',
+          variant: 'destructive',
+        });
       };
     } catch (error: any) {
+      setSubmitting(false);
       console.error('Error submitting application:', error);
       toast({
         title: 'Submission failed',
         description: error.message || 'Please try again later',
         variant: 'destructive',
       });
-    } finally {
-      setSubmitting(false);
     }
   };
 

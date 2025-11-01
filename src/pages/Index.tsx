@@ -145,6 +145,9 @@ const Index = () => {
                   Anything
                 </span>
               </h1>
+              <p className="text-xl md:text-2xl lg:text-3xl text-gray-300 mb-8 md:mb-12 leading-relaxed">
+                with the world's first AI-native classroom and workspace
+              </p>
             </div>
             
             <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
