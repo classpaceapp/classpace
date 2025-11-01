@@ -35,47 +35,10 @@ const Investors = () => {
 
       <main className="container mx-auto px-4 py-8 md:py-16 max-w-6xl">
         {/* Hero Section */}
-        <div className="text-center mb-12 md:mb-20">
-          <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl animate-pulse">
-            <Rocket className="w-12 h-12 md:w-16 md:h-16 text-white" />
-          </div>
-          <h1 className="text-5xl md:text-8xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent mb-8 leading-tight pb-2">
-            Build the Future
+        <div className="text-center mb-12 md:mb-16">
+          <h1 className="text-5xl md:text-8xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent leading-tight pb-2">
+            Investors
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-200 max-w-4xl mx-auto mb-6 font-semibold">
-            Join us in revolutionizing education worldwide
-          </p>
-          <p className="text-xl md:text-2xl bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent max-w-3xl mx-auto font-bold">
-            Empowering millions of learners through AI-native education
-          </p>
-        </div>
-
-        {/* Key Highlights */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16 md:mb-24">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-            <div className="relative text-center p-8 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-3xl shadow-2xl border-2 border-purple-400/50 transform hover:scale-105 transition-transform duration-300 backdrop-blur-sm">
-              <TrendingUp className="w-16 h-16 md:w-20 md:h-20 text-purple-400 mx-auto mb-6" />
-              <h3 className="font-bold text-2xl md:text-3xl mb-4 text-white drop-shadow-lg">Market Opportunity</h3>
-              <p className="text-gray-200 text-lg md:text-xl">Transforming a $6T global education market with AI innovation</p>
-            </div>
-          </div>
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-            <div className="relative text-center p-8 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-3xl shadow-2xl border-2 border-pink-400/50 transform hover:scale-105 transition-transform duration-300 backdrop-blur-sm">
-              <Target className="w-16 h-16 md:w-20 md:h-20 text-pink-400 mx-auto mb-6" />
-              <h3 className="font-bold text-2xl md:text-3xl mb-4 text-white drop-shadow-lg">Innovation</h3>
-              <p className="text-gray-200 text-lg md:text-xl">First AI-native classroom platform with persistent memory</p>
-            </div>
-          </div>
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-cyan-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-            <div className="relative text-center p-8 bg-gradient-to-br from-gray-800/90 to-gray-900/90 rounded-3xl shadow-2xl border-2 border-cyan-400/50 transform hover:scale-105 transition-transform duration-300 backdrop-blur-sm">
-              <Users className="w-16 h-16 md:w-20 md:h-20 text-cyan-400 mx-auto mb-6" />
-              <h3 className="font-bold text-2xl md:text-3xl mb-4 text-white drop-shadow-lg">Growth</h3>
-              <p className="text-gray-200 text-lg md:text-xl">Rapid expansion across K-12, higher ed, and professional learning</p>
-            </div>
-          </div>
         </div>
 
         {/* Seed Round Card */}
@@ -102,7 +65,7 @@ const Investors = () => {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-10">
                 <a 
-                  href="mailto:social@classpace.co?subject=Investment Inquiry"
+                  href="mailto:arya@classpace.co?subject=Investment Inquiry"
                   className="inline-flex items-center px-8 py-4 bg-white text-purple-900 rounded-full font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl"
                 >
                   Get in Touch
@@ -127,8 +90,8 @@ const Investors = () => {
           {/* Investor Logos Grid - Empty for now */}
           <div className="relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-3xl p-12 md:p-20 border border-gray-700/50 backdrop-blur-sm min-h-[300px] flex items-center justify-center">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(168,85,247,0.1),transparent_70%)] rounded-3xl"></div>
-            <p className="relative text-gray-400 text-lg md:text-xl text-center italic">
-              Join our journey to revolutionize education
+            <p className="relative text-gray-400 text-lg md:text-xl text-center">
+              We will publish our existing investors in due time.
             </p>
           </div>
         </div>
