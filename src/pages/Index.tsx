@@ -162,7 +162,6 @@ const Index = () => {
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-12 md:px-16 py-6 md:py-8 text-xl md:text-2xl font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 border-0"
                 >
                   Start Teaching
-                  <ArrowRight className="w-6 h-6 md:w-8 md:h-8 ml-3" />
                 </Button>
                 <Button 
                   size="lg" 

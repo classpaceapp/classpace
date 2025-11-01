@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
-import CreatePodModal from '@/components/pods/CreatePodModal';
+import CreatePodFlow from '@/components/pods/CreatePodFlow';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -82,6 +82,20 @@ const TeacherPodsPage: React.FC = () => {
     };
   }, [user?.id]);
 
+  if (showCreateModal) {
+    return (
+      <DashboardLayout userRole="teacher">
+        <CreatePodFlow 
+          onComplete={() => {
+            setShowCreateModal(false);
+            fetchPods();
+          }}
+          onCancel={() => setShowCreateModal(false)}
+        />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout userRole="teacher">
       {loading ? (
@@ -150,12 +164,6 @@ const TeacherPodsPage: React.FC = () => {
               })}
             </div>
           )}
-          
-          <CreatePodModal 
-            open={showCreateModal}
-            onOpenChange={setShowCreateModal}
-            onPodCreated={fetchPods}
-          />
         </div>
       )}
     </DashboardLayout>

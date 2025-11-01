@@ -13,6 +13,7 @@ import { PodMaterials } from '@/components/pods/PodMaterials';
 import PodMeetings from '@/components/pods/PodMeetings';
 import PodQuizzesWithArchive from '@/components/pods/PodQuizzesWithArchive';
 import { WhiteboardTab } from '@/components/pods/WhiteboardTab';
+import { PodMembers } from '@/components/pods/PodMembers';
 import { 
   ArrowLeft, 
   Users, 
@@ -208,13 +209,20 @@ const StudentPodView: React.FC = () => {
 
         {/* Pod Navigation Tabs - Enhanced Styling */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7 lg:w-fit lg:grid-cols-7 h-auto p-2 gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl border-2 border-white/10">
+          <TabsList className="grid w-full grid-cols-8 lg:w-fit lg:grid-cols-8 h-auto p-2 gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl border-2 border-white/10">
             <TabsTrigger 
               value="overview" 
               className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-blue-300"
             >
               <Users className="h-5 w-5" />
               <span className="hidden sm:inline font-semibold">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="members" 
+              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-emerald-300"
+            >
+              <Users className="h-5 w-5" />
+              <span className="hidden sm:inline font-semibold">Members</span>
             </TabsTrigger>
             <TabsTrigger 
               value="chat" 
@@ -302,6 +310,10 @@ const StudentPodView: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="members" className="mt-6">
+            <PodMembers podId={id!} teacherId={pod.teacher_id} />
           </TabsContent>
 
           <TabsContent value="chat" className="mt-6">

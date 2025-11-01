@@ -361,10 +361,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      // Update the profile with the selected role
+      // Extract names from Google user metadata
+      const firstName = user.user_metadata?.full_name?.split(' ')[0] || 
+                       user.user_metadata?.given_name || 
+                       user.user_metadata?.name?.split(' ')[0] || '';
+      const lastName = user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || 
+                      user.user_metadata?.family_name || 
+                      user.user_metadata?.name?.split(' ').slice(1).join(' ') || '';
+
+      // Update the profile with the selected role and names from Google
       const { error } = await supabase
         .from('profiles')
-        .update({ role })
+        .update({ 
+          role,
+          first_name: firstName,
+          last_name: lastName
+        })
         .eq('id', user.id);
 
       if (error) {

@@ -196,7 +196,7 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
             <Archive className="h-4 w-4" />
             {showArchived ? 'View Active' : 'View Archived'}
           </Button>
-          {isTeacher && !showArchived && (
+          {!showArchived && (
             <Button 
               onClick={() => {
                 setShowGenerateForm(!showGenerateForm);
@@ -272,7 +272,7 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
       )}
 
       {/* Inline Quiz Generation Form */}
-      {isTeacher && !showArchived && showGenerateForm && !quizLimitReached && (
+      {!showArchived && showGenerateForm && !quizLimitReached && (
         <Card className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50 dark:from-indigo-950/20 dark:to-purple-950/20 overflow-hidden relative z-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(99,102,241,0.1),transparent_50%)]" />
           <CardHeader className="relative border-b border-indigo-500/20 bg-gradient-to-r from-indigo-500/5 to-purple-500/5">

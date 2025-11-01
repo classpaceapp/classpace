@@ -18,6 +18,8 @@ interface Note {
   content: string;
   color: string;
   created_at: string;
+  author_name?: string;
+  is_teacher?: boolean;
 }
 
 interface PodNotesProps {
@@ -51,7 +53,42 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotes(data || []);
+
+      // Fetch pod teacher ID
+      const { data: podData } = await supabase
+        .from('pods')
+        .select('teacher_id')
+        .eq('id', podId)
+        .single();
+
+      // Fetch author profiles
+      const notesData = data || [];
+      const authorIds = [...new Set(notesData.map(n => n.created_by))];
+      
+      let profilesMap: Record<string, { first_name: string | null; last_name: string | null }> = {};
+      if (authorIds.length) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', authorIds);
+        
+        if (profiles) {
+          profilesMap = Object.fromEntries(
+            profiles.map((p: any) => [p.id, { first_name: p.first_name, last_name: p.last_name }])
+          );
+        }
+      }
+
+      const notesWithAuthors = notesData.map(note => {
+        const profile = profilesMap[note.created_by];
+        return {
+          ...note,
+          author_name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown' : 'Unknown',
+          is_teacher: podData?.teacher_id === note.created_by
+        };
+      });
+
+      setNotes(notesWithAuthors);
     } catch (error: any) {
       console.error('Error fetching notes:', error);
       toast({
@@ -136,8 +173,7 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
               <StickyNote className="h-5 w-5" />
               Class Notes
             </CardTitle>
-            {isTeacher && (
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90">
                     <Plus className="h-4 w-4" />
@@ -205,15 +241,12 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
                   </div>
                 </DialogContent>
               </Dialog>
-            )}
           </div>
         </CardHeader>
         <CardContent className="p-6">
           {notes.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
-              {isTeacher
-                ? 'No notes yet. Create your first note!'
-                : 'No notes have been shared yet.'}
+              No notes yet. Create your first note!
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -227,17 +260,33 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
                       transform: `rotate(${Math.random() * 4 - 2}deg)`,
                     }}
                   >
-                    {isTeacher && (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="absolute top-2 right-2 h-6 w-6 hover:bg-black/10"
-                        onClick={() => setNoteToDelete(note.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    )}
-                    <h3 className="font-bold text-lg mb-2 pr-8">{note.title}</h3>
+                    {/* Author badge at the top */}
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-current/20">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                          {note.author_name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-xs">{note.author_name}</span>
+                          {note.is_teacher && (
+                            <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold rounded-full shadow-sm">
+                              TEACHER
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {(isTeacher || note.created_by === user?.id) && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 hover:bg-black/10"
+                          onClick={() => setNoteToDelete(note.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{note.title}</h3>
                     <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                   </div>
                 );
