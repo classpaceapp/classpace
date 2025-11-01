@@ -57,9 +57,9 @@ const Careers = () => {
       return;
     }
 
-    setSubmitting(true);
-
     try {
+      setSubmitting(true);
+      
       // Convert CV to base64
       const reader = new FileReader();
       reader.readAsDataURL(cvFile);
@@ -219,7 +219,7 @@ const Careers = () => {
                     accept=".pdf"
                     onChange={handleFileChange}
                     required
-                    className="bg-slate-900/50 border-purple-500/30 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 h-12"
+                    className="bg-slate-900/50 border-purple-500/30 text-white file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 h-12"
                   />
                   {cvFile && (
                     <div className="mt-2 flex items-center gap-2 text-sm text-gray-300">

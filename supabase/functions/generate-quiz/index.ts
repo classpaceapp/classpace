@@ -171,7 +171,13 @@ Use the web search results below to inform your questions and ensure they align 
     }
 
     const aiData = await aiResponse.json();
-    const generatedQuiz = JSON.parse(aiData.choices[0].message.content);
+    
+    // Clean the AI response content to remove control characters
+    let content = aiData.choices[0].message.content;
+    // Remove control characters except newlines and tabs
+    content = content.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+    
+    const generatedQuiz = JSON.parse(content);
 
     console.log('Quiz generated successfully with', generatedQuiz.questions.length, 'questions');
 

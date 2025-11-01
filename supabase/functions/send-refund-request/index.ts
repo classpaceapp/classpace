@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Processing refund request from:", email);
 
     const emailResponse = await resend.emails.send({
-      from: "Classpace Refunds <onboarding@resend.dev>",
+      from: "social@classpace.co",
       to: ["social@classpace.co"],
       subject: `Refund Request from ${name}`,
       html: `

@@ -485,21 +485,6 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
           </Button>
 
           <Button
-            onClick={toggleScreenShare}
-            size="lg"
-            variant="outline"
-            className={`rounded-full h-14 w-14 p-0 border-white/20 hover:bg-white/10 ${
-              screenSharing ? 'bg-purple-500/20 border-purple-500/50' : ''
-            }`}
-          >
-            {screenSharing ? (
-              <MonitorOff className="h-6 w-6" />
-            ) : (
-              <Monitor className="h-6 w-6" />
-            )}
-          </Button>
-
-          <Button
             onClick={leaveMeeting}
             size="lg"
             className="rounded-full h-14 px-8 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"

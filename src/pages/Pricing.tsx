@@ -142,7 +142,7 @@ const Pricing = () => {
 
       <main className="container mx-auto px-4 py-12 md:py-20">
         <div className="text-center mb-12 md:mb-20">
-          <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-8">
+          <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-8 leading-tight pb-2">
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">

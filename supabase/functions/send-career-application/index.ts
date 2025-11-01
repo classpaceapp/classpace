@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Processing career application from:", email);
 
     const emailResponse = await resend.emails.send({
-      from: "Classpace Careers <onboarding@resend.dev>",
+      from: "careers@classpace.co",
       to: ["careers@classpace.co"],
       subject: `Career Application: ${name} - ${division}`,
       html: `

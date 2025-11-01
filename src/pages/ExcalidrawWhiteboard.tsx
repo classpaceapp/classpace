@@ -76,24 +76,43 @@ export default function ExcalidrawWhiteboard() {
     };
   }, [whiteboardId, user?.id]);
 
+  // Add debouncing for save operations
+  const [saveTimeout, setSaveTimeout] = React.useState<NodeJS.Timeout | null>(null);
+
   const handleChange = async (elements: any, appState: any) => {
     if (!whiteboardId || !whiteboard) return;
 
-    // Debounce saving to avoid too many updates
-    try {
-      await supabase
-        .from('whiteboards')
-        .update({
-          whiteboard_data: {
-            elements,
-            appState,
-          },
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', whiteboardId);
-    } catch (error) {
-      console.error('Error saving whiteboard:', error);
+    // Clear existing timeout
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
     }
+
+    // Set new timeout to save after 2 seconds of inactivity
+    const timeout = setTimeout(async () => {
+      try {
+        await supabase
+          .from('whiteboards')
+          .update({
+            whiteboard_data: {
+              elements,
+              appState,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', whiteboardId);
+        
+        console.log('Whiteboard saved successfully');
+      } catch (error) {
+        console.error('Error saving whiteboard:', error);
+        toast({
+          title: 'Failed to save',
+          description: 'Could not save whiteboard changes',
+          variant: 'destructive',
+        });
+      }
+    }, 2000);
+
+    setSaveTimeout(timeout);
   };
 
   if (!whiteboard) {
