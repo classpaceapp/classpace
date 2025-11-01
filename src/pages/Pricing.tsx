@@ -352,6 +352,14 @@ const Pricing = () => {
                 </li>
                 <li>
                   <button 
+                    onClick={() => navigate("/careers")}
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Careers
+                  </button>
+                </li>
+                <li>
+                  <button 
                     onClick={() => navigate("/login")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >

@@ -1,7 +1,150 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, CreditCard, Clock, CheckCircle, AlertCircle, Instagram, Linkedin } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, CreditCard, Clock, CheckCircle, AlertCircle, Instagram, Linkedin, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+const RefundForm = () => {
+  const { toast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    paymentMethod: '',
+    refundAmount: '',
+    reason: '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.email || !formData.paymentMethod || !formData.refundAmount || !formData.reason) {
+      toast({
+        title: 'Missing information',
+        description: 'Please fill in all fields',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-refund-request', {
+        body: formData,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Refund request submitted!',
+        description: "We've received your request and will review it shortly.",
+      });
+
+      setFormData({ name: '', email: '', paymentMethod: '', refundAmount: '', reason: '' });
+    } catch (error: any) {
+      console.error('Error submitting refund request:', error);
+      toast({
+        title: 'Submission failed',
+        description: error.message || 'Please try again later',
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="name" className="text-white text-base">Full Name *</Label>
+          <Input
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="John Doe"
+            required
+            className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-purple-400 h-12"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-white text-base">Email Address *</Label>
+          <Input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="john@example.com"
+            required
+            className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-purple-400 h-12"
+          />
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="paymentMethod" className="text-white text-base">Payment Method *</Label>
+          <Input
+            id="paymentMethod"
+            value={formData.paymentMethod}
+            onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+            placeholder="e.g., Credit Card, PayPal"
+            required
+            className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-purple-400 h-12"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="refundAmount" className="text-white text-base">Refund Amount *</Label>
+          <Input
+            id="refundAmount"
+            value={formData.refundAmount}
+            onChange={(e) => setFormData({ ...formData, refundAmount: e.target.value })}
+            placeholder="e.g., $7.00"
+            required
+            className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-purple-400 h-12"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="reason" className="text-white text-base">Reason for Refund *</Label>
+        <Textarea
+          id="reason"
+          value={formData.reason}
+          onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+          placeholder="Please explain why you're requesting a refund..."
+          rows={6}
+          required
+          className="bg-slate-900/50 border-purple-500/30 text-white placeholder:text-gray-500 focus:border-purple-400 resize-none"
+        />
+      </div>
+
+      <Button 
+        type="submit" 
+        disabled={submitting}
+        className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all duration-300"
+      >
+        {submitting ? (
+          <>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+            Submitting...
+          </>
+        ) : (
+          <>
+            <Sparkles className="h-5 w-5 mr-2" />
+            Submit Refund Request
+          </>
+        )}
+      </Button>
+    </form>
+  );
+};
 
 const Refunds = () => {
   const navigate = useNavigate();
@@ -100,11 +243,11 @@ const Refunds = () => {
           <div className="space-y-6 md:space-y-8">
             <div className="border-b border-gray-600 pb-6 md:pb-8">
               <h3 className="text-2xl font-semibold mb-4 text-white">
-                30-Day Money-Back Guarantee
+                Case-by-Case Considered Refunds
               </h3>
               <p className="text-gray-300 leading-relaxed text-lg">
-                We offer a full refund within 30 days of your initial purchase. No questions asked. 
-                We want you to be completely satisfied with Classpace.
+                We carefully review each refund request on an individual basis. 
+                While we strive to accommodate reasonable refund requests, approval is not automatic and depends on the circumstances of each case.
               </p>
             </div>
 
@@ -155,6 +298,22 @@ const Refunds = () => {
             </div>
           </div>
         </div>
+
+        {/* Refund Request Form */}
+        <Card className="border-2 border-purple-500/30 bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl shadow-2xl overflow-hidden mt-12">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(139,92,246,0.15),transparent_50%)]"></div>
+          <CardHeader className="relative border-b border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Request a Refund
+            </CardTitle>
+            <CardDescription className="text-gray-300 text-lg">
+              Fill out the form below and we'll review your request
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="relative pt-8">
+            <RefundForm />
+          </CardContent>
+        </Card>
       </main>
 
       {/* Footer */}
@@ -213,6 +372,14 @@ const Refunds = () => {
                     className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Our Journey
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => navigate("/careers")}
+                    className="font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Careers
                   </button>
                 </li>
                 <li>

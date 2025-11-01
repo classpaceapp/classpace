@@ -370,29 +370,7 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
                 Cancel
               </Button>
               <Button 
-                onClick={async () => {
-                  // Check if quiz limit reached before generation
-                  const { data, error } = await supabase.functions.invoke('generate-quiz', {
-                    body: {
-                      curriculum: formData.curriculum,
-                      yearLevel: formData.yearLevel,
-                      subject: formData.subject,
-                      topic: formData.topic,
-                      subtopic: formData.subtopic,
-                      quizType: formData.quizType,
-                      podId,
-                    },
-                  });
-                  
-                  if (data?.error === 'quiz_limit_reached') {
-                    setShowGenerateForm(false);
-                    setQuizLimitReached(true);
-                    return;
-                  }
-                  
-                  // Otherwise proceed with normal generation
-                  generateQuiz();
-                }} 
+                onClick={generateQuiz}
                 disabled={generating}
                 className="flex-1 gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 relative overflow-hidden shadow-lg"
               >

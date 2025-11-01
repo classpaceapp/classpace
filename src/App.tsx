@@ -39,6 +39,8 @@ import Educators from "./pages/Educators";
 import EducatorProfile from "./pages/EducatorProfile";
 import QuizView from "./pages/QuizView";
 import SubscriptionReturnHandler from "@/components/subscription/SubscriptionReturnHandler";
+import Careers from "./pages/Careers";
+import ExcalidrawWhiteboard from "./pages/ExcalidrawWhiteboard";
 
 const queryClient = new QueryClient();
 
@@ -150,6 +152,15 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/refunds" element={<Refunds />} />
             <Route path="/our-journey" element={<OurJourney />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route 
+              path="/excalidraw/:whiteboardId" 
+              element={
+                <ProtectedRoute>
+                  <ExcalidrawWhiteboard />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/documentation" element={
               <ProtectedRoute>
                 <Documentation />

@@ -341,6 +341,14 @@ const Index = () => {
                 </li>
                 <li>
                   <button 
+                    onClick={() => navigate("/careers")}
+                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Careers
+                  </button>
+                </li>
+                <li>
+                  <button 
                     onClick={() => navigate("/login")}
                     className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >

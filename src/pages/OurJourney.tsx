@@ -39,39 +39,46 @@ const OurJourney = () => {
 
       <main className="container mx-auto px-4 py-20 md:py-32 flex items-center justify-center min-h-[80vh]">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-white via-gray-100 to-white rounded-3xl shadow-2xl p-12 md:p-20 border border-gray-200">
-            <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-              <Mail className="w-10 h-10 md:w-12 md:h-12 text-white" />
-            </div>
+          <div className="relative bg-gradient-to-br from-white via-purple-50 to-pink-50 rounded-3xl shadow-2xl p-12 md:p-20 border-2 border-purple-200 overflow-hidden">
+            {/* Animated background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-pink-400/10 to-purple-400/10 animate-pulse"></div>
+            <div className="absolute -top-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl"></div>
             
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-8 leading-tight">
-              Revolutionizing Education for
-              <span className="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                the AI & Internet Era
-              </span>
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-700 mb-12 leading-relaxed max-w-3xl mx-auto">
-              We're building the future of teaching and learning through intelligent, 
-              collaborative spaces that adapt to every educator's needs.
-            </p>
-            
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 mb-8 border border-gray-200">
-              <p className="text-lg md:text-xl text-gray-800 mb-4 font-medium">
-                Interested in joining our mission?
+            <div className="relative z-10">
+              <div className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl transform hover:scale-110 transition-transform duration-300">
+                <Mail className="w-10 h-10 md:w-14 md:h-14 text-white" />
+              </div>
+              
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
+                Revolutionizing Education for
+                <span className="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-2">
+                  the AI Era
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-gray-700 mb-12 leading-relaxed max-w-3xl mx-auto">
+                We're building the future of teaching and learning through intelligent, 
+                collaborative spaces that adapt to every educator's needs.
               </p>
-              <a 
-                href="mailto:careers@classpace.co"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-xl text-lg"
-              >
-                <Mail className="w-5 h-5 mr-3" />
-                careers@classpace.co
-              </a>
+              
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-purple-200 shadow-lg">
+                <p className="text-lg md:text-xl text-gray-800 mb-6 font-medium">
+                  Interested in joining our mission?
+                </p>
+                <a 
+                  href="mailto:careers@classpace.co"
+                  className="inline-flex items-center px-8 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 hover:-translate-y-1 shadow-xl hover:shadow-2xl text-lg"
+                >
+                  <Mail className="w-6 h-6 mr-3" />
+                  careers@classpace.co
+                </a>
+              </div>
+              
+              <p className="text-gray-600 text-base md:text-lg">
+                Join us in transforming how the world teaches and learns.
+              </p>
             </div>
-            
-            <p className="text-gray-600 text-base md:text-lg">
-              Join us in transforming how the world teaches and learns.
-            </p>
           </div>
         </div>
       </main>
@@ -134,6 +141,14 @@ const OurJourney = () => {
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Our Journey
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => navigate("/careers")}
+                    className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  >
+                    Careers
                   </button>
                 </li>
                 <li>

@@ -277,16 +277,18 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
     if (!screenSharing) {
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: { displaySurface: 'monitor' },
-          audio: false,
+          video: {
+            displaySurface: 'monitor',
+          },
         });
 
         const screenTrack = screenStream.getVideoTracks()[0];
 
-        // DON'T replace the local camera feed - keep both streams
         // Display screen in separate video element
         if (screenVideoRef.current) {
           screenVideoRef.current.srcObject = screenStream;
+          // Force video to play
+          await screenVideoRef.current.play();
         }
 
         // Send screen track to all peers as an additional track

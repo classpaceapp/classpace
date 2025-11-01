@@ -69,14 +69,17 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
     setCreating(true);
     try {
-      // Store the whiteboard for Fabric.js-based collaborative whiteboard
+      // Store the whiteboard for Excalidraw-based collaborative whiteboard
       const { data, error } = await supabase
         .from('whiteboards')
         .insert({
           pod_id: podId,
           title: newWhiteboardTitle.trim(),
           created_by: user.id,
-          whiteboard_data: {}
+          whiteboard_data: {
+            elements: [],
+            appState: {}
+          }
         })
         .select()
         .single();
@@ -85,11 +88,11 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
       toast({
         title: 'Whiteboard created!',
-        description: 'Opening whiteboard...',
+        description: 'Opening Excalidraw whiteboard...',
       });
 
-      // Open whiteboard in our app
-      window.open(`/whiteboard/${data.id}`, '_blank');
+      // Open Excalidraw whiteboard in our app
+      window.open(`/excalidraw/${data.id}`, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
@@ -139,8 +142,8 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
   };
 
   const openWhiteboard = (whiteboard: Whiteboard) => {
-    // Open whiteboard in our app using the new Tldraw-based whiteboard view
-    window.open(`/whiteboard/${whiteboard.id}`, '_blank');
+    // Open Excalidraw whiteboard in our app
+    window.open(`/excalidraw/${whiteboard.id}`, '_blank');
   };
 
   useEffect(() => {
