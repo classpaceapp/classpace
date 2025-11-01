@@ -59,7 +59,13 @@ serve(async (req) => {
       }),
     });
 
-    const searchResults = await searchResponse.json();
+    let searchResults: any = { results: [] };
+    if (!searchResponse.ok) {
+      const tavilyErrorText = await searchResponse.text();
+      console.error('Tavily API error:', searchResponse.status, tavilyErrorText);
+    } else {
+      searchResults = await searchResponse.json();
+    }
     console.log('Search results obtained:', searchResults.results?.length || 0);
 
     // Use Lovable AI to generate quiz from search results
@@ -136,9 +142,17 @@ Use the web search results below to inform your questions and ensure they align 
     });
 
     if (!aiResponse.ok) {
+      const status = aiResponse.status;
       const errorText = await aiResponse.text();
-      console.error('AI API error:', aiResponse.status, errorText);
-      throw new Error(`AI generation failed: ${errorText}`);
+      console.error('AI API error:', status, errorText);
+      const payload = {
+        error: status === 429 ? 'rate_limited' : status === 402 ? 'payment_required' : 'ai_gateway_error',
+        message: errorText,
+      };
+      return new Response(JSON.stringify(payload), {
+        status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const aiData = await aiResponse.json();
