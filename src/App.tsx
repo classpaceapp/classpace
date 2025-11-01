@@ -141,7 +141,7 @@ const App = () => (
               path="/whiteboard/:id" 
               element={
                 <ProtectedRoute>
-                  <TldrawWhiteboard />
+                  <WhiteboardView />
                 </ProtectedRoute>
               } 
             />

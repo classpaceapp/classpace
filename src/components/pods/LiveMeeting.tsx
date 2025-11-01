@@ -405,6 +405,7 @@ export default function LiveMeeting({ podId, onClose }: LiveMeetingProps) {
                     ref={screenVideoRef}
                     autoPlay
                     muted
+                    playsInline
                     className="w-full h-full object-contain bg-black"
                   />
                   <div className="absolute bottom-3 left-3 px-3 py-1 bg-gradient-to-r from-green-500/90 to-emerald-500/90 rounded-full">

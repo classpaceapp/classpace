@@ -69,27 +69,14 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
     setCreating(true);
     try {
-      // Generate a unique Excalidraw room ID
-      const roomId = `${podId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
-      // Generate a 22-character encryption key for Excalidraw collaboration
-      // This is required for live collaboration to work properly
-      const encryptionKey = Math.random().toString(36).substring(2, 15) + 
-                           Math.random().toString(36).substring(2, 15);
-      const trimmedKey = encryptionKey.substring(0, 22); // Exactly 22 characters
-      
-      // Store the whiteboard with Excalidraw room ID and encryption key
+      // Store the whiteboard for Fabric.js-based collaborative whiteboard
       const { data, error } = await supabase
         .from('whiteboards')
         .insert({
           pod_id: podId,
           title: newWhiteboardTitle.trim(),
           created_by: user.id,
-          whiteboard_data: { 
-            type: 'excalidraw',
-            room_id: roomId,
-            encryption_key: trimmedKey
-          }
+          whiteboard_data: {}
         })
         .select()
         .single();
@@ -98,12 +85,11 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
       toast({
         title: 'Whiteboard created!',
-        description: 'Opening in a new tab...',
+        description: 'Opening whiteboard...',
       });
 
-      // Open Excalidraw with room collaboration and encryption key
-      const excalidrawUrl = `https://excalidraw.com/#room=${roomId},${trimmedKey}`;
-      window.open(excalidrawUrl, '_blank');
+      // Open whiteboard in our app
+      window.open(`/whiteboard/${data.id}`, '_blank');
 
       setNewWhiteboardTitle('');
       setCreateDialogOpen(false);
@@ -153,16 +139,8 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
   };
 
   const openWhiteboard = (whiteboard: Whiteboard) => {
-    const data = whiteboard.whiteboard_data as any;
-    if (data?.type === 'excalidraw' && data?.room_id) {
-      // Use the stored encryption key for proper collaboration
-      const encryptionKey = data?.encryption_key || '';
-      const excalidrawUrl = `https://excalidraw.com/#room=${data.room_id},${encryptionKey}`;
-      window.open(excalidrawUrl, '_blank');
-    } else {
-      // Fallback for old whiteboards
-      window.open(`/whiteboard/${whiteboard.id}`, '_blank');
-    }
+    // Open whiteboard in our app using the new Tldraw-based whiteboard view
+    window.open(`/whiteboard/${whiteboard.id}`, '_blank');
   };
 
   useEffect(() => {

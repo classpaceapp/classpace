@@ -107,27 +107,9 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
       });
 
       // Check for specific error responses in data
-      if (data?.error === 'quiz_limit_reached') {
+      if (data?.error === 'quiz_limit_reached' || data?.error === 'rate_limited' || data?.error === 'payment_required') {
         setShowGenerateForm(false);
         setQuizLimitReached(true);
-        return;
-      }
-
-      if (data?.error === 'rate_limited') {
-        toast({
-          title: 'Rate limit exceeded',
-          description: 'Too many requests. Please wait a moment and try again.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      if (data?.error === 'payment_required') {
-        toast({
-          title: 'Credits required',
-          description: 'AI credits depleted. Please contact support.',
-          variant: 'destructive',
-        });
         return;
       }
 

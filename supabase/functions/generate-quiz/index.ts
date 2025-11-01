@@ -78,8 +78,23 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert educator creating ${quizType === 'mcq' ? 'multiple choice' : 'essay-type'} quiz questions.
     
-Based on the provided curriculum information and web search results, create a comprehensive quiz with 10 high-quality questions.
-The questions should be tailored to the specific curriculum, year level, subject, and topic provided.
+CRITICAL INSTRUCTION: Create ONLY content-based questions that test actual knowledge and understanding of the subject matter. 
+NEVER create meta questions about the curriculum itself, exam papers, or practice questions.
+
+FORBIDDEN question types:
+- Questions that reference "IB Maths AA SL Paper 2"
+- Questions about "exam style practice questions"
+- Questions about "past papers" or "examination questions"
+- Any meta-references to the curriculum or assessment structure
+
+REQUIRED question types:
+- Direct questions testing concepts, formulas, and principles
+- Application questions using real scenarios
+- Problem-solving questions with specific numerical or analytical challenges
+- Conceptual understanding questions
+
+Based on the provided curriculum information and web search results, create a comprehensive quiz with 10 high-quality CONTENT-BASED questions.
+The questions should test actual understanding of the subject matter for the specified curriculum, year level, and topic.
 
 Curriculum: ${curriculum || 'Not specified'}
 Year Level: ${yearLevel || 'Not specified'}
