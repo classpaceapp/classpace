@@ -49,12 +49,15 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
 
       // Fetch profiles for all members
       const memberIds = podMembers?.map(m => m.user_id) || [];
-      const { data: memberProfiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, avatar_url, role')
-        .in('id', memberIds);
-
-      if (profilesError) throw profilesError;
+      let memberProfiles: any[] = [];
+      if (memberIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, avatar_url, role')
+          .in('id', memberIds);
+        if (profilesError) throw profilesError;
+        memberProfiles = profiles || [];
+      }
 
       // Combine teacher and students
       const teacher: Member = {
