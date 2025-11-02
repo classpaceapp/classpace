@@ -21,6 +21,7 @@ import TldrawWhiteboard from "./pages/TldrawWhiteboard";
 import PublicPodsDiscovery from "./pages/PublicPodsDiscovery";
 import TeacherPodsPage from "./pages/TeacherPodsPage";
 import StudentPodsPage from "./pages/StudentPodsPage";
+import MyResources from "./pages/MyResources";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Pricing from "./pages/Pricing";
@@ -182,6 +183,11 @@ const App = () => (
             <Route path="/phoenix" element={
               <ProtectedRoute requireRole="learner">
                 <Phoenix />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-resources" element={
+              <ProtectedRoute requireRole="learner">
+                <MyResources />
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />

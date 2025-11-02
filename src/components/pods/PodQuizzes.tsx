@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { BookOpen, Plus, Sparkles, Crown, ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
+import { BookOpen, Plus, Sparkles, Crown, ArrowRight, CheckCircle2, XCircle, FileQuestion } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Quiz {
@@ -158,29 +158,25 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl overflow-hidden">
-        <CardHeader className="p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="p-3 rounded-xl bg-white/20 backdrop-blur-sm">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl font-bold text-white mb-1">
-                  AI-Generated Quizzes
-                </CardTitle>
-                <p className="text-white/90">Create quizzes using AI with web search for authentic exam questions</p>
-              </div>
+    <Card className="border-2 border-border/50 shadow-2xl bg-white/80 backdrop-blur-xl">
+      <CardHeader className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border-b border-border/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
+              <FileQuestion className="h-6 w-6 text-white" />
             </div>
-            {isTeacher && (
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2 bg-white text-indigo-600 hover:bg-white/90 shadow-lg font-semibold">
-                    <Sparkles className="h-4 w-4" />
-                    Generate Quiz
-                  </Button>
-                </DialogTrigger>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              Quizzes
+            </CardTitle>
+          </div>
+          {isTeacher && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate Quiz
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 border-2 border-indigo-500/30 max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
@@ -295,11 +291,11 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
               </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
-            )}
-          </div>
-        </CardHeader>
-      </Card>
+            </Dialog>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-6">
 
       {/* Upgrade Dialog */}
       <Dialog open={upgradeDialogOpen} onOpenChange={setUpgradeDialogOpen}>

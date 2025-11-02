@@ -56,7 +56,7 @@ export const PersonalQuizzes = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setQuizzes(data || []);
+      setQuizzes((data as PersonalQuiz[]) || []);
     } catch (error) {
       console.error("Error fetching quizzes:", error);
       toast.error("Failed to load quizzes");
