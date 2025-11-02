@@ -14,6 +14,7 @@ interface Member {
   avatar_url: string | null;
   role: 'teacher' | 'learner';
   is_teacher: boolean;
+  email: string | null;
 }
 
 interface PodMembersProps {
@@ -33,7 +34,7 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
       // Fetch teacher profile
       const { data: teacherProfile, error: teacherError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, avatar_url, role')
+        .select('id, first_name, last_name, avatar_url, role, email')
         .eq('id', teacherId)
         .single();
 
@@ -50,10 +51,11 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
       // Fetch profiles for all members
       const memberIds = podMembers?.map(m => m.user_id) || [];
       let memberProfiles: any[] = [];
+      
       if (memberIds.length > 0) {
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, avatar_url, role')
+          .select('id, first_name, last_name, avatar_url, role, email')
           .in('id', memberIds);
         if (profilesError) throw profilesError;
         memberProfiles = profiles || [];
@@ -68,6 +70,7 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
         avatar_url: teacherProfile.avatar_url,
         role: teacherProfile.role as 'teacher' | 'learner',
         is_teacher: true,
+        email: teacherProfile.email,
       };
 
       const students: Member[] = (memberProfiles || []).map((profile) => ({
@@ -78,6 +81,7 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
         avatar_url: profile.avatar_url,
         role: profile.role as 'teacher' | 'learner',
         is_teacher: false,
+        email: profile.email,
       }));
 
       setMembers([teacher, ...students]);
@@ -146,7 +150,9 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {teacher.first_name} {teacher.last_name}
+                      {teacher.first_name && teacher.last_name 
+                        ? `${teacher.first_name} ${teacher.last_name}`
+                        : teacher.email || 'Teacher'}
                     </h3>
                     <Badge className="bg-gradient-to-r from-amber-500 to-orange-600 text-white border-0 shadow-md">
                       TEACHER
@@ -191,7 +197,9 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 dark:text-white truncate">
-                        {student.first_name} {student.last_name}
+                        {student.first_name && student.last_name 
+                          ? `${student.first_name} ${student.last_name}`
+                          : student.email || 'Student'}
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                         <User className="h-3 w-3" />
