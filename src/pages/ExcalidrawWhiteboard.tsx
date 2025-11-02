@@ -126,25 +126,25 @@ export default function ExcalidrawWhiteboard() {
   return (
     <div className="h-screen flex flex-col bg-slate-900">
       {/* Header */}
-      <div className="bg-slate-900/95 backdrop-blur-md border-b border-white/10 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="bg-slate-900/95 backdrop-blur-md border-b border-white/10 p-2 md:p-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate(-1)}
-            className="text-white hover:bg-white/10"
+            className="text-white hover:bg-white/10 h-8 w-8 md:h-9 md:w-auto px-2 md:px-3"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            <ArrowLeft className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Back</span>
           </Button>
           <div>
-            <h1 className="text-xl font-bold text-white">{whiteboard.title}</h1>
-            <p className="text-sm text-gray-400">Collaborative Whiteboard</p>
+            <h1 className="text-sm md:text-xl font-bold text-white truncate max-w-[150px] md:max-w-none">{whiteboard.title}</h1>
+            <p className="text-xs md:text-sm text-gray-400 hidden md:block">Collaborative Whiteboard</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full">
-          <Users className="h-4 w-4 text-white" />
-          <span className="text-sm font-medium text-white">{participants} online</span>
+        <div className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1 md:py-2 bg-white/10 rounded-full">
+          <Users className="h-3 w-3 md:h-4 md:w-4 text-white" />
+          <span className="text-xs md:text-sm font-medium text-white">{participants}</span>
         </div>
       </div>
 

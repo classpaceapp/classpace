@@ -165,20 +165,20 @@ const EducatorProfile: React.FC = () => {
 
   return (
     <DashboardLayout userRole={profile?.role === 'teacher' ? 'teacher' : 'learner'}>
-      <div className="container mx-auto px-4 py-8 mt-6">
-        <div className="space-y-6 pl-8">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 mt-3 md:mt-6">
+        <div className="space-y-4 md:space-y-6 pl-0 md:pl-8">
           {/* Header */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <Button
               variant="outline"
               size="icon"
               onClick={() => navigate('/educators')}
-              className="shrink-0"
+              className="shrink-0 h-9 w-9 md:h-10 md:w-10"
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                 Educator Profile
               </h1>
             </div>
@@ -186,28 +186,28 @@ const EducatorProfile: React.FC = () => {
 
           {/* Profile Card */}
           <Card className="border-2 border-teal-500/30 shadow-xl bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-950/20 dark:to-cyan-950/20">
-            <CardHeader className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border-b border-teal-500/20">
-              <div className="flex items-start gap-6">
-                <Avatar className="h-24 w-24 border-4 border-teal-500/40 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border-b border-teal-500/20 p-4 md:p-6">
+              <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6">
+                <Avatar className="h-20 w-20 md:h-24 md:w-24 border-4 border-teal-500/40 shadow-lg mx-auto md:mx-0">
                   <AvatarImage src={educator.profiles.avatar_url || undefined} />
-                  <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white text-2xl font-bold">
+                  <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white text-xl md:text-2xl font-bold">
                     {getInitials(educator.profiles.first_name, educator.profiles.last_name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <CardTitle className="text-3xl bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
+                <div className="flex-1 text-center md:text-left">
+                  <CardTitle className="text-2xl md:text-3xl bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
                     {educator.profiles.first_name} {educator.profiles.last_name}
                   </CardTitle>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Award className="h-5 w-5 text-teal-600" />
-                    <span className="text-lg text-muted-foreground font-medium">
-                      {educator.years_experience} {educator.years_experience === 1 ? 'year' : 'years'} of teaching experience
+                  <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
+                    <Award className="h-4 w-4 md:h-5 md:w-5 text-teal-600" />
+                    <span className="text-sm md:text-lg text-muted-foreground font-medium">
+                      {educator.years_experience} {educator.years_experience === 1 ? 'year' : 'years'} of experience
                     </span>
                   </div>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8 space-y-8">
+            <CardContent className="p-4 md:p-8 space-y-6 md:space-y-8">
               {/* Bio */}
               {educator.profiles.bio && (
                 <div className="space-y-2">

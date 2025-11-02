@@ -156,22 +156,22 @@ const SessionView: React.FC = () => {
 
   return (
     <DashboardLayout userRole={profile?.role || 'learner'}>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 px-3 md:px-0">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={goBackToPod}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-0">
+          <div className="flex items-center gap-2 md:gap-4">
+            <Button variant="ghost" size="icon" onClick={goBackToPod} className="h-9 w-9 md:h-10 md:w-10">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">{sessionTitle}</h1>
-              <p className="text-muted-foreground">{session.pod.title}</p>
+              <h1 className="text-xl md:text-3xl font-bold">{sessionTitle}</h1>
+              <p className="text-sm md:text-base text-muted-foreground">{session.pod.title}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant={isActive ? "default" : "secondary"} className="px-3 py-1">
-              <div className={`w-2 h-2 rounded-full mr-2 ${isActive ? 'bg-green-400' : 'bg-gray-400'}`} />
-              {isActive ? 'Live Session' : 'Session Ended'}
+          <div className="flex items-center gap-2 md:gap-3 ml-11 md:ml-0">
+            <Badge variant={isActive ? "default" : "secondary"} className="px-2 md:px-3 py-1 text-xs md:text-sm">
+              <div className={`w-2 h-2 rounded-full mr-1 md:mr-2 ${isActive ? 'bg-green-400' : 'bg-gray-400'}`} />
+              {isActive ? 'Live' : 'Ended'}
             </Badge>
             {isTeacher && isActive && (
               <Button
@@ -179,9 +179,10 @@ const SessionView: React.FC = () => {
                 disabled={endingSession}
                 variant="destructive"
                 size="sm"
+                className="h-9 md:h-10"
               >
-                <Square className="h-4 w-4 mr-2" />
-                {endingSession ? 'Ending...' : 'End Session'}
+                <Square className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">{endingSession ? 'Ending...' : 'End Session'}</span>
               </Button>
             )}
           </div>
@@ -189,14 +190,14 @@ const SessionView: React.FC = () => {
 
         {/* Session Info */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+              <Clock className="h-4 w-4 md:h-5 md:w-5" />
               Session Details
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="p-4 md:p-6 pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               <div>
                 <p className="text-sm font-medium">Started</p>
                 <p className="text-muted-foreground">

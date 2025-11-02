@@ -286,18 +286,18 @@ const WhiteboardView: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
       {/* Toolbar - Fixed positioning with higher z-index */}
-      <div className="sticky top-0 z-50 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 shadow-2xl px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-white">{whiteboard?.title}</h1>
-          <div className="flex items-center gap-2 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 shadow-2xl px-3 md:px-6 py-2 md:py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-4">
+          <h1 className="text-sm md:text-xl font-bold text-white truncate">{whiteboard?.title}</h1>
+          <div className="hidden md:flex items-center gap-2 text-xs text-white/80 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
             <Users className="h-3.5 w-3.5" />
             <span className="font-medium">Real-time collaboration</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 md:gap-3">
           {/* Drawing tools */}
-          <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-lg p-1.5">
+          <div className="flex items-center gap-0.5 md:gap-1 bg-white/10 backdrop-blur-sm rounded-lg p-1">
             <Button
               size="sm"
               variant={activeTool === 'select' ? 'default' : 'ghost'}
@@ -305,19 +305,19 @@ const WhiteboardView: React.FC = () => {
                 setActiveTool('select');
                 if (fabricCanvas) fabricCanvas.isDrawingMode = false;
               }}
-              className={`h-10 w-10 p-0 ${activeTool === 'select' ? 'bg-white text-purple-600' : 'text-white hover:bg-white/20'}`}
+              className={`h-8 w-8 md:h-10 md:w-10 p-0 ${activeTool === 'select' ? 'bg-white text-purple-600' : 'text-white hover:bg-white/20'}`}
               title="Select"
             >
-              <span className="text-lg">👆</span>
+              <span className="text-base md:text-lg">👆</span>
             </Button>
             <Button
               size="sm"
               variant={activeTool === 'draw' ? 'default' : 'ghost'}
               onClick={() => handleToolClick('draw')}
-              className={`h-10 w-10 p-0 ${activeTool === 'draw' ? 'bg-white text-purple-600' : 'text-white hover:bg-white/20'}`}
+              className={`h-8 w-8 md:h-10 md:w-10 p-0 ${activeTool === 'draw' ? 'bg-white text-purple-600' : 'text-white hover:bg-white/20'}`}
               title="Draw"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3 w-3 md:h-4 md:w-4" />
             </Button>
             <Button
               size="sm"
@@ -365,26 +365,26 @@ const WhiteboardView: React.FC = () => {
             type="color"
             value={activeColor}
             onChange={(e) => setActiveColor(e.target.value)}
-            className="h-10 w-14 rounded-lg border-2 border-white/30 cursor-pointer bg-white/10 backdrop-blur-sm"
+            className="h-8 w-10 md:h-10 md:w-14 rounded-lg border-2 border-white/30 cursor-pointer bg-white/10 backdrop-blur-sm"
             title="Pick color"
           />
 
           {/* Actions */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 md:gap-1.5">
             <Button 
               size="sm" 
               variant="outline" 
               onClick={handleClear}
-              className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm"
+              className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm h-8 px-2 md:h-9 md:px-3"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear
+              <Trash2 className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+              <span className="hidden md:inline">Clear</span>
             </Button>
             <Button 
               size="sm" 
               variant="outline" 
               onClick={handleDownload}
-              className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm"
+              className="hidden md:flex bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm"
             >
               <Download className="h-4 w-4 mr-2" />
               Download
@@ -393,10 +393,10 @@ const WhiteboardView: React.FC = () => {
               size="sm" 
               onClick={handleSave} 
               disabled={saving}
-              className="bg-white text-purple-600 hover:bg-white/90 font-semibold shadow-lg"
+              className="bg-white text-purple-600 hover:bg-white/90 font-semibold shadow-lg h-8 px-2 md:h-9 md:px-3"
             >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Saving...' : 'Save'}
+              <Save className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+              <span className="hidden md:inline">{saving ? 'Saving...' : 'Save'}</span>
             </Button>
           </div>
         </div>

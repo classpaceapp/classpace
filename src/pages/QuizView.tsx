@@ -81,25 +81,25 @@ export default function QuizView() {
 
   return (
     <DashboardLayout userRole="learner">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Button variant="outline" onClick={handleBackToPod} className="mb-6">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 max-w-4xl">
+        <Button variant="outline" onClick={handleBackToPod} className="mb-4 md:mb-6 h-9 md:h-10">
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Pod
         </Button>
         
         <Card className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50/50 to-purple-50/50">
-          <CardHeader>
-            <CardTitle className="text-3xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-xl md:text-3xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               <MathRenderer text={quiz.title} />
             </CardTitle>
             {response?.score !== null && response?.score !== undefined && (
-              <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg border-2 border-green-500/30">
-                <div className="flex items-center gap-3">
-                  <Award className="h-8 w-8 text-green-600" />
+              <div className="mt-3 md:mt-4 p-3 md:p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg border-2 border-green-500/30">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <Award className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
                   <div>
-                    <p className="text-lg font-bold text-green-700 dark:text-green-400">
+                    <p className="text-base md:text-lg font-bold text-green-700 dark:text-green-400">
                       Your Score: {response.score}%
                     </p>
-                    <p className="text-sm text-green-600 dark:text-green-500">
+                    <p className="text-xs md:text-sm text-green-600 dark:text-green-500">
                       {response.score >= 80 ? 'Excellent work!' : response.score >= 60 ? 'Good job!' : 'Keep practicing!'}
                     </p>
                   </div>
@@ -107,21 +107,22 @@ export default function QuizView() {
               </div>
             )}
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
             {quiz.questions.map((q: any, idx: number) => (
               <Card key={idx} className="border-2 border-indigo-500/20">
-                <CardHeader>
-                  <CardTitle className="text-lg">Question {idx + 1}</CardTitle>
-                  <div className="text-foreground font-medium">
+                <CardHeader className="p-3 md:p-6">
+                  <CardTitle className="text-base md:text-lg">Question {idx + 1}</CardTitle>
+                  <div className="text-sm md:text-base text-foreground font-medium">
                     <MathRenderer text={q.question} />
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-3 md:p-6 pt-0">
                   {quiz.quiz_type === 'mcq' ? (
                     <RadioGroup 
                       value={answers[idx]} 
                       onValueChange={(v) => !response && setAnswers({ ...answers, [idx]: v })}
                       disabled={!!response}
+                      className="space-y-2"
                     >
                       {q.options.map((opt: string, optIdx: number) => {
                         const isCorrect = q.correctAnswer === optIdx;
@@ -131,7 +132,7 @@ export default function QuizView() {
                         return (
                           <div 
                             key={optIdx} 
-                            className={`flex items-center space-x-2 p-2 rounded ${
+                            className={`flex items-center space-x-2 p-3 md:p-2 rounded min-h-[48px] md:min-h-0 ${
                               showFeedback 
                                 ? isCorrect 
                                   ? 'bg-green-50 dark:bg-green-950/20 border border-green-500/30' 
@@ -139,15 +140,15 @@ export default function QuizView() {
                                 : ''
                             }`}
                           >
-                            <RadioGroupItem value={String(optIdx)} id={`q${idx}-${optIdx}`} />
-                            <Label htmlFor={`q${idx}-${optIdx}`} className="flex-1 cursor-pointer">
+                            <RadioGroupItem value={String(optIdx)} id={`q${idx}-${optIdx}`} className="h-5 w-5" />
+                            <Label htmlFor={`q${idx}-${optIdx}`} className="flex-1 cursor-pointer text-sm md:text-base">
                               <MathRenderer text={opt} />
                             </Label>
                             {showFeedback && (
                               isCorrect ? (
                                 <CheckCircle2 className="h-5 w-5 text-green-600" />
                               ) : (
-                                <span className="text-red-600 text-sm font-semibold">Incorrect</span>
+                                <span className="text-red-600 text-xs md:text-sm font-semibold">Incorrect</span>
                               )
                             )}
                           </div>
@@ -161,19 +162,20 @@ export default function QuizView() {
                       onChange={(e) => setAnswers({ ...answers, [idx]: e.target.value })}
                       rows={6}
                       disabled={!!response}
+                      className="min-h-[120px] text-base"
                     />
                   )}
                 </CardContent>
               </Card>
             ))}
             
-            <div className="flex gap-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 mt-4">
               {response ? (
-                <Button variant="outline" onClick={() => { setAnswers({}); setResponse(null); }} className="gap-2">
+                <Button variant="outline" onClick={() => { setAnswers({}); setResponse(null); }} className="gap-2 h-12 md:h-10 w-full md:w-auto">
                   <RotateCcw className="h-4 w-4" /> Re-attempt Quiz
                 </Button>
               ) : (
-                <Button onClick={handleSubmit} disabled={submitting} className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600">
+                <Button onClick={handleSubmit} disabled={submitting} className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 h-12 md:h-10 w-full md:w-auto">
                   <Send className="h-4 w-4" /> {submitting ? 'Submitting...' : 'Submit Quiz'}
                 </Button>
               )}

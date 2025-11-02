@@ -366,19 +366,19 @@ const Phoenix: React.FC = () => {
 
   return (
     <DashboardLayout userRole="learner">
-      <div className="flex h-[calc(100vh-80px)] bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
+      <div className="flex h-[calc(100vh-80px)] md:h-[calc(100vh-80px)] bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
         {/* Left Sidebar - Sessions & Transcript */}
-        <div className="w-72 bg-white/60 backdrop-blur-xl border-r border-gray-200 flex flex-col shadow-xl">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
+        <div className="hidden md:flex w-72 bg-white/60 backdrop-blur-xl border-r border-gray-200 flex-col shadow-xl">
+          <div className="p-3 md:p-4 border-b border-gray-200">
+            <div className="flex items-center space-x-2 md:space-x-3 mb-3 md:mb-4">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                   Phoenix
                 </h1>
-                <p className="text-xs text-muted-foreground">AI Teaching Assistant</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground">AI Teaching Assistant</p>
               </div>
             </div>
             
@@ -491,7 +491,7 @@ const Phoenix: React.FC = () => {
 
         {/* Center - Interactive Whiteboard */}
         <div className="flex-1 flex flex-col bg-white/40 backdrop-blur-sm min-w-0">
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-2 md:p-4">
             {!isConnected ? (
               <div className="h-full flex flex-col items-center justify-center text-center px-8">
                 <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-8 shadow-2xl animate-pulse">
@@ -567,7 +567,7 @@ const Phoenix: React.FC = () => {
         </div>
 
         {/* Right Sidebar - Voice Controls */}
-        <div className="w-64 bg-white/60 backdrop-blur-xl border-l border-gray-200 flex flex-col shadow-xl">
+        <div className="hidden lg:flex w-64 bg-white/60 backdrop-blur-xl border-l border-gray-200 flex-col shadow-xl">
           <div className="p-4">
             <h3 className="font-semibold text-lg mb-4">Voice Controls</h3>
             

@@ -171,17 +171,17 @@ const Profile: React.FC = () => {
 
           {/* Settings Form */}
           <Card className="lg:col-span-2 bg-white/60 backdrop-blur-sm border-border">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <User className="h-5 w-5 text-purple-600" />
+            <CardHeader className="pb-3 md:pb-4 p-4 md:p-6">
+              <CardTitle className="flex items-center gap-2 text-foreground text-base md:text-lg">
+                <User className="h-4 w-4 md:h-5 md:w-5 text-purple-600" />
                 Personal Information
               </CardTitle>
-              <CardDescription className="text-foreground/60">
+              <CardDescription className="text-foreground/60 text-sm md:text-base">
                 Update your personal details and contact information
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6 pt-0">
+              <div className="grid grid-cols-1 gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="first_name" className="text-sm font-medium">
                     First Name
@@ -191,7 +191,7 @@ const Profile: React.FC = () => {
                     value={formData.first_name}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
                     placeholder="Enter your first name"
-                    className="bg-background/50 border-border/50 focus:border-primary/50"
+                    className="bg-background/50 border-border/50 focus:border-primary/50 h-12 md:h-10 text-base"
                   />
                 </div>
 
@@ -204,7 +204,7 @@ const Profile: React.FC = () => {
                     value={formData.last_name}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
                     placeholder="Enter your last name"
-                    className="bg-background/50 border-border/50 focus:border-primary/50"
+                    className="bg-background/50 border-border/50 focus:border-primary/50 h-12 md:h-10 text-base"
                   />
                 </div>
               </div>
@@ -219,7 +219,7 @@ const Profile: React.FC = () => {
                     type="email"
                     value={formData.email}
                     readOnly
-                    className="bg-background/50 border-border/50 focus:border-primary/50"
+                    className="bg-background/50 border-border/50 focus:border-primary/50 h-12 md:h-10 text-base"
                   />
                 </div>
 
@@ -234,11 +234,11 @@ const Profile: React.FC = () => {
                     value={formData.phone_number}
                     onChange={(e) => handleInputChange('phone_number', e.target.value)}
                     placeholder="Enter your phone number"
-                    className="bg-background/50 border-border/50 focus:border-primary/50"
+                    className="bg-background/50 border-border/50 focus:border-primary/50 h-12 md:h-10 text-base"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 md:gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="date_of_birth" className="text-sm font-medium flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
@@ -249,7 +249,7 @@ const Profile: React.FC = () => {
                       type="date"
                       value={formData.date_of_birth}
                       onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                      className="bg-background/50 border-border/50 focus:border-primary/50"
+                      className="bg-background/50 border-border/50 focus:border-primary/50 h-12 md:h-10 text-base"
                     />
                   </div>
                   <div className="space-y-2">
@@ -261,16 +261,16 @@ const Profile: React.FC = () => {
                       value={formData.bio}
                       onChange={(e) => handleInputChange('bio', e.target.value)}
                       placeholder="Tell us a bit about yourself"
-                      className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[120px]"
+                      className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[120px] text-base"
                     />
                   </div>
                 </div>
 
-              <div className="pt-5 border-t border-border">
+              <div className="pt-4 md:pt-5 border-t border-border">
                 <Button 
                   onClick={handleSave} 
                   disabled={loading}
-                  className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg font-medium"
+                  className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg font-medium h-12 md:h-10"
                 >
                   {loading ? (
                     <>
