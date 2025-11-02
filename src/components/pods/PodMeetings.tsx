@@ -196,12 +196,14 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
   return (
     <div className="space-y-6">
       {/* Live Meeting Section */}
-      <Card className="border-3 border-purple-500/40 bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-purple-50/50 dark:from-purple-950/30 dark:via-pink-950/20 dark:to-purple-950/30 shadow-xl shadow-purple-500/10">
-        <CardHeader>
-          <CardTitle className="text-2xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-3">
-            <Users className="h-6 w-6 text-purple-500" />
-            Live Meeting Room
-          </CardTitle>
+      <Card className="border-2 border-purple-500/30 shadow-2xl bg-gradient-to-br from-purple-100/90 via-pink-100/90 to-fuchsia-100/90 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-fuchsia-900/40 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-purple-600 via-pink-600 to-fuchsia-600 border-b-2 border-purple-400/50 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <Users className="h-6 w-6 md:h-7 md:w-7 text-white" />
+            </div>
+            <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Live Meeting Room</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {activeMeeting ? (

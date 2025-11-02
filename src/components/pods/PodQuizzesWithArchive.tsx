@@ -273,16 +273,18 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
 
       {/* Inline Quiz Generation Form */}
       {!showArchived && showGenerateForm && !quizLimitReached && (
-        <Card className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50 dark:from-indigo-950/20 dark:to-purple-950/20 overflow-hidden relative z-10">
+        <Card className="border-2 border-indigo-500/30 shadow-2xl bg-gradient-to-br from-indigo-100/90 via-purple-100/90 to-violet-100/90 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-violet-900/40 backdrop-blur-sm overflow-hidden relative z-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(99,102,241,0.1),transparent_50%)]" />
-          <CardHeader className="relative border-b border-indigo-500/20 bg-gradient-to-r from-indigo-500/5 to-purple-500/5">
-            <CardTitle className="text-2xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-indigo-600" />
-              Generate AI Quiz with Web Search
-            </CardTitle>
-            <CardDescription>
-              Our AI will search the web for authentic past papers and examination questions tailored to your specifications
-            </CardDescription>
+          <CardHeader className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 border-b-2 border-indigo-400/50 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+                <Sparkles className="h-6 w-6 md:h-7 md:w-7 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Generate AI Quiz</CardTitle>
+                <p className="text-sm text-white/80 mt-1">Using web search for authentic exam questions</p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="relative pt-6 space-y-4">
             <div className="space-y-2">

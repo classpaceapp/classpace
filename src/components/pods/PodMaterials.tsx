@@ -292,19 +292,21 @@ export const PodMaterials: React.FC<PodMaterialsProps> = ({ podId, isTeacher }) 
       <AutoFlashcards podId={podId} />
 
       {/* Learning Materials */}
-      <Card className="border-primary/20 bg-gradient-to-br from-card via-card/95 to-primary/5 mt-6">
-        <CardHeader className="border-b border-primary/10">
+      <Card className="border-2 border-rose-500/30 shadow-2xl bg-gradient-to-br from-rose-100/90 via-pink-100/90 to-red-100/90 dark:from-rose-900/40 dark:via-pink-900/40 dark:to-red-900/40 backdrop-blur-sm mt-6">
+        <CardHeader className="bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 border-b-2 border-rose-400/50 shadow-lg">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Learning Materials
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+                <FileText className="h-6 w-6 md:h-7 md:w-7 text-white" />
+              </div>
+              <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Learning Materials</CardTitle>
+            </div>
             {isTeacher && (
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90">
-                    <Upload className="h-4 w-4" />
-                    Upload Material
+                  <Button size="sm" className="gap-2 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 font-semibold shadow-md h-10 md:h-9 px-4">
+                    <Upload className="h-5 w-5 md:h-4 md:w-4" />
+                    <span className="text-sm md:text-sm">Upload Material</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">

@@ -173,14 +173,16 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
   const students = members.filter(m => !m.is_teacher);
 
   return (
-    <Card className="border-2 border-emerald-500/30 shadow-xl bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20">
-      <CardHeader className="border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 to-teal-500/10">
+    <Card className="border-2 border-emerald-500/30 shadow-2xl bg-gradient-to-br from-emerald-100/90 via-teal-100/90 to-cyan-100/90 dark:from-emerald-900/40 dark:via-teal-900/40 dark:to-cyan-900/40 backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 border-b-2 border-emerald-400/50 shadow-lg">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent flex items-center gap-2">
-            <Users className="h-6 w-6 text-emerald-600" />
-            Pod Members
-          </CardTitle>
-          <Badge variant="secondary" className="text-lg px-4 py-1">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <Users className="h-6 w-6 md:h-7 md:w-7 text-white" />
+            </div>
+            <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Pod Members</CardTitle>
+          </div>
+          <Badge className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-semibold shadow-md text-base px-4 py-1">
             {members.length} {members.length === 1 ? 'Member' : 'Members'}
           </Badge>
         </div>
