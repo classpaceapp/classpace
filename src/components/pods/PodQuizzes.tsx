@@ -404,7 +404,8 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
           ))
         )}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

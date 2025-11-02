@@ -169,21 +169,24 @@ const TeacherDashboard: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-3 md:p-8">
           {/* Welcome Section */}
           <div className="mb-6 md:mb-12">
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-2xl border border-white/20">
-              <div className="flex items-center space-x-3 md:space-x-4 mb-3 md:mb-4">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Welcome back, {(profile?.first_name || '') + (profile?.last_name ? ` ${profile.last_name}` : '') || user?.email?.split('@')[0]}!
-                  </h1>
-                  <p className="text-sm md:text-xl text-gray-600 mt-1 md:mt-2">
-                    Ready to inspire and educate? Here's what's happening in your classroom.
-                  </p>
+            <Card className="border-0 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden">
+              <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 md:p-10">
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
+                <div className="relative flex items-center gap-4 md:gap-6">
+                  <div className="w-16 h-16 md:w-24 md:h-24 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center shrink-0 shadow-2xl border-2 border-white/40">
+                    <Sparkles className="h-8 w-8 md:h-12 md:w-12 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-2">
+                      Welcome back, {(profile?.first_name || '') + (profile?.last_name ? ` ${profile.last_name}` : '') || user?.email?.split('@')[0]}!
+                    </h1>
+                    <p className="text-base md:text-2xl text-white/95 font-medium drop-shadow-md">
+                      Ready to inspire and educate? Here's what's happening in your classroom.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Stats and Subscription Section */}

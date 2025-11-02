@@ -286,6 +286,125 @@ export type Database = {
           },
         ]
       }
+      personal_flashcard_cards: {
+        Row: {
+          card_order: number
+          content: string
+          created_at: string | null
+          flashcard_set_id: string
+          hint: string
+          id: string
+        }
+        Insert: {
+          card_order: number
+          content: string
+          created_at?: string | null
+          flashcard_set_id: string
+          hint: string
+          id?: string
+        }
+        Update: {
+          card_order?: number
+          content?: string
+          created_at?: string | null
+          flashcard_set_id?: string
+          hint?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "personal_flashcard_cards_flashcard_set_id_fkey"
+            columns: ["flashcard_set_id"]
+            isOneToOne: false
+            referencedRelation: "personal_flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personal_flashcards: {
+        Row: {
+          archived: boolean
+          card_count: number
+          created_at: string | null
+          curriculum: string
+          id: string
+          subtopic: string | null
+          title: string
+          topic: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          card_count?: number
+          created_at?: string | null
+          curriculum: string
+          id?: string
+          subtopic?: string | null
+          title: string
+          topic: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          card_count?: number
+          created_at?: string | null
+          curriculum?: string
+          id?: string
+          subtopic?: string | null
+          title?: string
+          topic?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      personal_quizzes: {
+        Row: {
+          archived: boolean
+          created_at: string | null
+          curriculum: string | null
+          id: string
+          questions: Json
+          quiz_type: string
+          subject: string | null
+          subtopic: string | null
+          title: string
+          topic: string | null
+          user_id: string
+          year_level: string | null
+        }
+        Insert: {
+          archived?: boolean
+          created_at?: string | null
+          curriculum?: string | null
+          id?: string
+          questions?: Json
+          quiz_type: string
+          subject?: string | null
+          subtopic?: string | null
+          title: string
+          topic?: string | null
+          user_id: string
+          year_level?: string | null
+        }
+        Update: {
+          archived?: boolean
+          created_at?: string | null
+          curriculum?: string | null
+          id?: string
+          questions?: Json
+          quiz_type?: string
+          subject?: string | null
+          subtopic?: string | null
+          title?: string
+          topic?: string | null
+          user_id?: string
+          year_level?: string | null
+        }
+        Relationships: []
+      }
       phoenix_sessions: {
         Row: {
           created_at: string | null
