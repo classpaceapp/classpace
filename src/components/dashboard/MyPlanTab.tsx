@@ -124,70 +124,70 @@ export const MyPlanTab: React.FC = () => {
         ];
 
   return (
-    <div className="p-8 min-h-screen">
+    <div className="p-3 md:p-8 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-8 h-8 text-white" />
+        <div className="mb-6 md:mb-12">
+          <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-6 h-6 md:w-8 md:w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-600 bg-clip-text text-transparent inline-block leading-tight pb-1">
+              <h1 className="text-2xl md:text-5xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-600 bg-clip-text text-transparent inline-block leading-tight pb-1">
                 My Plan
               </h1>
             </div>
           </div>
-          <p className="text-lg text-foreground/70">
+          <p className="text-sm md:text-lg text-foreground/70">
             Manage your subscription
           </p>
         </div>
 
-        <Card className={`border-2 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl ${
+        <Card className={`border-2 backdrop-blur-sm rounded-xl md:rounded-2xl overflow-hidden shadow-2xl ${
           isPremium ? 'border-purple-500/30 bg-gradient-to-br from-card/80 to-card/50 hover:shadow-purple-500/20' : 'border-border/30 bg-gradient-to-br from-card/80 to-card/50'
         }`}>
-          <CardHeader className={`p-8 border-b-2 ${
+          <CardHeader className={`p-4 md:p-8 border-b-2 ${
             isPremium 
               ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 border-purple-500/30' 
               : 'bg-gradient-to-r from-foreground/10 to-foreground/5 border-border/30'
           }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg ${
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg ${
                   isPremium ? 'bg-white/20' : 'bg-background/50'
                 }`}>
-                  {isPremium ? <Crown className="h-8 w-8 text-white" /> : <Sparkles className="h-8 w-8 text-foreground/60" />}
+                  {isPremium ? <Crown className="h-6 w-6 md:h-8 md:w-8 text-white" /> : <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-foreground/60" />}
                 </div>
                 <div>
-                  <CardTitle className={`text-3xl font-bold ${isPremium ? 'text-white' : 'text-foreground'}`}>
+                  <CardTitle className={`text-xl md:text-3xl font-bold ${isPremium ? 'text-white' : 'text-foreground'}`}>
                     {planName}
                   </CardTitle>
-                  <CardDescription className={`text-base ${isPremium ? 'text-white/80' : 'text-muted-foreground'}`}>
+                  <CardDescription className={`text-sm md:text-base ${isPremium ? 'text-white/80' : 'text-muted-foreground'}`}>
                     {isPremium ? 'All premium features' : 'Core features'}
                   </CardDescription>
                 </div>
               </div>
               {isPremium && (
-                <Badge className="bg-white text-purple-600 hover:bg-white font-bold px-4 py-2 text-base shadow-lg">
+                <Badge className="bg-white text-purple-600 hover:bg-white font-bold px-3 md:px-4 py-1 md:py-2 text-sm md:text-base shadow-lg">
                   Active
                 </Badge>
               )}
             </div>
           </CardHeader>
           
-          <CardContent className="p-8">
-            <div className="space-y-6 mb-8">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+          <CardContent className="p-4 md:p-8">
+            <div className="space-y-4 md:space-y-6 mb-6 md:mb-8">
+              <h3 className="text-base md:text-xl font-bold text-foreground flex items-center gap-2 md:gap-3">
                 {isPremium ? '✓ Your benefits' : '→ Unlock with premium'}
               </h3>
-              <ul className="space-y-4">
+              <ul className="space-y-3 md:space-y-4">
                 {features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-4 bg-muted/20 rounded-xl p-4 border border-border/20">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+                  <li key={index} className="flex items-start gap-3 md:gap-4 bg-muted/20 rounded-lg md:rounded-xl p-3 md:p-4 border border-border/20">
+                    <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
                       isPremium ? 'bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30' : 'bg-muted border-border'
                     }`}>
-                      <Check className={`h-4 w-4 font-bold ${isPremium ? 'text-green-600' : 'text-muted-foreground'}`} />
+                      <Check className={`h-3 w-3 md:h-4 md:w-4 font-bold ${isPremium ? 'text-green-600' : 'text-muted-foreground'}`} />
                     </div>
-                    <span className="text-foreground font-medium leading-relaxed">{feature}</span>
+                    <span className="text-foreground font-medium leading-relaxed text-sm md:text-base">{feature}</span>
                   </li>
                 ))}
               </ul>

@@ -91,41 +91,41 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-3 md:p-4">
       {/* Back Button */}
       <Button 
         onClick={() => navigate("/")}
         variant="ghost"
-        className="fixed top-4 left-4 z-50 text-white hover:bg-white/10"
+        className="fixed top-2 left-2 md:top-4 md:left-4 z-50 text-white hover:bg-white/10 h-8 md:h-10"
       >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back to Home
+        <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+        <span className="text-xs md:text-sm">Back to Home</span>
       </Button>
 
       <Card className="w-full max-w-md shadow-2xl border-gray-700 bg-gray-800/90 backdrop-blur-md">
-        <CardHeader className="text-center space-y-4">
+        <CardHeader className="text-center space-y-3 md:space-y-4 p-4 md:p-6">
           <button 
             onClick={() => navigate("/")}
-            className="flex items-center justify-center space-x-3 hover:opacity-80 transition-opacity mx-auto"
+            className="flex items-center justify-center space-x-2 md:space-x-3 hover:opacity-80 transition-opacity mx-auto"
           >
             <img 
               src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
               alt="Classpace Logo" 
-              className="w-8 h-8"
+              className="w-6 h-6 md:w-8 md:h-8"
             />
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Classpace
             </span>
           </button>
-          <CardTitle className="text-2xl text-white font-bold">
+          <CardTitle className="text-xl md:text-2xl text-white font-bold">
             {isSignUp ? "Create your account" : "Sign in to continue"}
           </CardTitle>
-          <CardDescription className="text-gray-300">
+          <CardDescription className="text-gray-300 text-sm md:text-base">
             {isSignUp ? "Join thousands of educators and learners" : "Welcome back to your learning journey"}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
           {/* Role Selection - Only show for sign up */}
           {isSignUp && (
             <div className="space-y-3">
