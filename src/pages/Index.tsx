@@ -86,15 +86,15 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3">
               <img 
                 src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
                 alt="Classpace Logo" 
-                className="w-8 h-8 md:w-10 md:h-10"
+                className="w-7 h-7 md:w-10 md:h-10"
               />
-              <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Classpace
               </span>
             </div>
@@ -135,20 +135,20 @@ const Index = () => {
       </header>
 
       {/* Hero Section - Enhanced prominence for desktop */}
-      <section className="relative py-16 md:py-40 lg:py-48 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="container mx-auto px-4">
+      <section className="relative py-12 md:py-40 lg:py-48 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="container mx-auto px-3 md:px-4">
           <div className="text-center max-w-6xl mx-auto">
             <div className="animate-fade-in">
-              <h1 className="text-5xl md:text-8xl lg:text-9xl font-bold mb-6 md:mb-8 leading-[1.1] tracking-tight text-clip-fix bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-3xl md:text-8xl lg:text-9xl font-bold mb-4 md:mb-8 leading-[1.1] tracking-tight text-clip-fix bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent px-2">
                 Learn and Teach Anything
               </h1>
-              <p className="text-2xl md:text-4xl lg:text-5xl font-semibold text-gray-200 mb-8 md:mb-12">
+              <p className="text-lg md:text-4xl lg:text-5xl font-semibold text-gray-200 mb-6 md:mb-12 px-2">
                 with the world's first AI-native classroom and workspace
               </p>
             </div>
             
             <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <p className="text-xl md:text-3xl lg:text-4xl mb-12 md:mb-20 max-w-5xl mx-auto leading-relaxed font-medium bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent">
+              <p className="text-base md:text-3xl lg:text-4xl mb-8 md:mb-20 max-w-5xl mx-auto leading-relaxed font-medium bg-gradient-to-r from-green-400 via-emerald-400 to-green-500 bg-clip-text text-transparent px-2">
                 AI-powered shared workspaces where teachers and learners collaborate, 
                 share knowledge, and grow through intelligent conversations.
               </p>
@@ -177,13 +177,13 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 overflow-hidden">
-        <div className="container mx-auto px-4 mb-16">
+      <section className="py-12 md:py-32 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 overflow-hidden">
+        <div className="container mx-auto px-3 md:px-4 mb-10 md:mb-16">
           <div className="text-center">
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h2 className="text-2xl md:text-6xl font-bold text-white mb-4 md:mb-6 px-2">
               Powered by <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Intelligence</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto px-3">
               Revolutionary AI features that transform how you teach and learn
             </p>
           </div>
@@ -215,13 +215,13 @@ const Index = () => {
       </section>
 
       {/* Domains Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-        <div className="container mx-auto px-4 mb-16">
+      <section className="py-12 md:py-32 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+        <div className="container mx-auto px-3 md:px-4 mb-10 md:mb-16">
           <div className="text-center">
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h2 className="text-2xl md:text-6xl font-bold text-white mb-4 md:mb-6 px-2">
               Perfect for <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Every Domain</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-4xl mx-auto">
+            <p className="text-base md:text-xl text-gray-300 max-w-4xl mx-auto px-3">
               Whether you're teaching online or in-person, Classpace adapts to any subject, 
               skill, or learning environment with seamless precision.
             </p>
@@ -255,13 +255,13 @@ const Index = () => {
 
       {/* CTA Section */}
       {!user && (
-        <section className="py-20 md:py-32 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600">
-          <div className="container mx-auto px-4 text-center">
-            <div className="max-w-4xl mx-auto text-white">
-              <h2 className="text-4xl md:text-6xl font-bold mb-8">
+        <section className="py-12 md:py-32 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600">
+          <div className="container mx-auto px-3 md:px-4 text-center">
+            <div className="max-w-4xl mx-auto text-white px-2">
+              <h2 className="text-2xl md:text-6xl font-bold mb-6 md:mb-8">
                 Ready to Transform Learning?
               </h2>
-              <p className="text-xl md:text-2xl mb-12 opacity-90">
+              <p className="text-base md:text-2xl mb-8 md:mb-12 opacity-90">
                 Join thousands of educators and learners already using Classpace
               </p>
               <Button 
@@ -279,8 +279,8 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
-        <div className="container mx-auto px-4 py-12 md:py-16">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+        <div className="container mx-auto px-3 md:px-4 py-8 md:py-16">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12">
             {/* Brand Section */}
             <div className="lg:col-span-1">
               <div className="flex items-center space-x-3 mb-6">

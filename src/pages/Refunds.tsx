@@ -174,7 +174,7 @@ const Refunds = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
             <button 
               onClick={() => navigate("/")}
@@ -201,15 +201,15 @@ const Refunds = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 md:py-16 max-w-4xl">
-        <div className="text-center mb-12 md:mb-16">
-          <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
-            <CreditCard className="w-10 h-10 text-white" />
+      <main className="container mx-auto px-3 md:px-4 py-6 md:py-16 max-w-4xl">
+        <div className="text-center mb-8 md:mb-16">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-2xl">
+            <CreditCard className="w-8 h-8 md:w-10 md:h-10 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 md:mb-6 px-2">
             Refund Policy
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-gray-300 max-w-2xl mx-auto px-3">
             We stand behind our product. If you're not satisfied, we'll make it right.
           </p>
         </div>

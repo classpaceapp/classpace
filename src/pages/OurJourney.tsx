@@ -10,7 +10,7 @@ const OurJourney = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
             <button 
               onClick={() => navigate("/")}
@@ -37,9 +37,9 @@ const OurJourney = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-20 md:py-32 flex items-center justify-center min-h-[80vh]">
+      <main className="container mx-auto px-3 md:px-4 py-12 md:py-32 flex items-center justify-center min-h-[80vh]">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="relative bg-gradient-to-br from-white via-purple-50 to-pink-50 rounded-3xl shadow-2xl p-12 md:p-20 border-2 border-purple-200 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-white via-purple-50 to-pink-50 rounded-2xl md:rounded-3xl shadow-2xl p-6 md:p-20 border-2 border-purple-200 overflow-hidden">
             {/* Animated background gradient */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-pink-400/10 to-purple-400/10 animate-pulse"></div>
             <div className="absolute -top-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
@@ -50,14 +50,14 @@ const OurJourney = () => {
                 <Mail className="w-10 h-10 md:w-14 md:h-14 text-white" />
               </div>
               
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
+              <h1 className="text-2xl md:text-6xl font-bold text-gray-900 mb-6 md:mb-8 leading-tight">
                 Revolutionizing Education for
                 <span className="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-2">
                   the AI Era
                 </span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-gray-700 mb-12 leading-relaxed max-w-3xl mx-auto">
+              <p className="text-base md:text-2xl text-gray-700 mb-8 md:mb-12 leading-relaxed max-w-3xl mx-auto">
                 We're building the future of teaching and learning through intelligent, 
                 collaborative spaces that adapt to every educator's needs.
               </p>

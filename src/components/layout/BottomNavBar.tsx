@@ -64,23 +64,25 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ userRole }) => {
               key={tab.name}
               onClick={() => handleNavigation(tab.href, tab.name)}
               className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ${
-                active ? 'text-primary' : 'text-muted-foreground'
+                active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <div className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-200 ${
-                active ? 'bg-primary/10 scale-105' : ''
+              <div className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 ${
+                active ? 'bg-primary/15 scale-105' : 'hover:bg-muted'
               }`}>
                 {typeof tab.icon === 'string' ? (
                   tab.icon === 'learnspace' ? (
-                    <img src={learnspaceLogo} alt="Learnspace" className="h-6 w-6" />
+                    <img src={learnspaceLogo} alt="Learnspace" className={`h-5 w-5 transition-all ${active ? 'brightness-125' : ''}`} />
                   ) : tab.icon === 'phoenix' ? (
-                    <img src={phoenixLogo} alt="Phoenix" className="h-6 w-6" />
+                    <img src={phoenixLogo} alt="Phoenix" className={`h-5 w-5 transition-all ${active ? 'brightness-125' : ''}`} />
                   ) : null
                 ) : (
-                  React.createElement(tab.icon, { className: 'h-6 w-6' })
+                  React.createElement(tab.icon, { 
+                    className: `h-5 w-5 transition-colors ${active ? 'text-primary' : ''}` 
+                  })
                 )}
               </div>
-              <span className={`text-xs mt-1 font-medium ${active ? 'font-semibold' : ''}`}>
+              <span className={`text-xs mt-1 transition-all ${active ? 'font-semibold text-primary' : 'font-medium'}`}>
                 {tab.name}
               </span>
             </button>

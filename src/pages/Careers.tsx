@@ -125,7 +125,7 @@ const Careers = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
             <button 
               onClick={() => navigate("/")}
@@ -152,19 +152,19 @@ const Careers = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 md:py-16 max-w-4xl">
+      <main className="container mx-auto px-3 md:px-4 py-6 md:py-16 max-w-4xl">
         {/* Hero Section */}
-        <div className="text-center mb-12 md:mb-16">
-          <div className="relative inline-block mb-8">
+        <div className="text-center mb-8 md:mb-16">
+          <div className="relative inline-block mb-6 md:mb-8">
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 blur-2xl opacity-50 animate-pulse"></div>
-            <div className="relative w-24 h-24 bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl flex items-center justify-center shadow-2xl">
-              <Briefcase className="w-12 h-12 text-white" />
+            <div className="relative w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-2xl">
+              <Briefcase className="w-8 h-8 md:w-12 md:h-12 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-3xl md:text-6xl font-bold text-white mb-4 md:mb-6 leading-tight px-2">
             Join Our Team
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-3">
             Help us revolutionize education for the{" "}
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold">
               AI Era

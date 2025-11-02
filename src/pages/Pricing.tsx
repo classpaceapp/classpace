@@ -113,7 +113,7 @@ const Pricing = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
             <button 
               onClick={() => navigate("/")}
@@ -140,25 +140,25 @@ const Pricing = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-12 md:py-20">
-        <div className="text-center mb-12 md:mb-20">
-          <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-8 leading-tight pb-2">
+      <main className="container mx-auto px-3 md:px-4 py-8 md:py-20">
+        <div className="text-center mb-8 md:mb-20">
+          <h1 className="text-3xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6 md:mb-8 leading-tight pb-2 px-2">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-base md:text-2xl text-gray-300 max-w-3xl mx-auto px-3">
             Choose the perfect plan for your needs. Separate plans for teachers and students.
           </p>
         </div>
 
         {/* Teacher Plans */}
-        <div className="mb-20">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-8 text-white">
+        <div className="mb-12 md:mb-20">
+          <h2 className="text-2xl md:text-5xl font-bold text-center mb-4 md:mb-8 text-white px-2">
             For Teachers
           </h2>
-          <p className="text-lg text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-300 text-center mb-8 md:mb-12 max-w-2xl mx-auto px-3">
             Manage classrooms and create AI-powered learning pods
           </p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
             {teacherPlans.map((plan, index) => {
               const IconComponent = plan.icon;
               return (
@@ -202,14 +202,14 @@ const Pricing = () => {
         </div>
 
         {/* Student Plans */}
-        <div className="mb-16 md:mb-24">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-8 text-white">
+        <div className="mb-12 md:mb-24">
+          <h2 className="text-2xl md:text-5xl font-bold text-center mb-4 md:mb-8 text-white px-2">
             For Students
           </h2>
-          <p className="text-lg text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-gray-300 text-center mb-8 md:mb-12 max-w-2xl mx-auto px-3">
             Enhance your learning with AI-powered tools
           </p>
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
             {studentPlans.map((plan, index) => {
               const IconComponent = plan.icon;
               return (

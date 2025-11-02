@@ -10,7 +10,7 @@ const Terms = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img 
@@ -34,16 +34,16 @@ const Terms = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 md:py-16 max-w-5xl">
+      <main className="container mx-auto px-3 md:px-4 py-6 md:py-16 max-w-5xl">
         {/* Hero Section */}
-        <div className="text-center mb-12 md:mb-20">
-          <div className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
-            <Scale className="w-10 h-10 md:w-14 md:h-14 text-white" />
+        <div className="text-center mb-8 md:mb-20">
+          <div className="w-16 h-16 md:w-28 md:h-28 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8 shadow-2xl">
+            <Scale className="w-8 h-8 md:w-14 md:h-14 text-white" />
           </div>
-          <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-8">
+          <h1 className="text-3xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6 md:mb-8 px-2">
             Terms & Conditions
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-base md:text-2xl text-gray-300 max-w-3xl mx-auto px-3">
             Clear, transparent terms that protect both you and Classpace while ensuring a great experience for everyone.
           </p>
         </div>
