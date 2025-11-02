@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, Download, FileText, Trash2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { AutoFlashcards } from './AutoFlashcards';
 
 interface Material {
   id: string;
@@ -287,7 +288,11 @@ export const PodMaterials: React.FC<PodMaterialsProps> = ({ podId, isTeacher }) 
 
   return (
     <>
-      <Card className="border-primary/20 bg-gradient-to-br from-card via-card/95 to-primary/5">
+      {/* Auto Flashcards Module */}
+      <AutoFlashcards podId={podId} />
+
+      {/* Learning Materials */}
+      <Card className="border-primary/20 bg-gradient-to-br from-card via-card/95 to-primary/5 mt-6">
         <CardHeader className="border-b border-primary/10">
           <div className="flex items-center justify-between">
             <CardTitle className="text-primary flex items-center gap-2">

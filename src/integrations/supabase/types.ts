@@ -46,6 +46,41 @@ export type Database = {
           },
         ]
       }
+      flashcard_cards: {
+        Row: {
+          card_order: number
+          content: string
+          created_at: string | null
+          flashcard_set_id: string
+          hint: string
+          id: string
+        }
+        Insert: {
+          card_order: number
+          content: string
+          created_at?: string | null
+          flashcard_set_id: string
+          hint: string
+          id?: string
+        }
+        Update: {
+          card_order?: number
+          content?: string
+          created_at?: string | null
+          flashcard_set_id?: string
+          hint?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcard_cards_flashcard_set_id_fkey"
+            columns: ["flashcard_set_id"]
+            isOneToOne: false
+            referencedRelation: "pod_flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_chats: {
         Row: {
           created_at: string
@@ -280,6 +315,53 @@ export type Database = {
           whiteboard_state?: Json | null
         }
         Relationships: []
+      }
+      pod_flashcards: {
+        Row: {
+          card_count: number
+          created_at: string | null
+          created_by: string
+          curriculum: string
+          id: string
+          pod_id: string
+          subtopic: string | null
+          title: string
+          topic: string
+          updated_at: string | null
+        }
+        Insert: {
+          card_count?: number
+          created_at?: string | null
+          created_by: string
+          curriculum: string
+          id?: string
+          pod_id: string
+          subtopic?: string | null
+          title: string
+          topic: string
+          updated_at?: string | null
+        }
+        Update: {
+          card_count?: number
+          created_at?: string | null
+          created_by?: string
+          curriculum?: string
+          id?: string
+          pod_id?: string
+          subtopic?: string | null
+          title?: string
+          topic?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pod_flashcards_pod_id_fkey"
+            columns: ["pod_id"]
+            isOneToOne: false
+            referencedRelation: "pods"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pod_materials: {
         Row: {
