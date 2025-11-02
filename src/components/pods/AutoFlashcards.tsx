@@ -139,10 +139,10 @@ export const AutoFlashcards = ({ podId }: AutoFlashcardsProps) => {
 
   if (loading) {
     return (
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+      <Card className="border-2 border-rose-500/30 shadow-2xl bg-gradient-to-br from-rose-100/90 via-pink-100/90 to-red-100/90 dark:from-rose-900/40 dark:via-pink-900/40 dark:to-red-900/40 backdrop-blur-sm">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-rose-500" />
           </div>
         </CardContent>
       </Card>

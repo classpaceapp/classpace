@@ -170,10 +170,13 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
   const displayQuizzes = quizzes.filter(q => q.archived === showArchived);
 
   if (loading) {
-    return <div className="animate-pulse space-y-4">
-      <div className="h-32 bg-muted rounded-lg"></div>
-      <div className="h-32 bg-muted rounded-lg"></div>
-    </div>;
+    return (
+      <Card className="border-2 border-indigo-500/30 shadow-2xl bg-gradient-to-br from-indigo-100/90 via-purple-100/90 to-violet-100/90 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-violet-900/40 backdrop-blur-sm">
+        <CardContent className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

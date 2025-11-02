@@ -161,9 +161,9 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
 
   if (loading) {
     return (
-      <Card className="border-primary/20">
+      <Card className="border-2 border-emerald-500/30 shadow-2xl bg-gradient-to-br from-emerald-100/90 via-teal-100/90 to-cyan-100/90 dark:from-emerald-900/40 dark:via-teal-900/40 dark:to-cyan-900/40 backdrop-blur-sm">
         <CardContent className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
         </CardContent>
       </Card>
     );

@@ -187,10 +187,13 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
   }
 
   if (loading) {
-    return <div className="animate-pulse space-y-4">
-      <div className="h-32 bg-muted rounded-lg"></div>
-      <div className="h-32 bg-muted rounded-lg"></div>
-    </div>;
+    return (
+      <Card className="border-2 border-purple-500/30 shadow-2xl bg-gradient-to-br from-purple-100/90 via-pink-100/90 to-fuchsia-100/90 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-fuchsia-900/40 backdrop-blur-sm">
+        <CardContent className="flex items-center justify-center h-96">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

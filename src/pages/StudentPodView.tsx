@@ -269,13 +269,18 @@ const StudentPodView: React.FC = () => {
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
-            <Card className="border-2 border-blue-500/30 shadow-xl bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20">
-              <CardHeader className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border-b border-blue-500/20">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Pod Information</CardTitle>
+            <Card className="border-2 border-blue-500/30 shadow-2xl bg-gradient-to-br from-blue-100/90 via-indigo-100/90 to-purple-100/90 dark:from-blue-900/40 dark:via-indigo-900/40 dark:to-purple-900/40 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 border-b-2 border-blue-400/50 shadow-lg">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+                      <Users className="h-6 w-6 md:h-7 md:w-7 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Pod Information</CardTitle>
+                  </div>
                   <Button 
                     variant="outline"
-                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    className="bg-red-500/20 backdrop-blur-sm border-red-400/40 text-white hover:bg-red-500/40 hover:border-red-400/60 font-semibold shadow-md"
                     onClick={handleLeavePod}
                     disabled={leaving}
                   >
@@ -283,26 +288,26 @@ const StudentPodView: React.FC = () => {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm text-muted-foreground">Title</label>
-                    <p className="font-medium text-lg">{pod.title}</p>
+              <CardContent className="p-6 md:p-8">
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 rounded-xl p-5 border-2 border-blue-300/30 shadow-md">
+                    <label className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2 block">Pod Title</label>
+                    <p className="font-bold text-xl md:text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">{pod.title}</p>
                   </div>
                   {pod.description && (
-                    <div>
-                      <label className="text-sm text-muted-foreground">Description</label>
-                      <p className="font-medium">{pod.description}</p>
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 rounded-xl p-5 border-2 border-indigo-300/30 shadow-md">
+                      <label className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2 block">Description</label>
+                      <p className="font-medium text-foreground leading-relaxed">{pod.description}</p>
                     </div>
                   )}
-                  <div>
-                    <label className="text-sm text-muted-foreground">Subject</label>
-                    <p className="font-medium">{pod.subject}</p>
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 rounded-xl p-5 border-2 border-purple-300/30 shadow-md">
+                    <label className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-2 block">Subject</label>
+                    <p className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">{pod.subject}</p>
                   </div>
                   {pod.profiles && (
-                    <div>
-                      <label className="text-sm text-muted-foreground">Teacher</label>
-                      <p className="font-medium">
+                    <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/50 dark:to-rose-950/50 rounded-xl p-5 border-2 border-pink-300/30 shadow-md">
+                      <label className="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400 mb-2 block">Teacher</label>
+                      <p className="font-bold text-lg bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-400 dark:to-rose-400 bg-clip-text text-transparent">
                         {pod.profiles.first_name} {pod.profiles.last_name}
                       </p>
                     </div>

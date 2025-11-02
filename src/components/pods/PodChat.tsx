@@ -152,13 +152,21 @@ export const PodChat: React.FC<PodChatProps> = ({ podId }) => {
 
   if (loading) {
     return (
-      <Card className="border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-primary">Pod Chat</CardTitle>
+      <Card className="border-2 border-blue-500/30 shadow-2xl bg-gradient-to-br from-blue-100/90 via-indigo-100/90 to-purple-100/90 dark:from-blue-900/40 dark:via-indigo-900/40 dark:to-purple-900/40 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 border-b-2 border-blue-400/50 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+              </span>
+            </div>
+            <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Real-time Chat</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-96">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
           </div>
         </CardContent>
       </Card>

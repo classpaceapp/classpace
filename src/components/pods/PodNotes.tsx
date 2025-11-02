@@ -152,9 +152,9 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
 
   if (loading) {
     return (
-      <Card className="border-primary/20">
+      <Card className="border-2 border-amber-500/30 shadow-2xl bg-gradient-to-br from-amber-100/90 via-yellow-100/90 to-orange-100/90 dark:from-amber-900/40 dark:via-yellow-900/40 dark:to-orange-900/40 backdrop-blur-sm">
         <CardContent className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
         </CardContent>
       </Card>
     );

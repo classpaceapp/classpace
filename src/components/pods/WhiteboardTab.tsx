@@ -188,13 +188,18 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
 
   if (loading) {
     return (
-      <Card className="border-primary/20">
-        <CardHeader>
-          <CardTitle>Collaborative Whiteboards</CardTitle>
+      <Card className="border-2 border-pink-500/30 shadow-2xl bg-gradient-to-br from-pink-100/90 via-rose-100/90 to-purple-100/90 dark:from-pink-900/40 dark:via-rose-900/40 dark:to-purple-900/40 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600 border-b-2 border-pink-400/50 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <Palette className="h-6 w-6 md:h-7 md:w-7 text-white" />
+            </div>
+            <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Collaborative Whiteboards</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-96">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
           </div>
         </CardContent>
       </Card>
