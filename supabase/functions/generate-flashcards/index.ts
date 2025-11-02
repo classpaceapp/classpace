@@ -83,9 +83,10 @@ serve(async (req) => {
       );
     }
 
-    // Construct search query
-    const searchQuery = `${curriculum} ${topic} ${subtopic || ""} educational content flashcards`.trim();
-    logStep("Search query", { searchQuery });
+    // Construct search query with subtopic truncation to prevent errors
+    const truncatedSubtopic = subtopic ? subtopic.slice(0, 500) : "";
+    const searchQuery = `${curriculum} ${topic} ${truncatedSubtopic} educational content flashcards`.trim();
+    logStep("Search query", { searchQuery, originalSubtopicLength: subtopic?.length });
 
     // Get Tavily API key
     const tavilyApiKey = Deno.env.get("TAVILY_API_KEY");
@@ -113,7 +114,7 @@ serve(async (req) => {
     const searchContext = searchResults.results
       ?.map((r: any) => `${r.title}\n${r.content}`)
       .join("\n\n")
-      .slice(0, 8000);
+      .slice(0, 12000); // Increased from 8000 to 12000 for more context
 
     // Generate flashcards with Lovable AI
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -142,15 +143,19 @@ Return format:
   ]
 }`;
 
+    // Truncate subtopic in prompt to prevent token limit errors
+    const promptSubtopic = subtopic ? subtopic.slice(0, 1000) : "";
     const userPrompt = `Create ${cardCount} educational flashcards about:
 Curriculum: ${curriculum}
 Topic: ${topic}
-${subtopic ? `Subtopic: ${subtopic}` : ""}
+${promptSubtopic ? `Subtopic: ${promptSubtopic}` : ""}
 
 Use this educational content as reference:
 ${searchContext}
 
 Generate exactly ${cardCount} flashcards with clear hints and comprehensive content. Use LaTeX for any mathematical expressions.`;
+    
+    logStep("User prompt length", { length: userPrompt.length });
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

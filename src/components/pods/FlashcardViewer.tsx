@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, RotateCcw, X, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, X, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
+import { jsPDF } from 'jspdf';
 
 interface FlashcardCard {
   id: string;
@@ -89,6 +90,115 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
   const handleReset = () => {
     setCurrentIndex(0);
     setIsFlipped(false);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!cards[currentIndex]) return;
+
+    try {
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const card = cards[currentIndex];
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pageWidth - (2 * margin);
+
+      // Golden gradient background for front
+      pdf.setFillColor(255, 223, 128);
+      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+      
+      // Add decorative golden border
+      pdf.setDrawColor(218, 165, 32);
+      pdf.setLineWidth(2);
+      pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
+
+      // Front of card - Question
+      pdf.setFontSize(24);
+      pdf.setTextColor(139, 69, 19);
+      pdf.text('Question', pageWidth / 2, margin + 10, { align: 'center' });
+
+      // Card number with golden badge
+      pdf.setFillColor(255, 215, 0);
+      pdf.roundedRect(pageWidth / 2 - 15, margin + 20, 30, 10, 3, 3, 'F');
+      pdf.setFontSize(14);
+      pdf.setTextColor(139, 69, 19);
+      pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
+
+      // Question content (remove LaTeX for PDF - plain text)
+      const cleanHint = card.hint.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
+      pdf.setFontSize(16);
+      pdf.setTextColor(51, 51, 51);
+      const hintLines = pdf.splitTextToSize(cleanHint, contentWidth - 20);
+      pdf.text(hintLines, pageWidth / 2, margin + 50, { align: 'center', maxWidth: contentWidth - 20 });
+
+      // Add new page for answer
+      pdf.addPage();
+
+      // Golden gradient background for back
+      pdf.setFillColor(255, 235, 205);
+      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+      
+      // Add decorative golden border
+      pdf.setDrawColor(218, 165, 32);
+      pdf.setLineWidth(2);
+      pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
+
+      // Back of card - Answer
+      pdf.setFontSize(24);
+      pdf.setTextColor(139, 69, 19);
+      pdf.text('Answer', pageWidth / 2, margin + 10, { align: 'center' });
+
+      // Card number with golden badge
+      pdf.setFillColor(255, 215, 0);
+      pdf.roundedRect(pageWidth / 2 - 15, margin + 20, 30, 10, 3, 3, 'F');
+      pdf.setFontSize(14);
+      pdf.setTextColor(139, 69, 19);
+      pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
+
+      // Answer content (remove LaTeX for PDF - plain text)
+      const cleanContent = card.content.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
+      pdf.setFontSize(14);
+      pdf.setTextColor(51, 51, 51);
+      const contentLines = pdf.splitTextToSize(cleanContent, contentWidth - 20);
+      
+      let yPosition = margin + 50;
+      const lineHeight = 7;
+      const maxY = pageHeight - margin - 20;
+
+      contentLines.forEach((line: string, index: number) => {
+        if (yPosition + lineHeight > maxY) {
+          pdf.addPage();
+          // Repeat background for new page
+          pdf.setFillColor(255, 235, 205);
+          pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+          pdf.setDrawColor(218, 165, 32);
+          pdf.setLineWidth(2);
+          pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
+          yPosition = margin + 10;
+        }
+        pdf.text(line, pageWidth / 2, yPosition, { align: 'center', maxWidth: contentWidth - 20 });
+        yPosition += lineHeight;
+      });
+
+      // Add footer with metadata
+      pdf.setFontSize(10);
+      pdf.setTextColor(128, 128, 128);
+      pdf.text(`${flashcardSet?.title || 'Flashcard'}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+      // Save PDF
+      const fileName = `flashcard-${card.card_order}-${flashcardSet?.title?.replace(/[^a-z0-9]/gi, '-') || 'set'}.pdf`;
+      pdf.save(fileName);
+
+      toast.success(`Flashcard ${card.card_order} has been downloaded successfully.`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error("Failed to generate PDF. Please try again.");
+    }
   };
 
   const renderMathContent = (text: string) => {
@@ -295,6 +405,15 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
             <ChevronRight className="h-5 w-5 md:ml-2" />
           </Button>
         </div>
+
+        {/* Download PDF Button */}
+        <Button
+          onClick={handleDownloadPDF}
+          className="w-full mt-2 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 h-12 md:h-10"
+        >
+          <Download className="w-5 h-5 md:w-4 md:h-4 mr-2" />
+          Download as PDF
+        </Button>
       </div>
     </Card>
   );

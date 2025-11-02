@@ -155,7 +155,11 @@ const SubscriptionCard: React.FC = () => {
           <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
       ) : (
-        <Card className="relative overflow-hidden bg-card/70 dark:bg-card/40 border border-border/60 shadow-2xl transition-all duration-300 backdrop-blur-sm">
+        <Card className={`relative overflow-hidden border border-border/60 shadow-2xl transition-all duration-300 backdrop-blur-sm ${
+          isPremium 
+            ? 'bg-gradient-to-br from-amber-100/90 via-yellow-50/90 to-amber-100/90 dark:from-amber-900/40 dark:via-yellow-800/40 dark:to-amber-900/40' 
+            : 'bg-card/70 dark:bg-card/40'
+        }`}>
           <CardContent className="relative p-8">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-4">
