@@ -171,7 +171,7 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
 
   if (loading) {
     return (
-      <Card className="border-2 border-indigo-500/30 shadow-2xl bg-gradient-to-br from-indigo-100/90 via-purple-100/90 to-violet-100/90 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-violet-900/40 backdrop-blur-sm">
+      <Card className="border-2 border-indigo-500/30 shadow-2xl bg-gradient-to-br from-indigo-100/90 via-purple-100/90 to-violet-100/90 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-violet-900/40 backdrop-blur-sm rounded-2xl">
         <CardContent className="flex items-center justify-center h-96">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
         </CardContent>
@@ -180,39 +180,47 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            {showArchived ? 'Archived Quizzes' : 'AI-Generated Quizzes'}
-          </h2>
-          <p className="text-muted-foreground">
-            {showArchived ? 'View your archived quizzes' : 'Create quizzes using AI with web search for authentic exam questions'}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowArchived(!showArchived)}
-            className="gap-2"
-          >
-            <Archive className="h-4 w-4" />
-            {showArchived ? 'View Active' : 'View Archived'}
-          </Button>
-          {!showArchived && (
+    <Card className="border-2 border-indigo-500/30 shadow-2xl bg-gradient-to-br from-indigo-100/90 via-purple-100/90 to-violet-100/90 dark:from-indigo-900/40 dark:via-purple-900/40 dark:to-violet-900/40 backdrop-blur-sm rounded-2xl overflow-hidden">
+      <CardHeader className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 border-b-2 border-indigo-400/50 shadow-lg">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <BookOpen className="h-6 w-6 md:h-7 md:w-7 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+                {showArchived ? 'Archived Quizzes' : 'AI-Generated Quizzes'}
+              </CardTitle>
+              <p className="text-sm text-white/80 mt-1">
+                {showArchived ? 'View your archived quizzes' : 'Create quizzes using AI with web search for authentic exam questions'}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
             <Button 
-              onClick={() => {
-                setShowGenerateForm(!showGenerateForm);
-                setQuizLimitReached(false);
-              }}
-              className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+              variant="outline" 
+              onClick={() => setShowArchived(!showArchived)}
+              className="gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 shadow-lg"
             >
-              <Sparkles className="h-4 w-4" />
-              {showGenerateForm ? 'Hide Form' : 'Generate Quiz'}
+              <Archive className="h-4 w-4" />
+              {showArchived ? 'View Active' : 'View Archived'}
             </Button>
-          )}
+            {!showArchived && (
+              <Button 
+                onClick={() => {
+                  setShowGenerateForm(!showGenerateForm);
+                  setQuizLimitReached(false);
+                }}
+                className="gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 shadow-lg"
+              >
+                <Sparkles className="h-4 w-4" />
+                {showGenerateForm ? 'Hide Form' : 'Generate Quiz'}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-6">
 
       {/* Quiz Limit Reached - Beautiful Inline Message */}
       {quizLimitReached && (
@@ -401,11 +409,16 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
 
       <div className="grid gap-4">
         {displayQuizzes.length === 0 ? (
-          <Card className="border-2 border-dashed border-indigo-500/30 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/10 dark:to-purple-950/10">
+          <Card className="border-2 border-dashed border-indigo-500/30 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/10 dark:to-purple-950/10 rounded-2xl">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Archive className="h-12 w-12 text-indigo-500 mb-4" />
-              <p className="text-muted-foreground">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center mb-4">
+                <Archive className="h-10 w-10 text-indigo-500" />
+              </div>
+              <p className="text-lg font-semibold text-foreground mb-2">
                 {showArchived ? 'No archived quizzes' : 'No active quizzes'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {showArchived ? 'Archived quizzes will appear here' : isTeacher ? 'Click "Generate Quiz" to create one with AI' : 'Your teacher will create quizzes here'}
               </p>
             </CardContent>
           </Card>
@@ -413,42 +426,45 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
           displayQuizzes.map((quiz) => (
             <Card 
               key={quiz.id} 
-              className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50/30 to-purple-50/30 dark:from-indigo-950/10 dark:to-purple-950/10 hover:shadow-lg transition-all duration-300"
+              className="border-2 border-indigo-500/30 bg-gradient-to-br from-indigo-50/30 to-purple-50/30 dark:from-indigo-950/10 dark:to-purple-950/10 hover:shadow-lg hover:border-indigo-500/50 transition-all duration-300 cursor-pointer overflow-hidden group rounded-2xl"
             >
-              <CardHeader>
+              <CardHeader className="p-6">
                 <div className="flex items-start justify-between">
                   <div 
-                    className="flex items-center gap-3 flex-1 cursor-pointer"
+                    className="flex items-center gap-4 flex-1"
                     onClick={() => window.open(`/quiz/${quiz.id}`, '_blank')}
                   >
-                    <div className="p-2 rounded-lg bg-indigo-500">
-                      <BookOpen className="h-5 w-5 text-white" />
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
+                      <BookOpen className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <CardTitle className="text-lg">
+                      <CardTitle className="text-xl font-bold mb-2 group-hover:text-indigo-600 transition-colors">
                         <MathRenderer text={quiz.title} />
                       </CardTitle>
-                      <CardDescription className="text-sm space-y-1 mt-2">
-                        {quiz.curriculum && <div>📚 {quiz.curriculum}</div>}
-                        {quiz.subject && <div>📖 {quiz.subject}</div>}
-                        {quiz.topic && <div>📝 {quiz.topic}</div>}
+                      <CardDescription className="text-sm space-y-1">
+                        {quiz.curriculum && <div className="flex items-center gap-2"><span className="text-indigo-500">📚</span>{quiz.curriculum}</div>}
+                        {quiz.subject && <div className="flex items-center gap-2"><span className="text-purple-500">📖</span>{quiz.subject}</div>}
+                        {quiz.topic && <div className="flex items-center gap-2"><span className="text-pink-500">📝</span>{quiz.topic}</div>}
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                  <div className="flex items-center gap-3">
+                    <span className={`px-4 py-1.5 text-xs font-bold rounded-full ${
                       quiz.quiz_type === 'mcq' 
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
-                        : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                        ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' 
+                        : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
                     }`}>
                       {quiz.quiz_type === 'mcq' ? 'MCQ' : 'Essay'}
                     </span>
                     {isTeacher && (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => toggleArchive(quiz.id, quiz.archived)}
-                        className="gap-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleArchive(quiz.id, quiz.archived);
+                        }}
+                        className="gap-2 border-2 hover:scale-110 transition-all duration-300"
                       >
                         {quiz.archived ? (
                           <><ArchiveRestore className="h-4 w-4" /> Restore</>
@@ -457,20 +473,22 @@ export const PodQuizzesWithArchive: React.FC<{ podId: string; isTeacher: boolean
                         )}
                       </Button>
                     )}
+                    <ArrowRight className="h-6 w-6 text-indigo-500 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{quiz.questions.length} questions</span>
-                  <span>Created {new Date(quiz.created_at).toLocaleDateString()}</span>
+              <CardContent className="px-6 pb-6">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-semibold text-indigo-600">{quiz.questions.length} questions</span>
+                  <span className="text-muted-foreground">Created {new Date(quiz.created_at).toLocaleDateString()}</span>
                 </div>
               </CardContent>
             </Card>
           ))
         )}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
