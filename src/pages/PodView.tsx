@@ -223,62 +223,62 @@ const PodView: React.FC = () => {
 
         {/* Pod Navigation Tabs - Enhanced Styling */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:w-fit lg:grid-cols-8 h-auto p-1.5 md:p-2 gap-1 md:gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-xl md:rounded-2xl shadow-2xl border-2 border-white/10 overflow-x-auto">
-            <TabsTrigger 
+          <TabsList className="flex md:grid w-full md:grid-cols-8 lg:w-fit lg:grid-cols-8 h-auto p-1.5 md:p-2 gap-1 md:gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-xl md:rounded-2xl shadow-2xl border-2 border-white/10 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+            <TabsTrigger
               value="overview" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-blue-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-blue-300"
             >
-              <Users className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Overview</span>
+              <Users className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Overview</span>
             </TabsTrigger>
             <TabsTrigger 
               value="members" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-emerald-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-emerald-300"
             >
-              <Users className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Members</span>
+              <Users className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Members</span>
             </TabsTrigger>
             <TabsTrigger 
               value="chat" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-green-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-green-500 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-green-300"
             >
-              <MessageSquare className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Chat</span>
+              <MessageSquare className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Chat</span>
             </TabsTrigger>
             <TabsTrigger 
               value="notes" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-amber-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-amber-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-amber-300"
             >
-              <FileText className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Notes</span>
+              <FileText className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Notes</span>
             </TabsTrigger>
             <TabsTrigger 
               value="meetings" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-teal-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-teal-300"
             >
-              <Video className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Meetings</span>
+              <Video className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Meetings</span>
             </TabsTrigger>
             <TabsTrigger 
               value="materials" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-purple-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-500 data-[state=active]:to-violet-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-purple-300"
             >
-              <Upload className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Materials</span>
+              <Upload className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Materials</span>
             </TabsTrigger>
             <TabsTrigger 
               value="quizzes" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-indigo-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-indigo-300"
             >
-              <BookOpen className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Quizzes</span>
+              <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Quizzes</span>
             </TabsTrigger>
             <TabsTrigger 
               value="whiteboard" 
-              className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-pink-300"
+              className="gap-1 md:gap-2 h-12 md:h-14 px-3 md:px-4 rounded-xl snap-center shrink-0 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-pink-500 data-[state=active]:to-rose-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-pink-300"
             >
-              <Palette className="h-5 w-5" />
-              <span className="hidden sm:inline font-semibold">Whiteboard</span>
+              <Palette className="h-4 w-4 md:h-5 md:w-5" />
+              <span className="hidden sm:inline font-semibold text-xs md:text-sm">Whiteboard</span>
             </TabsTrigger>
           </TabsList>
 

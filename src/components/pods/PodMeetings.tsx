@@ -307,7 +307,7 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
         </Dialog>
       </div>
 
-      <div className="grid gap-4">
+      <div className="flex flex-col gap-3 md:gap-4">
         {meetings.length === 0 ? (
           <Card className="border-2 border-dashed border-teal-500/30 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 dark:from-teal-950/10 dark:to-cyan-950/10">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -326,11 +326,11 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
                   : 'border-teal-500/20 bg-gradient-to-br from-teal-50/30 to-cyan-50/30 dark:from-teal-950/10 dark:to-cyan-950/10'
               }`}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
+              <CardHeader className="pb-2 md:pb-3">
+                <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-3 md:gap-0">
+                  <div className="flex items-center gap-2 md:gap-3 flex-1">
                     <div className={`p-2 rounded-lg ${meeting.is_pinned ? 'bg-teal-500' : 'bg-teal-500/70'}`}>
-                      <Video className="h-5 w-5 text-white" />
+                      <Video className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -370,18 +370,18 @@ export const PodMeetings: React.FC<{ podId: string }> = ({ podId }) => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between gap-2">
-                  <code className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 rounded text-sm font-mono border border-teal-500/30 truncate">
+              <CardContent className="pt-2 md:pt-4">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
+                  <code className="flex-1 px-2 md:px-3 py-2 bg-white dark:bg-gray-800 rounded text-xs md:text-sm font-mono border border-teal-500/30 truncate">
                     {meeting.meeting_link}
                   </code>
                   <Button
                     size="sm"
                     onClick={() => window.open(meeting.meeting_link, '_blank')}
-                    className="gap-2 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 shrink-0"
+                    className="gap-2 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 shrink-0 h-10 md:h-9 w-full md:w-auto"
                   >
                     <ExternalLink className="h-4 w-4" />
-                    Join
+                    <span>Join</span>
                   </Button>
                 </div>
               </CardContent>

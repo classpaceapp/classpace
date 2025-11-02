@@ -177,8 +177,8 @@ export const PodChat: React.FC<PodChatProps> = ({ podId }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <ScrollArea className="h-[500px] p-4" ref={scrollRef}>
-          <div className="space-y-4">
+        <ScrollArea className="h-[400px] md:h-[500px] p-3 md:p-4" ref={scrollRef}>
+          <div className="space-y-3 md:space-y-4">
             {messages.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 No messages yet. Start the conversation!
@@ -201,13 +201,13 @@ export const PodChat: React.FC<PodChatProps> = ({ podId }) => {
                     </span>
                   </div>
                   <div
-                    className={`rounded-2xl px-4 py-2 max-w-[70%] shadow-sm ${
+                    className={`rounded-2xl px-3 py-2 md:px-4 md:py-2 max-w-[85%] md:max-w-[70%] shadow-sm ${
                       msg.user_id === user?.id
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-secondary text-secondary-foreground'
                     }`}
                   >
-                    <p className="text-sm break-words">{msg.message}</p>
+                    <p className="text-sm md:text-sm break-words">{msg.message}</p>
                   </div>
                 </div>
               ))
@@ -216,22 +216,22 @@ export const PodChat: React.FC<PodChatProps> = ({ podId }) => {
         </ScrollArea>
         <form
           onSubmit={sendMessage}
-          className="flex gap-2 p-4 border-t border-primary/10 bg-card"
+          className="flex gap-2 p-3 md:p-4 border-t border-primary/10 bg-card"
         >
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type your message..."
             disabled={sending}
-            className="flex-1 border-primary/20 focus-visible:ring-primary"
+            className="flex-1 border-primary/20 focus-visible:ring-primary h-12 md:h-10 text-base"
           />
           <Button
             type="submit"
             disabled={sending || !newMessage.trim()}
             size="icon"
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary/90 h-12 w-12 md:h-10 md:w-10"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-5 w-5 md:h-4 md:w-4" />
           </Button>
         </form>
       </CardContent>

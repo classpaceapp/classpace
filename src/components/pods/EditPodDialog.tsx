@@ -74,7 +74,7 @@ export const EditPodDialog: React.FC<EditPodDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg w-[95vw] md:w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Pod Details</DialogTitle>
         </DialogHeader>
@@ -86,6 +86,7 @@ export const EditPodDialog: React.FC<EditPodDialogProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter pod title"
+              className="h-12 md:h-10 text-base"
             />
           </div>
           <div className="space-y-2">
@@ -95,6 +96,7 @@ export const EditPodDialog: React.FC<EditPodDialogProps> = ({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="e.g., Mathematics, Science"
+              className="h-12 md:h-10 text-base"
             />
           </div>
           <div className="space-y-2">
@@ -105,14 +107,15 @@ export const EditPodDialog: React.FC<EditPodDialogProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Brief description of the pod"
               rows={3}
+              className="text-base"
             />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={updating}>
+        <DialogFooter className="gap-2 flex-col md:flex-row">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={updating} className="w-full md:w-auto h-12 md:h-10">
             Cancel
           </Button>
-          <Button onClick={handleUpdate} disabled={updating}>
+          <Button onClick={handleUpdate} disabled={updating} className="w-full md:w-auto h-12 md:h-10">
             {updating ? 'Updating...' : 'Update Pod'}
           </Button>
         </DialogFooter>

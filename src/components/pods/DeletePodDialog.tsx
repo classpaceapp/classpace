@@ -58,7 +58,7 @@ export const DeletePodDialog: React.FC<DeletePodDialogProps> = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-lg border-2 border-destructive/20">
+      <AlertDialogContent className="max-w-lg w-[95vw] md:w-full border-2 border-destructive/20">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-3 rounded-full bg-destructive/10">
@@ -80,12 +80,12 @@ export const DeletePodDialog: React.FC<DeletePodDialogProps> = ({
             </ul>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2 sm:gap-0">
-          <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+        <AlertDialogFooter className="gap-2 flex-col md:flex-row">
+          <AlertDialogCancel disabled={deleting} className="w-full md:w-auto h-12 md:h-10">Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={deleting}
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground w-full md:w-auto h-12 md:h-10"
           >
             {deleting ? 'Deleting...' : 'Delete Pod'}
           </AlertDialogAction>

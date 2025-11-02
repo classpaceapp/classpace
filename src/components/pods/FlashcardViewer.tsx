@@ -174,8 +174,8 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
   const currentCard = cards[currentIndex];
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
-      <div className="p-6 space-y-6">
+    <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden h-screen md:h-auto">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -209,10 +209,10 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
         </div>
 
         {/* Flashcard */}
-        <div className="relative perspective-1000">
+        <div className="relative perspective-1000 flex-1 flex items-center">
           <button
             onClick={handleFlip}
-            className={`w-full min-h-[400px] rounded-xl transition-all duration-500 transform-style-3d ${
+            className={`w-full min-h-[300px] md:min-h-[400px] rounded-xl transition-all duration-500 transform-style-3d ${
               isFlipped ? "rotate-y-180" : ""
             }`}
             style={{ transformStyle: "preserve-3d" }}
@@ -262,23 +262,23 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2 md:gap-4">
           <Button
             onClick={handlePrevious}
             disabled={currentIndex === 0}
             variant="outline"
             size="lg"
-            className="flex-1"
+            className="flex-1 h-12 md:h-10"
           >
-            <ChevronLeft className="h-5 w-5 mr-2" />
-            Previous
+            <ChevronLeft className="h-5 w-5 md:mr-2" />
+            <span className="hidden md:inline">Previous</span>
           </Button>
 
           <Button
             onClick={handleReset}
             variant="outline"
             size="icon"
-            className="shrink-0"
+            className="shrink-0 h-12 w-12 md:h-10 md:w-10"
             title="Reset to first card"
           >
             <RotateCcw className="h-5 w-5" />
@@ -289,10 +289,10 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
             disabled={currentIndex === cards.length - 1}
             variant="outline"
             size="lg"
-            className="flex-1"
+            className="flex-1 h-12 md:h-10"
           >
-            Next
-            <ChevronRight className="h-5 w-5 ml-2" />
+            <span className="hidden md:inline">Next</span>
+            <ChevronRight className="h-5 w-5 md:ml-2" />
           </Button>
         </div>
       </div>

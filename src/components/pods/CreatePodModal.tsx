@@ -80,7 +80,7 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] w-[95vw] md:w-full max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Create New Pod</DialogTitle>
           <DialogDescription>
@@ -99,7 +99,7 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="e.g., Biology 101, Math Grade 9"
               required
-              className="w-full"
+              className="w-full h-12 md:h-10 text-base"
             />
           </div>
 
@@ -113,7 +113,7 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Brief description of what this pod is about..."
               rows={3}
-              className="w-full resize-none"
+              className="w-full resize-none text-base"
             />
           </div>
 
@@ -126,22 +126,24 @@ const CreatePodModal: React.FC<CreatePodModalProps> = ({ open, onOpenChange, onP
               value={formData.subject}
               onChange={(e) => handleInputChange('subject', e.target.value)}
               placeholder="e.g., Mathematics, Science"
+              className="h-12 md:h-10 text-base"
             />
           </div>
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-2 flex-col md:flex-row">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full md:w-auto h-12 md:h-10"
             >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={loading || !formData.title.trim()}
-              className="min-w-[100px]"
+              className="min-w-[100px] w-full md:w-auto h-12 md:h-10"
             >
               {loading ? (
                 <>

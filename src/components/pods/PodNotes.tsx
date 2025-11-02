@@ -175,9 +175,9 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
             </CardTitle>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90">
-                    <Plus className="h-4 w-4" />
-                    Add Note
+                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 h-10 md:h-9 px-4">
+                    <Plus className="h-5 w-5 md:h-4 md:w-4" />
+                    <span className="text-sm md:text-sm">Add Note</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">

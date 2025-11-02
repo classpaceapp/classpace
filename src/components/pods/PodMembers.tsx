@@ -181,14 +181,14 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
               <p className="text-sm mt-1">Share your pod code to get started!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col md:grid md:grid-cols-2 gap-3 md:gap-4">
               {students.map((student) => (
                 <div
                   key={student.id}
-                  className="bg-white dark:bg-gray-900 rounded-xl p-4 border-2 border-emerald-200/50 dark:border-emerald-900/50 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400"
+                  className="bg-white dark:bg-gray-900 rounded-xl p-3 md:p-4 border-2 border-emerald-200/50 dark:border-emerald-900/50 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400"
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-12 w-12 border-2 border-emerald-300 shadow-md">
+                    <Avatar className="h-14 w-14 md:h-12 md:w-12 border-2 border-emerald-300 shadow-md">
                       <AvatarImage src={student.avatar_url || undefined} />
                       <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold">
                         {student.first_name?.charAt(0) || 'S'}
