@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import learnspaceLogo from '@/assets/learnspace-logo.png';
 import phoenixLogo from '@/assets/phoenix-logo.png';
+import BottomNavBar from './BottomNavBar';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -106,8 +107,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         </Button>
       </div>
 
-      {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card/50 backdrop-blur-md border-r border-border/50 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+      {/* Sidebar - Fixed transparency issue with solid background */}
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card backdrop-blur-md border-r border-border shadow-2xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         {/* Logo */}
@@ -191,9 +192,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
       </aside>
 
       {/* Main content */}
-      <main className="transition-all duration-300 ease-in-out md:ml-64 min-h-screen">
-        {/* Top bar */}
-        <header className="bg-card/30 backdrop-blur-md border-b border-border/50 px-6 py-4">
+      <main className="transition-all duration-300 ease-in-out md:ml-64 min-h-screen pb-20 md:pb-0">
+        {/* Top bar - Compact on mobile */}
+        <header className="bg-card/30 backdrop-blur-md border-b border-border/50 px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="md:hidden" /> {/* Spacer for mobile menu button */}
             
@@ -243,10 +244,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Bottom Navigation - Mobile Only */}
+      <BottomNavBar userRole={userRole} />
     </div>
   );
 };

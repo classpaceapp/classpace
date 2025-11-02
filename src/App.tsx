@@ -42,6 +42,7 @@ import SubscriptionReturnHandler from "@/components/subscription/SubscriptionRet
 import Careers from "./pages/Careers";
 import ExcalidrawWhiteboard from "./pages/ExcalidrawWhiteboard";
 import Investors from "./pages/Investors";
+import More from "./pages/More";
 
 const queryClient = new QueryClient();
 
@@ -207,6 +208,11 @@ const App = () => (
             <Route path="/educator/:userId" element={
               <ProtectedRoute>
                 <EducatorProfile />
+              </ProtectedRoute>
+            } />
+            <Route path="/more" element={
+              <ProtectedRoute>
+                <More />
               </ProtectedRoute>
             } />
             <Route 

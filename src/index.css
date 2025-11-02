@@ -37,6 +37,14 @@ body {
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+    
+    /* Mobile-specific design tokens */
+    --mobile-tap-target: 44px;
+    --mobile-spacing-xs: 0.5rem;
+    --mobile-spacing-sm: 0.75rem;
+    --mobile-spacing-md: 1rem;
+    --mobile-spacing-lg: 1.5rem;
+    --mobile-nav-height: 64px;
   }
 
   .dark {
@@ -339,4 +347,32 @@ body {
 
 .rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+/* Mobile-specific utilities */
+@layer utilities {
+  .tap-target {
+    min-width: var(--mobile-tap-target);
+    min-height: var(--mobile-tap-target);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Mobile typography scale */
+  @media (max-width: 768px) {
+    .mobile-text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .mobile-text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .mobile-text-base { font-size: 1rem; line-height: 1.5rem; }
+    .mobile-text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .mobile-text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+    .mobile-text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .mobile-text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+    .mobile-text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+  }
 }
