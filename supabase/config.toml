@@ -1,22 +1,55 @@
 project_id = "roodcmebqkwmoxrfjdzq"
 
+[functions.cancel-subscription]
+verify_jwt = true
+
 [functions.check-subscription]
 verify_jwt = true
 
 [functions.create-checkout]
 verify_jwt = true
 
-[functions.customer-portal]
+[functions.create-miro-board]
 verify_jwt = true
 
-[functions.generate-quiz]
+[functions.customer-portal]
 verify_jwt = true
 
 [functions.generate-flashcards]
 verify_jwt = true
 
-[functions.send-refund-request]
-verify_jwt = false
+[functions.generate-personal-flashcards]
+verify_jwt = true
+
+[functions.generate-personal-notes]
+verify_jwt = true
+
+[functions.generate-personal-quiz]
+verify_jwt = true
+
+[functions.generate-quiz]
+verify_jwt = true
+
+[functions.learnspace-chat]
+verify_jwt = true
+
+[functions.phoenix-ai-tutor]
+verify_jwt = true
+
+[functions.phoenix-voice-stt]
+verify_jwt = true
+
+[functions.phoenix-voice-tts]
+verify_jwt = true
+
+[functions.resume-subscription]
+verify_jwt = true
 
 [functions.send-career-application]
 verify_jwt = false
+
+[functions.send-refund-request]
+verify_jwt = false
+
+[functions.teacher-assistant]
+verify_jwt = true

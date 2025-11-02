@@ -360,6 +360,48 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_notes: {
+        Row: {
+          additional_details: string | null
+          archived: boolean
+          content: string
+          created_at: string
+          curriculum: string
+          id: string
+          subtopic: string | null
+          title: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_details?: string | null
+          archived?: boolean
+          content: string
+          created_at?: string
+          curriculum: string
+          id?: string
+          subtopic?: string | null
+          title: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_details?: string | null
+          archived?: boolean
+          content?: string
+          created_at?: string
+          curriculum?: string
+          id?: string
+          subtopic?: string | null
+          title?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       personal_quizzes: {
         Row: {
           archived: boolean

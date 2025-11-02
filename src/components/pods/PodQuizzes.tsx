@@ -158,21 +158,22 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
   }
 
   return (
-    <Card className="border-2 border-border/50 shadow-2xl bg-white/80 backdrop-blur-xl">
-      <CardHeader className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border-b border-border/50">
+    <Card className="border-2 border-emerald-500/30 shadow-2xl bg-gradient-to-br from-emerald-100/90 via-teal-100/90 to-cyan-100/90 dark:from-emerald-900/40 dark:via-teal-900/40 dark:to-cyan-900/40 backdrop-blur-sm">
+      <CardHeader className="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 border-b-2 border-emerald-400/50 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
-              <FileQuestion className="h-6 w-6 text-white" />
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <FileQuestion className="h-6 w-6 md:h-7 md:w-7 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Quizzes
-            </CardTitle>
+            <div>
+              <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Quizzes</CardTitle>
+              <p className="text-sm text-white/80 mt-1">AI-generated with web search</p>
+            </div>
           </div>
           {isTeacher && (
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg">
+                <Button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 shadow-lg">
                   <Sparkles className="h-4 w-4 mr-2" />
                   Generate Quiz
                 </Button>
@@ -345,10 +346,10 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
 
       <div className="grid gap-4">
         {quizzes.length === 0 ? (
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm rounded-2xl">
+          <Card className="border-2 border-dashed border-emerald-500/30 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/10 dark:to-teal-950/10 rounded-2xl">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 mb-4">
-                <BookOpen className="h-12 w-12 text-white" />
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-4">
+                <BookOpen className="h-10 w-10 text-emerald-500" />
               </div>
               <p className="text-lg font-semibold text-foreground mb-2">No quizzes yet</p>
               <p className="text-sm text-muted-foreground">
@@ -360,7 +361,7 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
           quizzes.map((quiz) => (
             <Card 
               key={quiz.id} 
-              className="border-0 shadow-lg bg-white/80 backdrop-blur-sm rounded-2xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden group"
+              className="border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-50/30 to-teal-50/30 dark:from-emerald-950/10 dark:to-teal-950/10 hover:shadow-lg hover:border-emerald-500/50 transition-all duration-300 cursor-pointer overflow-hidden group rounded-2xl"
               onClick={() => window.open(`/quiz/${quiz.id}`, '_blank')}
             >
               <CardHeader className="p-6">

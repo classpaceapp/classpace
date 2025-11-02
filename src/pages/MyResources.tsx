@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Library, MessageSquare, FileText, CheckSquare } from "lucide-react";
 import { PersonalFlashcards } from "@/components/resources/PersonalFlashcards";
 import { PersonalQuizzes } from "@/components/resources/PersonalQuizzes";
+import { PersonalNotes } from "@/components/resources/PersonalNotes";
 
 const MyResources = () => {
   return (
@@ -40,10 +41,9 @@ const MyResources = () => {
               <CheckSquare className="h-4 w-4 mr-2" />
               Quizzes
             </TabsTrigger>
-            <TabsTrigger value="notes" disabled className="opacity-50">
+            <TabsTrigger value="notes" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white">
               <FileText className="h-4 w-4 mr-2" />
               Notes
-              <span className="ml-2 text-xs bg-gray-200 px-2 py-0.5 rounded">Coming Soon</span>
             </TabsTrigger>
             <TabsTrigger value="exam-advice" disabled className="opacity-50">
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -61,17 +61,7 @@ const MyResources = () => {
           </TabsContent>
 
           <TabsContent value="notes">
-            <Card className="border-2 border-border/50 shadow-xl bg-white/80 backdrop-blur-xl">
-              <CardContent className="p-12 text-center">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-4">
-                  <FileText className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Notes Coming Soon</h3>
-                <p className="text-muted-foreground">
-                  Create and organize your personal study notes
-                </p>
-              </CardContent>
-            </Card>
+            <PersonalNotes />
           </TabsContent>
 
           <TabsContent value="exam-advice">
