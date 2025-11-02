@@ -163,7 +163,7 @@ const StudentDashboard: React.FC = () => {
   return (
     <DashboardLayout userRole="learner">
       {loading ? (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-3 md:p-8">
           <div className="mb-8">
             <Skeleton className="h-12 w-80 mb-4 rounded-2xl" />
             <Skeleton className="h-6 w-96 rounded-xl" />
@@ -182,19 +182,19 @@ const StudentDashboard: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-3 md:p-8">
           {/* Welcome Section */}
-          <div className="mb-12">
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-white" />
+          <div className="mb-6 md:mb-12">
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-2xl border border-white/20">
+              <div className="flex items-center space-x-3 md:space-x-4 mb-3 md:mb-4">
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <h1 className="text-xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     Welcome back, {(profile?.first_name || '') + (profile?.last_name ? ` ${profile.last_name}` : '') || user?.email?.split('@')[0]}!
                   </h1>
-                  <p className="text-xl text-gray-600 mt-2">
+                  <p className="text-sm md:text-xl text-gray-600 mt-1 md:mt-2">
                     Ready to learn something amazing today? Here's your learning overview.
                   </p>
                 </div>
@@ -203,7 +203,7 @@ const StudentDashboard: React.FC = () => {
           </div>
 
           {/* Discovery and Join */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-12">
             <Card className="lg:col-span-2 border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6">
                 <div className="flex items-center justify-between">
@@ -241,9 +241,9 @@ const StudentDashboard: React.FC = () => {
           </div>
 
           {/* Stats and Subscription Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 mb-6 md:mb-12">
             {/* Stats Cards */}
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
             <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6">
                 <div className="flex items-center justify-between">
@@ -299,11 +299,11 @@ const StudentDashboard: React.FC = () => {
           </div>
 
           {/* Classes Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <Boxes className="h-7 w-7 text-foreground/70" />
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center justify-between mb-4 md:mb-8">
+              <div className="flex items-center gap-2 md:gap-3">
+                <Boxes className="h-5 w-5 md:h-7 md:w-7 text-foreground/70" />
+                <h2 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                   My Classes
                 </h2>
               </div>
@@ -324,7 +324,7 @@ const StudentDashboard: React.FC = () => {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                 {pods.map((pod) => (
                   <PodCard key={pod.id} pod={pod} userRole="learner" basePath="/student-dashboard" />
                 ))}

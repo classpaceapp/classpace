@@ -280,20 +280,20 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
         <div className="container mx-auto px-3 md:px-4 py-8 md:py-16">
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12">
             {/* Brand Section */}
             <div className="lg:col-span-1">
-              <div className="flex items-center space-x-3 mb-6">
+              <div className="flex items-center space-x-3 mb-4 md:mb-6">
                 <img 
                   src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
                   alt="Classpace Logo" 
-                  className="w-10 h-10"
+                  className="w-8 h-8 md:w-10 md:h-10"
                 />
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                   Classpace
                 </span>
               </div>
-              <p className="text-gray-300 leading-relaxed mb-6">
+              <p className="text-gray-300 leading-relaxed mb-4 md:mb-6 text-sm md:text-base">
                 Empowering educators and learners with AI-powered shared workspaces. 
                 Learn and teach anything.
               </p>
@@ -302,29 +302,29 @@ const Index = () => {
                   href="https://www.instagram.com/classpace.co/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
+                  className="w-9 h-9 md:w-10 md:h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
                 >
-                  <Instagram className="w-5 h-5 text-white" />
+                  <Instagram className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </a>
                 <a 
                   href="https://www.linkedin.com/company/classpace-app/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
+                  className="w-9 h-9 md:w-10 md:h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
                 >
-                  <Linkedin className="w-5 h-5 text-white" />
+                  <Linkedin className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </a>
               </div>
             </div>
 
             {/* Product Links */}
             <div>
-              <h3 className="text-xl font-bold mb-6 text-purple-300">Product</h3>
-              <ul className="space-y-4">
+              <h3 className="text-base md:text-xl font-bold mb-3 md:mb-6 text-purple-300">Product</h3>
+              <ul className="space-y-2 md:space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/pricing")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Pricing
                   </button>
@@ -332,7 +332,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/our-journey")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Our Journey
                   </button>
@@ -340,7 +340,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/careers")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Careers
                   </button>
@@ -348,7 +348,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/login")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Sign In
                   </button>
@@ -358,12 +358,12 @@ const Index = () => {
 
             {/* Support Links */}
             <div>
-              <h3 className="text-xl font-bold mb-6 text-purple-300">Support</h3>
-              <ul className="space-y-4">
+              <h3 className="text-base md:text-xl font-bold mb-3 md:mb-6 text-purple-300">Support</h3>
+              <ul className="space-y-2 md:space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/support")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Help Center
                   </button>
@@ -371,7 +371,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/refunds")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Refunds
                   </button>
@@ -379,7 +379,7 @@ const Index = () => {
                 <li>
                   <a 
                     href="mailto:social@classpace.co"
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Contact Us
                   </a>
@@ -389,12 +389,12 @@ const Index = () => {
 
             {/* Legal Links */}
             <div>
-              <h3 className="text-xl font-bold mb-6 text-purple-300">Legal</h3>
-              <ul className="space-y-4">
+              <h3 className="text-base md:text-xl font-bold mb-3 md:mb-6 text-purple-300">Legal</h3>
+              <ul className="space-y-2 md:space-y-4">
                 <li>
                   <button 
                     onClick={() => navigate("/terms")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Terms & Conditions
                   </button>
@@ -402,7 +402,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/privacy")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Privacy Policy
                   </button>
@@ -410,7 +410,7 @@ const Index = () => {
                 <li>
                   <button 
                     onClick={() => navigate("/investors")}
-                    className="text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
                     Investors
                   </button>
@@ -420,12 +420,12 @@ const Index = () => {
           </div>
 
           {/* Bottom Section */}
-          <div className="border-t border-gray-700 mt-12 pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-400 mb-4 md:mb-0">
+          <div className="border-t border-gray-700 mt-8 md:mt-12 pt-6 md:pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-0">
+              <p className="text-gray-400 text-xs md:text-base text-center md:text-left">
                 © 2025 Classpace. All rights reserved.
               </p>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs md:text-sm text-center md:text-right">
                 Built for educators and learners everywhere.
               </p>
             </div>

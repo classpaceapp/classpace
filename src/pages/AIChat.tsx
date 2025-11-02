@@ -95,22 +95,22 @@ const AIChat = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
         <div className="max-w-4xl mx-auto h-screen flex flex-col">
           {/* Header */}
-          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-white" />
+          <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 p-3 md:p-6">
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shrink-0">
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-lg md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   AI Teaching Assistant
                 </h1>
-                <p className="text-gray-600">Your intelligent companion for education</p>
+                <p className="text-xs md:text-base text-gray-600">Your intelligent companion for education</p>
               </div>
             </div>
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 p-6 overflow-hidden">
+          <div className="flex-1 p-3 md:p-6 overflow-hidden">
             <ScrollArea className="h-full" ref={scrollAreaRef}>
               <div className="space-y-6">
                 {messages.map((message) => (
@@ -171,8 +171,8 @@ const AIChat = () => {
           </div>
 
           {/* Input Area */}
-          <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50 p-6">
-            <div className="flex space-x-4">
+          <div className="bg-white/80 backdrop-blur-sm border-t border-gray-200/50 p-3 md:p-6">
+            <div className="flex space-x-2 md:space-x-4">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}

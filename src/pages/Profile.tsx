@@ -84,19 +84,19 @@ const Profile: React.FC = () => {
 
   return (
     <DashboardLayout userRole={profile?.role === 'teacher' ? 'teacher' : 'learner'}>
-      <div className="p-8">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className="p-3 md:p-8">
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-8">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent pb-1">
+        <div className="space-y-1 md:space-y-2">
+          <h1 className="text-2xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-clip-text text-transparent pb-1">
             Profile Settings
           </h1>
-          <p className="text-lg text-foreground/70">
+          <p className="text-sm md:text-lg text-foreground/70">
             Manage your personal information
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Profile Card */}
           <Card className="lg:col-span-1 bg-gradient-to-br from-purple-50/80 to-pink-50/80 border-purple-200/50">
             <CardHeader className="text-center pb-4">

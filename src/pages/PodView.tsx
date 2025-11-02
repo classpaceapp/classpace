@@ -149,20 +149,20 @@ const PodView: React.FC = () => {
 
   return (
     <DashboardLayout userRole="teacher">
-      <div className="container mx-auto px-4 py-8 mt-6">
-        <div className="space-y-6 pl-8">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 mt-3 md:mt-6">
+        <div className="space-y-4 md:space-y-6 pl-0 md:pl-8">
         {/* Header - Enhanced Styling */}
-        <div className="flex items-center gap-4 p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border-2 border-indigo-500/20 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="flex items-center gap-2 md:gap-4 p-3 md:p-6 rounded-xl md:rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border-2 border-indigo-500/20 shadow-lg hover:shadow-xl transition-all duration-300">
           <Button 
             variant="outline" 
             size="icon"
             onClick={() => navigate('/dashboard')}
-            className="shrink-0 border-2 border-indigo-500/50 hover:bg-indigo-500 hover:text-white hover:scale-110 transition-all duration-300 shadow-md"
+            className="shrink-0 border-2 border-indigo-500/50 hover:bg-indigo-500 hover:text-white hover:scale-110 transition-all duration-300 shadow-md h-8 w-8 md:h-10 md:w-10"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
+            <h1 className="text-xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent drop-shadow-sm">
               {pod.title}
             </h1>
             {pod.description && (
@@ -223,7 +223,7 @@ const PodView: React.FC = () => {
 
         {/* Pod Navigation Tabs - Enhanced Styling */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8 lg:w-fit lg:grid-cols-8 h-auto p-2 gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-2xl shadow-2xl border-2 border-white/10">
+          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:w-fit lg:grid-cols-8 h-auto p-1.5 md:p-2 gap-1 md:gap-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-purple-900 rounded-xl md:rounded-2xl shadow-2xl border-2 border-white/10 overflow-x-auto">
             <TabsTrigger 
               value="overview" 
               className="gap-2 h-14 rounded-xl data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-300 data-[state=inactive]:hover:bg-white/10 transition-all duration-300 data-[state=active]:border-2 data-[state=active]:border-blue-300"
