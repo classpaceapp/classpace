@@ -3,8 +3,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Users, GraduationCap, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, GraduationCap, User, UserMinus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Member {
   id: string;
@@ -24,8 +36,14 @@ interface PodMembersProps {
 
 export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [studentToRemove, setStudentToRemove] = useState<Member | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const isTeacher = user?.id === teacherId;
 
   const fetchMembers = async () => {
     try {
@@ -95,6 +113,46 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRemoveStudent = async () => {
+    if (!studentToRemove) return;
+
+    try {
+      setIsRemoving(true);
+
+      const { error } = await supabase
+        .from('pod_members')
+        .delete()
+        .eq('pod_id', podId)
+        .eq('user_id', studentToRemove.user_id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Student removed',
+        description: `${studentToRemove.first_name || 'Student'} has been removed from the pod.`,
+      });
+
+      // Refresh members list
+      fetchMembers();
+      setRemoveDialogOpen(false);
+      setStudentToRemove(null);
+    } catch (error: any) {
+      console.error('Error removing student:', error);
+      toast({
+        title: 'Failed to remove student',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const openRemoveDialog = (student: Member) => {
+    setStudentToRemove(student);
+    setRemoveDialogOpen(true);
   };
 
   useEffect(() => {
@@ -206,6 +264,17 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
                         Student
                       </p>
                     </div>
+                    {isTeacher && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openRemoveDialog(student)}
+                        className="h-9 w-9 md:h-8 md:w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors shrink-0"
+                        title="Remove student from pod"
+                      >
+                        <UserMinus className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -213,6 +282,58 @@ export const PodMembers: React.FC<PodMembersProps> = ({ podId, teacherId }) => {
           )}
         </div>
       </CardContent>
+
+      {/* Remove Student Confirmation Dialog */}
+      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <AlertDialogContent className="max-w-[95vw] md:max-w-lg mx-auto rounded-2xl border-2 border-red-200 dark:border-red-900/50 bg-gradient-to-br from-red-50/50 to-orange-50/50 dark:from-red-950/20 dark:to-orange-950/20">
+          <AlertDialogHeader className="space-y-3">
+            <div className="mx-auto h-14 w-14 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg">
+              <UserMinus className="h-7 w-7 text-white" />
+            </div>
+            <AlertDialogTitle className="text-xl md:text-2xl text-center bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+              Remove Student from Pod?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base space-y-2">
+              <p className="font-semibold text-gray-900 dark:text-white">
+                {studentToRemove?.first_name && studentToRemove?.last_name
+                  ? `${studentToRemove.first_name} ${studentToRemove.last_name}`
+                  : studentToRemove?.email || 'This student'}
+              </p>
+              <p className="text-gray-600 dark:text-gray-400">
+                This will remove the student from the pod. They will lose access to all pod content, materials, and discussions.
+              </p>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                This action cannot be undone. The student will need a new invitation to rejoin.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col md:flex-row gap-2 md:gap-3 mt-6">
+            <AlertDialogCancel 
+              disabled={isRemoving}
+              className="w-full md:w-auto h-12 md:h-10 text-base md:text-sm border-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveStudent}
+              disabled={isRemoving}
+              className="w-full md:w-auto h-12 md:h-10 text-base md:text-sm bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white border-0 shadow-lg disabled:opacity-50"
+            >
+              {isRemoving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Removing...
+                </>
+              ) : (
+                <>
+                  <UserMinus className="h-4 w-4 mr-2" />
+                  Remove Student
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
