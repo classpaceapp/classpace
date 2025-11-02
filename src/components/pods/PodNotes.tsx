@@ -166,16 +166,18 @@ export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
 
   return (
     <>
-      <Card className="border-primary/20 bg-gradient-to-br from-card via-card/95 to-primary/5">
-        <CardHeader className="border-b border-primary/10">
+      <Card className="border-2 border-amber-500/30 shadow-2xl bg-gradient-to-br from-amber-100/90 via-yellow-100/90 to-orange-100/90 dark:from-amber-900/40 dark:via-yellow-900/40 dark:to-orange-900/40 backdrop-blur-sm">
+        <CardHeader className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 border-b-2 border-amber-400/50 shadow-lg">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <StickyNote className="h-5 w-5" />
-              Class Notes
-            </CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+                <StickyNote className="h-6 w-6 md:h-7 md:w-7 text-white" />
+              </div>
+              <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Class Notes</CardTitle>
+            </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 h-10 md:h-9 px-4">
+                  <Button size="sm" className="gap-2 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 font-semibold shadow-md h-10 md:h-9 px-4">
                     <Plus className="h-5 w-5 md:h-4 md:w-4" />
                     <span className="text-sm md:text-sm">Add Note</span>
                   </Button>

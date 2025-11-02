@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, ExternalLink, Trash2, Calendar } from 'lucide-react';
+import { Plus, ExternalLink, Trash2, Calendar, Palette } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Whiteboard {
@@ -202,20 +202,25 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
   }
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-card via-card/95 to-primary/5">
-      <CardHeader className="border-b border-primary/10">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Collaborative Whiteboards
-            </CardTitle>
-            <CardDescription className="mt-2">
-              Create collaborative whiteboards powered by Excalidraw - opens in a new tab
-            </CardDescription>
+    <Card className="border-2 border-pink-500/30 shadow-2xl bg-gradient-to-br from-pink-100/90 via-rose-100/90 to-purple-100/90 dark:from-pink-900/40 dark:via-rose-900/40 dark:to-purple-900/40 backdrop-blur-sm">
+      <CardHeader className="bg-gradient-to-r from-pink-600 via-rose-600 to-purple-600 border-b-2 border-pink-400/50 shadow-lg">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
+              <Palette className="h-6 w-6 md:h-7 md:w-7 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+                Collaborative Whiteboards
+              </CardTitle>
+              <CardDescription className="mt-2 text-white/90 font-medium">
+                Create collaborative whiteboards powered by Excalidraw - opens in a new tab
+              </CardDescription>
+            </div>
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg">
+              <Button className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 font-semibold shadow-md">
                 <Plus className="h-4 w-4 mr-2" />
                 New Whiteboard
               </Button>
@@ -272,11 +277,11 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
               {whiteboards.map((whiteboard) => (
                 <Card
                   key={whiteboard.id}
-                  className="group relative overflow-hidden border-2 border-primary/10 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
+                  className="group relative overflow-hidden border-2 border-pink-500/20 hover:border-pink-500/40 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/20 bg-gradient-to-br from-white to-pink-50/50 dark:from-card dark:to-pink-950/20"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <CardHeader className="relative pb-3">
-                    <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-rose-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <CardHeader className="relative pb-3 bg-gradient-to-br from-pink-50/50 to-rose-50/50 dark:from-pink-950/30 dark:to-rose-950/30">
+                    <CardTitle className="text-lg line-clamp-2 font-bold bg-gradient-to-r from-pink-600 to-rose-600 dark:from-pink-400 dark:to-rose-400 bg-clip-text text-transparent group-hover:from-pink-700 group-hover:to-rose-700 transition-all">
                       {whiteboard.title}
                     </CardTitle>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
@@ -295,7 +300,7 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
                     <div className="flex gap-2">
                       <Button
                         onClick={() => openWhiteboard(whiteboard)}
-                        className="flex-1 bg-primary/90 hover:bg-primary shadow-md"
+                        className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg font-semibold"
                         size="sm"
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />

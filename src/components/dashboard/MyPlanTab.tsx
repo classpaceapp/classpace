@@ -143,7 +143,9 @@ export const MyPlanTab: React.FC = () => {
         </div>
 
         <Card className={`border-2 backdrop-blur-sm rounded-xl md:rounded-2xl overflow-hidden shadow-2xl ${
-          isPremium ? 'border-purple-500/30 bg-gradient-to-br from-card/80 to-card/50 hover:shadow-purple-500/20' : 'border-border/30 bg-gradient-to-br from-card/80 to-card/50'
+          isPremium 
+            ? 'border-amber-500/30 bg-gradient-to-br from-amber-100/90 via-yellow-50/90 to-amber-100/90 dark:from-amber-900/40 dark:via-yellow-800/40 dark:to-amber-900/40 hover:shadow-amber-500/20' 
+            : 'border-border/30 bg-gradient-to-br from-card/80 to-card/50'
         }`}>
           <CardHeader className={`p-4 md:p-8 border-b-2 ${
             isPremium 
