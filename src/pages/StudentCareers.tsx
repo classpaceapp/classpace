@@ -57,17 +57,28 @@ const StudentCareers = () => {
     setCvFile(file);
   };
 
-  const typeWriterEffect = async (text: string, setter: (val: string) => void) => {
+  const typeWriterEffect = async (html: string, setter: (val: string) => void) => {
+    // Types HTML by paragraphs so formatting and links stay intact once a paragraph is complete
     setIsTyping(true);
-    let currentText = '';
-    const words = text.split(' ');
-    
-    for (let i = 0; i < words.length; i++) {
-      currentText += (i > 0 ? ' ' : '') + words[i];
-      setter(currentText);
-      await new Promise(resolve => setTimeout(resolve, 50));
+
+    const stripTags = (s: string) => s.replace(/<[^>]+>/g, '');
+    const paragraphs = html.match(/<p[^>]*>.*?<\/p>/gms) || [`<p>${stripTags(html)}</p>`];
+
+    let builtHtml = '';
+    for (const paraHtml of paragraphs) {
+      const plain = stripTags(paraHtml);
+      let typed = '';
+      for (let i = 0; i < plain.length; i++) {
+        typed += plain[i];
+        const current = builtHtml + `<p>${typed}</p>`;
+        setter(current);
+        await new Promise((r) => setTimeout(r, 16));
+      }
+      // Replace the typed text paragraph with the final formatted HTML paragraph (with links)
+      builtHtml += paraHtml;
+      setter(builtHtml);
     }
-    
+
     setIsTyping(false);
   };
 

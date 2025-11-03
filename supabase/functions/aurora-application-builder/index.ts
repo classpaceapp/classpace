@@ -165,26 +165,29 @@ Please create the requested application materials following all humanization gui
       throw new Error("No response generated");
     }
 
-    // Clean and sanitize the output, then convert to HTML
+    // Clean and sanitize the output, preserving newlines for paragraphing
     let cleanedText = generatedText
       .replace(/—/g, '-') // Replace em dashes
       .replace(/\*/g, '') // Remove asterisks
-      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/\r\n/g, '\n')
+      .replace(/^\s*#+\s*/gm, '') // Remove markdown headings like ###
+      .replace(/^>\s?/gm, '') // Remove blockquotes
       .trim();
 
-    // Convert to proper HTML with paragraphs
-    // Split by double newlines to get paragraphs
-    const paragraphs = cleanedText.split(/\n\n+/);
-    const htmlContent = paragraphs
-      .map(para => {
-        // If paragraph already contains HTML tags, keep as is
-        if (para.includes('<p>')) {
-          return para;
-        }
-        // Otherwise, wrap in paragraph tags
-        return `<p>${para}</p>`;
-      })
-      .join('\n\n');
+    // Convert Markdown links [text](url) to HTML anchors
+    cleanedText = cleanedText.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-semibold">$1</a>');
+
+    // Build HTML blocks: wrap bullet groups as lists and others as paragraphs
+    const blocks = cleanedText.split(/\n{2,}/);
+    const htmlContent = blocks.map((block) => {
+      const lines = block.split(/\n/);
+      const isList = lines.every((l) => /^\s*[-*•]\s+/.test(l));
+      if (isList) {
+        const items = lines.map((l) => l.replace(/^\s*[-*•]\s+/, '').trim());
+        return `<ul class="list-disc pl-6 space-y-1">${items.map((it) => `<li>${it}</li>`).join('')}</ul>`;
+      }
+      return `<p>${block}</p>`;
+    }).join('\n');
 
     console.log("Application generated successfully");
 
