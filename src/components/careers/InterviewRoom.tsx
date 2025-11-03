@@ -337,29 +337,35 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
           {/* Question & Controls */}
           <Card className="bg-gradient-to-br from-blue-500/20 via-indigo-500/20 to-purple-500/20 border-2 border-white/30 backdrop-blur">
             <CardHeader>
-              <CardTitle className="text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 px-4 py-1.5 rounded-full shadow-lg">
-                    {currentQuestion.category}
-                  </span>
+              <CardTitle>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                  <div className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg border-2 border-purple-300">
+                    <span className="text-sm font-bold text-white uppercase tracking-wide">
+                      {currentQuestion.category}
+                    </span>
+                  </div>
                   {isPreparing ? (
-                    <div className="flex flex-col items-end">
-                      <span className="text-xs text-amber-300 font-semibold mb-1">PREP TIME</span>
-                      <span className="text-3xl font-bold text-amber-400 animate-pulse">
-                        {prepTimeRemaining}s
-                      </span>
+                    <div className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-lg border-2 border-amber-300 animate-pulse">
+                      <div className="flex flex-col items-center">
+                        <span className="text-xs text-white font-bold mb-0.5">PREP TIME</span>
+                        <span className="text-2xl font-black text-white">
+                          {prepTimeRemaining}s
+                        </span>
+                      </div>
                     </div>
                   ) : (
-                    <span className="text-3xl font-bold text-white">
-                      {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-                    </span>
+                    <div className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl shadow-lg border-2 border-emerald-300">
+                      <span className="text-2xl font-black text-white">
+                        {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                      </span>
+                    </div>
                   )}
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-white/10 p-6 rounded-xl border border-white/20">
-                <p className="text-white text-lg leading-relaxed">
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-700 p-6 rounded-2xl border-2 border-indigo-300 shadow-2xl">
+                <p className="text-white text-lg leading-relaxed font-medium">
                   {currentQuestion.text}
                 </p>
               </div>
@@ -367,13 +373,15 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
               {/* Recording Controls */}
               <div className="space-y-3">
                 {isPreparing && (
-                  <div className="text-center py-6">
-                    <p className="text-amber-300 text-lg font-bold mb-2">
-                      Get Ready! Recording will start in {prepTimeRemaining} seconds
-                    </p>
-                    <p className="text-white/70 text-sm">
-                      Use this time to think about your answer
-                    </p>
+                  <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-2xl border-2 border-amber-300 shadow-xl animate-pulse">
+                    <div className="text-center">
+                      <p className="text-white text-xl font-black mb-3">
+                        🎯 Get Ready! Recording starts in {prepTimeRemaining} seconds
+                      </p>
+                      <p className="text-white text-sm font-semibold">
+                        Use this time to think about your answer
+                      </p>
+                    </div>
                   </div>
                 )}
 
