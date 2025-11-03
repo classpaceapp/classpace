@@ -44,19 +44,18 @@ serve(async (req) => {
       }
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const jwt = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(jwt);
     
     if (userError) {
-      console.error('Error getting user:', userError);
+      console.error('auth.getUser error:', userError);
       throw new Error('Failed to authenticate user');
     }
-    
     if (!user) {
-      console.error('No user found after auth check');
+      console.error('No user after getUser with JWT');
       throw new Error('Unauthorized - no user found');
     }
-    
-    console.log('User authenticated:', user.id);
 
     // Check subscription tier and note limit
     const { data: subscription } = await supabaseClient
