@@ -201,49 +201,60 @@ const StudentCareers = () => {
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 blur-xl opacity-50 animate-pulse" />
-              <div className="relative w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-2xl">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 blur-2xl opacity-40" />
+              <div className="relative w-20 h-20 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-3xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-300">
+                <Sparkles className="w-10 h-10 text-white animate-[spin_8s_linear_infinite]" />
               </div>
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-3 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
             Careers Toolkit
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Powered by{' '}
             <span className="font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Aurora AI
+              Aurora
             </span>
             {' '}— Your intelligent career companion
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="application-builder" className="gap-2">
-              <FileText className="h-4 w-4" />
+          <TabsList className="grid w-full grid-cols-3 mb-8 h-16 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 p-2 rounded-2xl">
+            <TabsTrigger 
+              value="application-builder" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-xl rounded-xl transition-all duration-300 font-semibold"
+            >
+              <FileText className="h-5 w-5" />
               Application Builder
             </TabsTrigger>
-            <TabsTrigger value="role-search" className="gap-2">
-              <Search className="h-4 w-4" />
+            <TabsTrigger 
+              value="role-search" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-teal-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-xl rounded-xl transition-all duration-300 font-semibold"
+            >
+              <Search className="h-5 w-5" />
               Role Search
             </TabsTrigger>
-            <TabsTrigger value="interview-prep" className="gap-2">
-              <Target className="h-4 w-4" />
+            <TabsTrigger 
+              value="interview-prep" 
+              className="gap-2 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-xl rounded-xl transition-all duration-300 font-semibold"
+            >
+              <Target className="h-5 w-5" />
               Interview Prep
             </TabsTrigger>
           </TabsList>
 
           {/* Application Builder */}
           <TabsContent value="application-builder" className="space-y-6">
-            <Card className="border-2 border-emerald-500/20 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20">
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Sparkles className="h-6 w-6 text-emerald-600" />
+            <Card className="border-2 border-emerald-400/30 shadow-2xl bg-gradient-to-br from-white via-emerald-50/50 to-teal-50/50 dark:from-gray-950 dark:via-emerald-950/20 dark:to-teal-950/20">
+              <CardHeader className="bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100 dark:from-emerald-950/40 dark:via-teal-950/40 dark:to-cyan-950/40 border-b-2 border-emerald-200 dark:border-emerald-800">
+                <CardTitle className="flex items-center gap-3 text-3xl font-extrabold">
+                  <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg">
+                    <Sparkles className="h-7 w-7 text-white" />
+                  </div>
                   Application Builder
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-base mt-2 text-muted-foreground">
                   Upload your CV and job details — Aurora will craft perfect cover letters and application responses
                 </CardDescription>
               </CardHeader>
@@ -256,12 +267,12 @@ const StudentCareers = () => {
                       type="file"
                       accept=".pdf"
                       onChange={handleCvUpload}
-                      className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 dark:file:bg-emerald-950 dark:file:text-emerald-300"
+                      className="cursor-pointer h-12 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 dark:file:bg-emerald-950 dark:file:text-emerald-300"
                     />
                     {cvFile && (
-                      <div className="mt-2 flex items-center gap-2 text-sm text-emerald-600">
-                        <Upload className="h-4 w-4" />
-                        <span className="font-medium">{cvFile.name}</span>
+                      <div className="mt-3 flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                        <Upload className="h-5 w-5 text-emerald-600" />
+                        <span className="font-medium text-emerald-700 dark:text-emerald-300">{cvFile.name}</span>
                       </div>
                     )}
                   </div>
@@ -306,39 +317,42 @@ const StudentCareers = () => {
                 <Button
                   onClick={handleGenerateApplication}
                   disabled={generatingApplication || isTyping}
-                  className="w-full h-12 text-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                  className="w-full h-14 text-lg font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-700 hover:via-teal-700 hover:to-cyan-700 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
                 >
                   {generatingApplication ? (
                     <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      <Loader2 className="h-6 w-6 mr-2 animate-spin" />
                       Aurora is working...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5 mr-2" />
+                      <Sparkles className="h-6 w-6 mr-2" />
                       Generate with Aurora
                     </>
                   )}
                 </Button>
 
                 {applicationResult && (
-                  <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-emerald-200 dark:border-emerald-800">
-                    <CardHeader>
-                      <CardTitle className="text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-                        <Sparkles className="h-5 w-5" />
+                  <Card className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 border-2 border-emerald-300 dark:border-emerald-700 shadow-2xl">
+                    <CardHeader className="bg-gradient-to-r from-emerald-100/50 via-teal-100/50 to-cyan-100/50 dark:from-emerald-950/50 dark:via-teal-950/50 dark:to-cyan-950/50">
+                      <CardTitle className="text-emerald-700 dark:text-emerald-300 flex items-center gap-3 text-xl">
+                        <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg">
+                          <Sparkles className="h-5 w-5 text-white" />
+                        </div>
                         Aurora's Response
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
-                        {applicationResult}
-                      </div>
+                    <CardContent className="pt-6">
+                      <div 
+                        className="prose prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
+                        dangerouslySetInnerHTML={{ __html: applicationResult }}
+                      />
                       {!isTyping && (
                         <Button
                           variant="outline"
-                          className="mt-4"
+                          className="mt-6 border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 font-semibold"
                           onClick={() => {
-                            navigator.clipboard.writeText(applicationResult);
+                            navigator.clipboard.writeText(applicationResult.replace(/<[^>]*>/g, ''));
                             toast({ title: 'Copied!', description: 'Response copied to clipboard' });
                           }}
                         >
@@ -354,13 +368,15 @@ const StudentCareers = () => {
 
           {/* Role Search */}
           <TabsContent value="role-search" className="space-y-6">
-            <Card className="border-2 border-teal-500/20 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20">
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Search className="h-6 w-6 text-teal-600" />
+            <Card className="border-2 border-teal-400/30 shadow-2xl bg-gradient-to-br from-white via-teal-50/50 to-cyan-50/50 dark:from-gray-950 dark:via-teal-950/20 dark:to-cyan-950/20">
+              <CardHeader className="bg-gradient-to-r from-teal-100 via-cyan-100 to-blue-100 dark:from-teal-950/40 dark:via-cyan-950/40 dark:to-blue-950/40 border-b-2 border-teal-200 dark:border-teal-800">
+                <CardTitle className="flex items-center gap-3 text-3xl font-extrabold">
+                  <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl shadow-lg">
+                    <Search className="h-7 w-7 text-white" />
+                  </div>
                   Role Search
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-base mt-2 text-muted-foreground">
                   Tell Aurora what you're looking for — get perfectly matched opportunities
                 </CardDescription>
               </CardHeader>
@@ -430,33 +446,36 @@ const StudentCareers = () => {
                 <Button
                   onClick={handleRoleSearch}
                   disabled={searchingRoles || isTyping}
-                  className="w-full h-12 text-lg bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700"
+                  className="w-full h-14 text-lg font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 hover:from-teal-700 hover:via-cyan-700 hover:to-blue-700 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
                 >
                   {searchingRoles ? (
                     <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      <Loader2 className="h-6 w-6 mr-2 animate-spin" />
                       Aurora is searching...
                     </>
                   ) : (
                     <>
-                      <Search className="h-5 w-5 mr-2" />
+                      <Sparkles className="h-6 w-6 mr-2" />
                       Search with Aurora
                     </>
                   )}
                 </Button>
 
                 {roleResults && (
-                  <Card className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 dark:border-teal-800">
-                    <CardHeader>
-                      <CardTitle className="text-teal-700 dark:text-teal-300 flex items-center gap-2">
-                        <Sparkles className="h-5 w-5" />
-                        Aurora's Findings
+                  <Card className="bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 dark:from-teal-950/30 dark:via-cyan-950/30 dark:to-blue-950/30 border-2 border-teal-300 dark:border-teal-700 shadow-2xl">
+                    <CardHeader className="bg-gradient-to-r from-teal-100/50 via-cyan-100/50 to-blue-100/50 dark:from-teal-950/50 dark:via-cyan-950/50 dark:to-blue-950/50">
+                      <CardTitle className="text-teal-700 dark:text-teal-300 flex items-center gap-3 text-xl">
+                        <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg">
+                          <Sparkles className="h-5 w-5 text-white" />
+                        </div>
+                        Aurora's Results
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
-                        {roleResults}
-                      </div>
+                    <CardContent className="pt-6">
+                      <div 
+                        className="prose prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
+                        dangerouslySetInnerHTML={{ __html: roleResults }}
+                      />
                     </CardContent>
                   </Card>
                 )}
@@ -466,24 +485,26 @@ const StudentCareers = () => {
 
           {/* Interview Prep */}
           <TabsContent value="interview-prep">
-            <Card className="border-2 border-purple-500/20 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Target className="h-6 w-6 text-purple-600" />
+            <Card className="border-2 border-blue-400/30 shadow-2xl bg-gradient-to-br from-white via-blue-50/50 to-indigo-50/50 dark:from-gray-950 dark:via-blue-950/20 dark:to-indigo-950/20">
+              <CardHeader className="bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 border-b-2 border-blue-200 dark:border-blue-800">
+                <CardTitle className="flex items-center gap-3 text-3xl font-extrabold">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl shadow-lg">
+                    <Target className="h-7 w-7 text-white" />
+                  </div>
                   Interview Prep
                 </CardTitle>
-                <CardDescription className="text-base">
-                  AI-powered interview preparation and coaching
+                <CardDescription className="text-base mt-2 text-muted-foreground">
+                  Coming Soon — Comprehensive interview preparation powered by Aurora
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-8">
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-950/50 dark:to-pink-950/50 rounded-full mb-4">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
-                    <span className="font-semibold text-purple-700 dark:text-purple-300">Coming Soon</span>
+                <div className="text-center py-16">
+                  <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950/50 dark:via-indigo-950/50 dark:to-purple-950/50 rounded-2xl mb-6 shadow-lg">
+                    <Sparkles className="h-6 w-6 text-blue-600" />
+                    <span className="font-bold text-xl text-blue-700 dark:text-blue-300">Coming Soon</span>
                   </div>
-                  <p className="text-muted-foreground text-lg">
-                    Aurora will soon help you prepare for interviews with personalized coaching and practice
+                  <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                    Aurora will soon help you prepare for interviews with personalized coaching and practice sessions
                   </p>
                 </div>
               </CardContent>

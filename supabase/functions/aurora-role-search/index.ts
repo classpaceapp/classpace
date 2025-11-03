@@ -32,14 +32,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Construct search query based on mode
     let searchQuery = '';
     if (mode === 'structured') {
-      searchQuery = `${industry} jobs in ${location} current openings careers 2025`;
+      searchQuery = `${industry} careers jobs hiring ${location} 2025 apply now company career pages`;
     } else {
       searchQuery = naturalQuery || '';
     }
 
     console.log("Executing deep web search with query:", searchQuery);
 
-    // Step 1: Deep web search using Tavily
+    // Step 1: Deep web search using Tavily - NO domain restrictions to find company career pages
     const searchResponse = await fetch("https://api.tavily.com/search", {
       method: "POST",
       headers: {
@@ -49,14 +49,8 @@ const handler = async (req: Request): Promise<Response> => {
         api_key: TAVILY_API_KEY,
         query: searchQuery,
         search_depth: "advanced",
-        max_results: 10,
-        include_domains: [
-          "linkedin.com/jobs",
-          "indeed.com",
-          "glassdoor.com",
-          "reed.co.uk",
-          "monster.com",
-        ],
+        max_results: 15,
+        include_raw_content: true,
       }),
     });
 
@@ -78,14 +72,21 @@ CRITICAL HUMANIZATION RULES:
 5. Show genuine insight about each opportunity
 6. Be honest about fit and match quality
 
-Your task is to analyze the search results and present the most relevant opportunities in a beautiful, organized way. For each role:
-- Provide the job title and company
-- Include the direct link (make it clickable-ready)
+CRITICAL FORMATTING RULES:
+1. Structure your response with clear paragraphs separated by double line breaks
+2. Use proper HTML for links: <a href="URL" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 underline font-semibold">Link Text</a>
+3. Bold job titles and company names for emphasis
+4. Add spacing between each opportunity listing
+5. Create a clean, scannable format
+
+Your task is to analyze the search results and present the most relevant opportunities. For each role:
+- Provide the job title and company (bolded)
+- Include the direct application link as a properly formatted HTML anchor
 - Explain why this role matches the candidate's criteria
 - Note any standout features or requirements
 - Be honest if it's not a perfect match but still worth considering
 
-Format your response as a well-organized list that's easy to scan and act on. Make it feel like advice from a knowledgeable friend, not a robot.`;
+Format your response as a well-organized list with proper spacing and clickable links. Make it feel like advice from a knowledgeable friend, not a robot.`;
 
     const userPrompt = `Search Criteria:
 ${mode === 'structured' ? `Industry: ${industry}
@@ -134,17 +135,31 @@ Please analyze these opportunities and present the best matches in a clear, acti
       throw new Error("No analysis generated");
     }
 
-    // Clean and sanitize the output
+    // Clean and sanitize the output, then convert to HTML
     let cleanedText = analysisText
       .replace(/—/g, '-') // Replace em dashes
       .replace(/\*/g, '') // Remove asterisks
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
 
+    // Convert to proper HTML with paragraphs and preserve links
+    // Split by double newlines to get paragraphs
+    const paragraphs = cleanedText.split(/\n\n+/);
+    const htmlContent = paragraphs
+      .map(para => {
+        // If paragraph already contains HTML tags, keep as is
+        if (para.includes('<a ') || para.includes('<p>')) {
+          return para;
+        }
+        // Otherwise, wrap in paragraph tags
+        return `<p>${para}</p>`;
+      })
+      .join('\n\n');
+
     console.log("Role analysis completed successfully");
 
     return new Response(
-      JSON.stringify({ success: true, result: cleanedText }),
+      JSON.stringify({ success: true, result: htmlContent }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },

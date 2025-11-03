@@ -93,12 +93,19 @@ CRITICAL HUMANIZATION RULES:
 6. Vary sentence structure and length for natural flow
 7. Show genuine enthusiasm without sounding artificial
 
+CRITICAL FORMATTING RULES:
+1. Structure your response with clear paragraphs separated by double line breaks
+2. Use proper spacing between sections
+3. Create a clean, readable format that's easy to copy and paste
+4. Add appropriate line breaks for readability
+
 Your task is to analyze the candidate's CV, the job role details, and any LinkedIn information, then craft exactly what they've requested in their prompt. The output should be:
 - Professional yet personable
 - Tailored specifically to the role
 - Highlighting relevant experience and skills
 - Authentic and human in tone
 - Free from any AI-like formatting or phrases
+- Properly formatted with clear paragraphs and spacing
 
 Context provided:
 - CV information (simplified representation)
@@ -158,17 +165,31 @@ Please create the requested application materials following all humanization gui
       throw new Error("No response generated");
     }
 
-    // Clean and sanitize the output
+    // Clean and sanitize the output, then convert to HTML
     let cleanedText = generatedText
       .replace(/—/g, '-') // Replace em dashes
       .replace(/\*/g, '') // Remove asterisks
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
 
+    // Convert to proper HTML with paragraphs
+    // Split by double newlines to get paragraphs
+    const paragraphs = cleanedText.split(/\n\n+/);
+    const htmlContent = paragraphs
+      .map(para => {
+        // If paragraph already contains HTML tags, keep as is
+        if (para.includes('<p>')) {
+          return para;
+        }
+        // Otherwise, wrap in paragraph tags
+        return `<p>${para}</p>`;
+      })
+      .join('\n\n');
+
     console.log("Application generated successfully");
 
     return new Response(
-      JSON.stringify({ success: true, result: cleanedText }),
+      JSON.stringify({ success: true, result: htmlContent }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
