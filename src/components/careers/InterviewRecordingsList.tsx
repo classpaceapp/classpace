@@ -1,10 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Calendar, Clock, Video } from 'lucide-react';
+import { Play, Calendar, Clock, Video, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface Session {
   id: string;
@@ -31,6 +42,7 @@ const InterviewRecordingsList = () => {
   const [recordings, setRecordings] = useState<Record<string, Recording[]>>({});
   const [loading, setLoading] = useState(true);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const [deletingSession, setDeletingSession] = useState<string | null>(null);
 
   useEffect(() => {
     loadSessions();
@@ -101,6 +113,63 @@ const InterviewRecordingsList = () => {
     }
   };
 
+  const deleteSession = async (sessionId: string) => {
+    setDeletingSession(sessionId);
+    try {
+      // Get all recordings for this session
+      const sessionRecordings = recordings[sessionId] || [];
+      
+      // Delete video files from storage
+      for (const recording of sessionRecordings) {
+        const { error: storageError } = await supabase.storage
+          .from('interview-recordings')
+          .remove([recording.video_url]);
+        
+        if (storageError) {
+          console.error('Error deleting video file:', storageError);
+        }
+      }
+
+      // Delete recording records from database
+      const { error: recordingsError } = await supabase
+        .from('interview_recordings')
+        .delete()
+        .eq('session_id', sessionId);
+
+      if (recordingsError) throw recordingsError;
+
+      // Delete session
+      const { error: sessionError } = await supabase
+        .from('interview_sessions')
+        .delete()
+        .eq('id', sessionId);
+
+      if (sessionError) throw sessionError;
+
+      // Update UI
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      setRecordings(prev => {
+        const updated = { ...prev };
+        delete updated[sessionId];
+        return updated;
+      });
+
+      toast({
+        title: 'Deleted',
+        description: 'Interview practice session deleted successfully',
+      });
+    } catch (err: any) {
+      console.error('Error deleting session:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete interview session',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingSession(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -157,6 +226,35 @@ const InterviewRecordingsList = () => {
                     </div>
                   </div>
                 </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400"
+                      disabled={deletingSession === session.id}
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Interview Practice?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete this interview practice session and all its recordings. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteSession(session.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">

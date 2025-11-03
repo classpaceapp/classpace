@@ -10,6 +10,7 @@ interface Question {
   text: string;
   timeLimit: number;
   category: string;
+  prepTime: number;
 }
 
 interface InterviewRoomProps {
@@ -23,6 +24,8 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(true);
+  const [prepTimeRemaining, setPrepTimeRemaining] = useState(questions[0]?.prepTime || 30);
   const [attempt, setAttempt] = useState(1);
   const [timeRemaining, setTimeRemaining] = useState(questions[0]?.timeLimit || 0);
   const [videoEnabled, setVideoEnabled] = useState(true);
@@ -45,7 +48,27 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
 
   useEffect(() => {
     setTimeRemaining(questions[currentQuestionIndex]?.timeLimit || 0);
+    setPrepTimeRemaining(questions[currentQuestionIndex]?.prepTime || 30);
+    setIsPreparing(true);
   }, [currentQuestionIndex, questions]);
+
+  // Prep time countdown
+  useEffect(() => {
+    if (!isPreparing) return;
+
+    const prepTimer = setInterval(() => {
+      setPrepTimeRemaining(prev => {
+        if (prev <= 1) {
+          setIsPreparing(false);
+          startRecording();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(prepTimer);
+  }, [isPreparing, currentQuestionIndex]);
 
   const startCamera = async () => {
     try {
@@ -201,6 +224,8 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
       setCurrentQuestionIndex(prev => prev + 1);
       setAttempt(1);
       setTimeRemaining(questions[currentQuestionIndex + 1].timeLimit);
+      setPrepTimeRemaining(questions[currentQuestionIndex + 1].prepTime);
+      setIsPreparing(true);
     } else {
       handleEndInterview();
     }
@@ -210,6 +235,8 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
     if (attempt < 2) {
       setAttempt(2);
       setTimeRemaining(questions[currentQuestionIndex].timeLimit);
+      setPrepTimeRemaining(questions[currentQuestionIndex].prepTime);
+      setIsPreparing(true);
     }
   };
 
@@ -312,12 +339,21 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
             <CardHeader>
               <CardTitle className="text-white">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">
+                  <span className="text-sm font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-gray-900 px-4 py-1.5 rounded-full shadow-lg">
                     {currentQuestion.category}
                   </span>
-                  <span className="text-2xl font-bold">
-                    {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-                  </span>
+                  {isPreparing ? (
+                    <div className="flex flex-col items-end">
+                      <span className="text-xs text-amber-300 font-semibold mb-1">PREP TIME</span>
+                      <span className="text-3xl font-bold text-amber-400 animate-pulse">
+                        {prepTimeRemaining}s
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-3xl font-bold text-white">
+                      {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                    </span>
+                  )}
                 </div>
               </CardTitle>
             </CardHeader>
@@ -330,14 +366,15 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
 
               {/* Recording Controls */}
               <div className="space-y-3">
-                {!isRecording && !uploading && (
-                  <Button
-                    onClick={startRecording}
-                    className="w-full h-14 text-lg font-bold bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700"
-                  >
-                    <Circle className="h-5 w-5 mr-2 fill-current" />
-                    Start Recording
-                  </Button>
+                {isPreparing && (
+                  <div className="text-center py-6">
+                    <p className="text-amber-300 text-lg font-bold mb-2">
+                      Get Ready! Recording will start in {prepTimeRemaining} seconds
+                    </p>
+                    <p className="text-white/70 text-sm">
+                      Use this time to think about your answer
+                    </p>
+                  </div>
                 )}
 
                 {isRecording && (
@@ -356,17 +393,16 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
                   </Button>
                 )}
 
-                {!isRecording && !uploading && attempt < 2 && (
+                {!isRecording && !uploading && !isPreparing && attempt < 2 && (
                   <Button
                     onClick={handleRetry}
-                    variant="outline"
-                    className="w-full border-2 border-white/30 text-white hover:bg-white/10"
+                    className="w-full h-12 text-base font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border-2 border-purple-300 shadow-lg"
                   >
                     Try Again (Attempt 2)
                   </Button>
                 )}
 
-                {!isRecording && !uploading && (
+                {!isRecording && !uploading && !isPreparing && (
                   <Button
                     onClick={handleNext}
                     className="w-full h-14 text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"

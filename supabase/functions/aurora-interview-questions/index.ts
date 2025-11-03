@@ -39,8 +39,21 @@ serve(async (req) => {
         api_key: tavilyApiKey,
         query: searchQuery,
         search_depth: 'advanced',
-        max_results: 15,
-        include_domains: ['glassdoor.com', 'indeed.com', 'interviewprep.org', 'leetcode.com', 'hackerrank.com'],
+        max_results: 25,
+        include_domains: [
+          'glassdoor.com',
+          'indeed.com',
+          'interviewprep.org',
+          'leetcode.com',
+          'hackerrank.com',
+          'interviewbit.com',
+          'geeksforgeeks.org',
+          'careervidz.com',
+          'biginterview.com',
+          'theinterviewguys.com',
+          'themuse.com',
+          'vault.com',
+        ],
       }),
     });
 
@@ -65,21 +78,28 @@ Your task: Generate EXACTLY ${numQuestions} interview questions for this role.
 
 CRITICAL REQUIREMENTS:
 1. Questions MUST be realistic and commonly asked in actual interviews
-2. Base questions on the web research provided (Glassdoor, Indeed, etc.)
-3. Include a mix of:
+2. PRIORITIZE questions found in the web research from Glassdoor, Indeed, interview prep sites
+3. If actual interview questions are found in the research, USE THOSE EXACT QUESTIONS
+4. Include a mix of:
    - Behavioral questions (Tell me about a time...)
    - Technical/role-specific questions
    - Situational questions (What would you do if...)
-4. For EACH question, determine an appropriate time limit:
-   - Simple questions: 45-60 seconds
-   - Moderate questions: 90-120 seconds
-   - Complex/detailed questions: 150-300 seconds
+5. For EACH question, determine:
+   a) Prep time (thinking time before recording starts):
+      - Simple questions: 20-30 seconds
+      - Moderate questions: 30-45 seconds
+      - Complex questions: 45-60 seconds
+   b) Answer time limit:
+      - Simple questions: 45-60 seconds
+      - Moderate questions: 90-120 seconds
+      - Complex/detailed questions: 150-300 seconds
 
 OUTPUT FORMAT (JSON):
 {
   "questions": [
     {
       "text": "The interview question",
+      "prepTime": 30,
       "timeLimit": 90,
       "category": "behavioral|technical|situational"
     }
