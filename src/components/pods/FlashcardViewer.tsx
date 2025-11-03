@@ -93,7 +93,7 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
   };
 
   const handleDownloadPDF = async () => {
-    if (!cards[currentIndex]) return;
+    if (cards.length === 0) return;
 
     try {
       const pdf = new jsPDF({
@@ -102,99 +102,105 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
         format: 'a4'
       });
 
-      const card = cards[currentIndex];
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 15;
       const contentWidth = pageWidth - (2 * margin);
 
-      // Golden gradient background for front
-      pdf.setFillColor(255, 223, 128);
-      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-      
-      // Add decorative golden border
-      pdf.setDrawColor(218, 165, 32);
-      pdf.setLineWidth(2);
-      pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
-
-      // Front of card - Question
-      pdf.setFontSize(24);
-      pdf.setTextColor(139, 69, 19);
-      pdf.text('Question', pageWidth / 2, margin + 10, { align: 'center' });
-
-      // Card number with golden badge
-      pdf.setFillColor(255, 215, 0);
-      pdf.roundedRect(pageWidth / 2 - 15, margin + 20, 30, 10, 3, 3, 'F');
-      pdf.setFontSize(14);
-      pdf.setTextColor(139, 69, 19);
-      pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
-
-      // Question content (remove LaTeX for PDF - plain text)
-      const cleanHint = card.hint.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
-      pdf.setFontSize(16);
-      pdf.setTextColor(51, 51, 51);
-      const hintLines = pdf.splitTextToSize(cleanHint, contentWidth - 20);
-      pdf.text(hintLines, pageWidth / 2, margin + 50, { align: 'center', maxWidth: contentWidth - 20 });
-
-      // Add new page for answer
-      pdf.addPage();
-
-      // Golden gradient background for back
-      pdf.setFillColor(255, 235, 205);
-      pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-      
-      // Add decorative golden border
-      pdf.setDrawColor(218, 165, 32);
-      pdf.setLineWidth(2);
-      pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
-
-      // Back of card - Answer
-      pdf.setFontSize(24);
-      pdf.setTextColor(139, 69, 19);
-      pdf.text('Answer', pageWidth / 2, margin + 10, { align: 'center' });
-
-      // Card number with golden badge
-      pdf.setFillColor(255, 215, 0);
-      pdf.roundedRect(pageWidth / 2 - 15, margin + 20, 30, 10, 3, 3, 'F');
-      pdf.setFontSize(14);
-      pdf.setTextColor(139, 69, 19);
-      pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
-
-      // Answer content (remove LaTeX for PDF - plain text)
-      const cleanContent = card.content.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
-      pdf.setFontSize(14);
-      pdf.setTextColor(51, 51, 51);
-      const contentLines = pdf.splitTextToSize(cleanContent, contentWidth - 20);
-      
-      let yPosition = margin + 50;
-      const lineHeight = 7;
-      const maxY = pageHeight - margin - 20;
-
-      contentLines.forEach((line: string, index: number) => {
-        if (yPosition + lineHeight > maxY) {
+      // Loop through all cards
+      cards.forEach((card, index) => {
+        if (index > 0) {
           pdf.addPage();
-          // Repeat background for new page
-          pdf.setFillColor(255, 235, 205);
-          pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-          pdf.setDrawColor(218, 165, 32);
-          pdf.setLineWidth(2);
-          pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
-          yPosition = margin + 10;
         }
-        pdf.text(line, pageWidth / 2, yPosition, { align: 'center', maxWidth: contentWidth - 20 });
-        yPosition += lineHeight;
+
+        // Golden gradient background for front
+        pdf.setFillColor(255, 223, 128);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        // Add decorative golden border
+        pdf.setDrawColor(218, 165, 32);
+        pdf.setLineWidth(2);
+        pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
+
+        // Front of card - Question
+        pdf.setFontSize(24);
+        pdf.setTextColor(139, 69, 19);
+        pdf.text('Question', pageWidth / 2, margin + 10, { align: 'center' });
+
+        // Card number with golden badge
+        pdf.setFillColor(255, 215, 0);
+        pdf.roundedRect(pageWidth / 2 - 15, margin + 20, 30, 10, 3, 3, 'F');
+        pdf.setFontSize(14);
+        pdf.setTextColor(139, 69, 19);
+        pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
+
+        // Question content (remove LaTeX for PDF - plain text)
+        const cleanHint = card.hint.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
+        pdf.setFontSize(16);
+        pdf.setTextColor(51, 51, 51);
+        const hintLines = pdf.splitTextToSize(cleanHint, contentWidth - 20);
+        pdf.text(hintLines, pageWidth / 2, margin + 50, { align: 'center', maxWidth: contentWidth - 20 });
+
+        // Add new page for answer
+        pdf.addPage();
+
+        // Golden gradient background for back
+        pdf.setFillColor(255, 235, 205);
+        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+        
+        // Add decorative golden border
+        pdf.setDrawColor(218, 165, 32);
+        pdf.setLineWidth(2);
+        pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
+
+        // Back of card - Answer
+        pdf.setFontSize(24);
+        pdf.setTextColor(139, 69, 19);
+        pdf.text('Answer', pageWidth / 2, margin + 10, { align: 'center' });
+
+        // Card number with golden badge
+        pdf.setFillColor(255, 215, 0);
+        pdf.roundedRect(pageWidth / 2 - 15, margin + 20, 30, 10, 3, 3, 'F');
+        pdf.setFontSize(14);
+        pdf.setTextColor(139, 69, 19);
+        pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
+
+        // Answer content (remove LaTeX for PDF - plain text)
+        const cleanContent = card.content.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
+        pdf.setFontSize(14);
+        pdf.setTextColor(51, 51, 51);
+        const contentLines = pdf.splitTextToSize(cleanContent, contentWidth - 20);
+        
+        let yPosition = margin + 50;
+        const lineHeight = 7;
+        const maxY = pageHeight - margin - 20;
+
+        contentLines.forEach((line: string, lineIndex: number) => {
+          if (yPosition + lineHeight > maxY) {
+            pdf.addPage();
+            // Repeat background for new page
+            pdf.setFillColor(255, 235, 205);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            pdf.setDrawColor(218, 165, 32);
+            pdf.setLineWidth(2);
+            pdf.rect(margin - 5, margin - 5, contentWidth + 10, pageHeight - (2 * margin) + 10, 'S');
+            yPosition = margin + 10;
+          }
+          pdf.text(line, pageWidth / 2, yPosition, { align: 'center', maxWidth: contentWidth - 20 });
+          yPosition += lineHeight;
+        });
+
+        // Add footer with metadata
+        pdf.setFontSize(10);
+        pdf.setTextColor(128, 128, 128);
+        pdf.text(`${flashcardSet?.title || 'Flashcard'}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
       });
 
-      // Add footer with metadata
-      pdf.setFontSize(10);
-      pdf.setTextColor(128, 128, 128);
-      pdf.text(`${flashcardSet?.title || 'Flashcard'}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
-
       // Save PDF
-      const fileName = `flashcard-${card.card_order}-${flashcardSet?.title?.replace(/[^a-z0-9]/gi, '-') || 'set'}.pdf`;
+      const fileName = `flashcards-${flashcardSet?.title?.replace(/[^a-z0-9]/gi, '-') || 'set'}.pdf`;
       pdf.save(fileName);
 
-      toast.success(`Flashcard ${card.card_order} has been downloaded successfully.`);
+      toast.success(`All ${cards.length} flashcards have been downloaded successfully.`);
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error("Failed to generate PDF. Please try again.");
