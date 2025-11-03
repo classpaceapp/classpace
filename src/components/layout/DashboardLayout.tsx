@@ -15,7 +15,8 @@ import {
   Flame,
   Boxes,
   GraduationCap,
-  Library
+  Library,
+  Rocket
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -57,6 +58,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'Learnspace', href: '/learnspace', icon: 'learnspace', color: '' },
     { name: 'Phoenix', href: '/phoenix', icon: 'phoenix', color: '' },
     { name: 'My Resources', href: '/my-resources', icon: Library, color: 'text-amber-500' },
+    { name: 'Careers', href: '/student-careers', icon: Rocket, color: 'text-emerald-500' },
     { name: 'Educators', href: '/educators', icon: GraduationCap, color: 'text-teal-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
@@ -126,7 +128,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         </div>
 
         {/* Navigation */}
-        <nav className={`p-4 space-y-2 ${userRole === 'learner' ? 'space-y-1' : ''}`}>
+        <nav className={`p-4 overflow-y-auto max-h-[calc(100vh-200px)] ${userRole === 'learner' ? 'space-y-1' : 'space-y-2'}`}>
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.href;
             
@@ -134,8 +136,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
               <button
                 key={item.name}
                 onClick={() => handleNavigation(item.href)}
-                className={`flex items-center gap-3 px-4 rounded-xl transition-all duration-200 w-full text-left ${
-                  userRole === 'learner' ? 'py-2.5 text-sm' : 'py-3'
+                className={`flex items-center gap-2.5 px-3 rounded-xl transition-all duration-200 w-full text-left ${
+                  userRole === 'learner' ? 'py-2 text-xs' : 'py-3'
                 } ${
                   isActive 
                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' 
@@ -144,18 +146,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
               >
                 {typeof item.icon === 'string' ? (
                   item.icon === 'learnspace' ? (
-                    <img src={learnspaceLogo} alt="Learnspace" className={userRole === 'learner' ? 'h-4 w-4' : 'h-5 w-5'} />
+                    <img src={learnspaceLogo} alt="Learnspace" className={userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} />
                   ) : item.icon === 'phoenix' ? (
-                    <img src={phoenixLogo} alt="Phoenix" className={userRole === 'learner' ? 'h-4 w-4' : 'h-5 w-5'} />
+                    <img src={phoenixLogo} alt="Phoenix" className={userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} />
                   ) : null
                 ) : (
                   React.createElement(item.icon, { 
-                    className: `${userRole === 'learner' ? 'h-4 w-4' : 'h-5 w-5'} ${!isActive && item.color ? item.color : ''}` 
+                    className: `${userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} ${!isActive && item.color ? item.color : ''}` 
                   })
                 )}
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium truncate">{item.name}</span>
                 {userRole === 'learner' && item.icon === 'phoenix' && PHOENIX_COMING_SOON && (
-                  <Badge variant="secondary" className="ml-auto text-xs">Coming soon</Badge>
+                  <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 flex-shrink-0">Soon</Badge>
                 )}
               </button>
             );
@@ -163,21 +165,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         </nav>
 
         {/* User section */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/50">
-          <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-10 w-10">
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border/50 bg-card">
+          <div className={`flex items-center mb-3 ${userRole === 'learner' ? 'gap-2' : 'gap-3'}`}>
+            <Avatar className={userRole === 'learner' ? 'h-8 w-8 flex-shrink-0' : 'h-10 w-10'}>
               {profile?.avatar_url && (
                 <AvatarImage src={profile.avatar_url} alt="Profile avatar" />
               )}
-              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-xs">
                 {userInitials}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
+              <p className={`font-medium text-foreground truncate ${userRole === 'learner' ? 'text-xs' : 'text-sm'}`}>
                 {profile?.first_name} {profile?.last_name}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className={`text-muted-foreground truncate ${userRole === 'learner' ? 'text-[10px]' : 'text-xs'}`}>
                 {user?.email}
               </p>
             </div>
@@ -185,9 +187,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
           <Button 
             variant="outline" 
             onClick={handleSignOut}
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            className={`w-full justify-start text-muted-foreground hover:text-foreground ${
+              userRole === 'learner' ? 'h-8 text-xs gap-1.5 px-2' : 'gap-2'
+            }`}
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className={userRole === 'learner' ? 'h-3 w-3' : 'h-4 w-4'} />
             Sign Out
           </Button>
         </div>

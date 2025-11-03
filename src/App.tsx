@@ -41,6 +41,7 @@ import EducatorProfile from "./pages/EducatorProfile";
 import QuizView from "./pages/QuizView";
 import SubscriptionReturnHandler from "@/components/subscription/SubscriptionReturnHandler";
 import Careers from "./pages/Careers";
+import StudentCareers from "./pages/StudentCareers";
 import ExcalidrawWhiteboard from "./pages/ExcalidrawWhiteboard";
 import Investors from "./pages/Investors";
 import More from "./pages/More";
@@ -188,6 +189,11 @@ const App = () => (
             <Route path="/my-resources" element={
               <ProtectedRoute requireRole="learner">
                 <MyResources />
+              </ProtectedRoute>
+            } />
+            <Route path="/student-careers" element={
+              <ProtectedRoute requireRole="learner">
+                <StudentCareers />
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />
