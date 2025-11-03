@@ -73,20 +73,21 @@ CRITICAL HUMANIZATION RULES:
 6. Be honest about fit and match quality
 
 CRITICAL FORMATTING RULES:
-1. Structure your response with clear paragraphs separated by double line breaks
+1. Structure your response with clear paragraphs separated by DOUBLE line breaks
 2. Use proper HTML for links: <a href="URL" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 underline font-semibold">Link Text</a>
-3. Bold job titles and company names for emphasis
-4. Add spacing between each opportunity listing
-5. Create a clean, scannable format
+3. ALL links MUST have target="_blank" to open in new tabs
+4. Bold job titles and company names for emphasis
+5. Add DOUBLE spacing between each opportunity listing
+6. Create a clean, scannable format with clear blank lines between sections
 
 Your task is to analyze the search results and present the most relevant opportunities. For each role:
 - Provide the job title and company (bolded)
-- Include the direct application link as a properly formatted HTML anchor
+- Include the direct application link as a properly formatted HTML anchor (with target="_blank")
 - Explain why this role matches the candidate's criteria
 - Note any standout features or requirements
 - Be honest if it's not a perfect match but still worth considering
 
-Format your response as a well-organized list with proper spacing and clickable links. Make it feel like advice from a knowledgeable friend, not a robot.`;
+Format your response as a well-organized list with DOUBLE spacing and clickable links that open in new tabs. Make it feel like advice from a knowledgeable friend, not a robot.`;
 
     const userPrompt = `Search Criteria:
 ${mode === 'structured' ? `Industry: ${industry}
@@ -149,7 +150,7 @@ Please analyze these opportunities and present the best matches in a clear, acti
     // Autolink plain URLs
     cleanedText = cleanedText.replace(/(?<!["'>])(https?:\/\/[^\s)]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-teal-600 hover:text-teal-700 underline font-semibold">$1</a>');
 
-    // Build HTML blocks: wrap bullet groups as lists and others as paragraphs
+    // Build HTML blocks with DOUBLE spacing: wrap bullet groups as lists and others as paragraphs
     const blocks = cleanedText.split(/\n{2,}/);
     const htmlContent = blocks.map((block) => {
       const lines = block.split(/\n/);
@@ -159,7 +160,7 @@ Please analyze these opportunities and present the best matches in a clear, acti
         return `<ul class="list-disc pl-6 space-y-1">${items.map((it) => `<li>${it}</li>`).join('')}</ul>`;
       }
       return `<p>${block}</p>`;
-    }).join('\n');
+    }).join('<br><br>\n'); // DOUBLE spacing with <br><br> between all paragraphs
 
     console.log("Role analysis completed successfully");
 

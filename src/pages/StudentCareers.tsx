@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, Upload, FileText, Search, Target, Loader2, Briefcase } from 'lucide-react';
+import { Sparkles, Upload, FileText, Search, Target, Loader2, Briefcase, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import InterviewRoom from '@/components/careers/InterviewRoom';
+import InterviewRecordingsList from '@/components/careers/InterviewRecordingsList';
 
 const StudentCareers = () => {
   const { toast } = useToast();
@@ -31,6 +33,15 @@ const StudentCareers = () => {
   const [naturalQuery, setNaturalQuery] = useState('');
   const [searchingRoles, setSearchingRoles] = useState(false);
   const [roleResults, setRoleResults] = useState('');
+
+  // Interview Prep state
+  const [interviewJobLink, setInterviewJobLink] = useState('');
+  const [interviewJobDesc, setInterviewJobDesc] = useState('');
+  const [numQuestions, setNumQuestions] = useState(5);
+  const [generatingQuestions, setGeneratingQuestions] = useState(false);
+  const [inInterviewRoom, setInInterviewRoom] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [currentQuestions, setCurrentQuestions] = useState<any[]>([]);
 
   const handleCvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -58,25 +69,41 @@ const StudentCareers = () => {
   };
 
   const typeWriterEffect = async (html: string, setter: (val: string) => void) => {
-    // Types HTML by paragraphs so formatting and links stay intact once a paragraph is complete
+    // Types HTML by paragraphs with DOUBLE spacing, so formatting and links stay intact
     setIsTyping(true);
 
     const stripTags = (s: string) => s.replace(/<[^>]+>/g, '');
-    const paragraphs = html.match(/<p[^>]*>.*?<\/p>/gms) || [`<p>${stripTags(html)}</p>`];
+    // Split by <br><br> or paragraph tags to respect double spacing
+    const paragraphs = html.split(/(<br><br>|<\/p>\s*<p[^>]*>)/).filter(p => p.trim() && !p.match(/^<br>|^<\/p>/));
 
     let builtHtml = '';
-    for (const paraHtml of paragraphs) {
-      const plain = stripTags(paraHtml);
-      let typed = '';
-      for (let i = 0; i < plain.length; i++) {
-        typed += plain[i];
-        const current = builtHtml + `<p>${typed}</p>`;
-        setter(current);
-        await new Promise((r) => setTimeout(r, 16));
+    for (let i = 0; i < paragraphs.length; i++) {
+      const segment = paragraphs[i];
+      
+      // If it's a paragraph or content block
+      if (segment.includes('<p>') || !segment.startsWith('<')) {
+        const plain = stripTags(segment);
+        let typed = '';
+        for (let j = 0; j < plain.length; j++) {
+          typed += plain[j];
+          const current = builtHtml + (segment.includes('<p>') ? segment.replace(stripTags(segment), typed) : `<p>${typed}</p>`);
+          setter(current);
+          await new Promise((r) => setTimeout(r, 16));
+        }
+        // Add the complete formatted segment
+        builtHtml += segment;
+        setter(builtHtml);
+        
+        // Add double spacing after each paragraph
+        if (i < paragraphs.length - 1) {
+          builtHtml += '<br><br>\n';
+          setter(builtHtml);
+        }
+      } else {
+        // For other HTML elements (lists, etc.), add them directly
+        builtHtml += segment;
+        setter(builtHtml);
       }
-      // Replace the typed text paragraph with the final formatted HTML paragraph (with links)
-      builtHtml += paraHtml;
-      setter(builtHtml);
     }
 
     setIsTyping(false);
@@ -204,6 +231,26 @@ const StudentCareers = () => {
       setSearchingRoles(false);
     }
   };
+
+  if (inInterviewRoom && currentSessionId && currentQuestions.length > 0) {
+    return (
+      <InterviewRoom
+        sessionId={currentSessionId}
+        questions={currentQuestions}
+        onComplete={() => {
+          setInInterviewRoom(false);
+          setCurrentSessionId(null);
+          setCurrentQuestions([]);
+          toast({ title: 'Interview completed!', description: 'Your recordings have been saved' });
+        }}
+        onExit={() => {
+          setInInterviewRoom(false);
+          setCurrentSessionId(null);
+          setCurrentQuestions([]);
+        }}
+      />
+    );
+  }
 
   return (
     <DashboardLayout userRole="learner">
@@ -495,7 +542,7 @@ const StudentCareers = () => {
           </TabsContent>
 
           {/* Interview Prep */}
-          <TabsContent value="interview-prep">
+          <TabsContent value="interview-prep" className="space-y-6">
             <Card className="border-2 border-blue-400/30 shadow-2xl bg-gradient-to-br from-white via-blue-50/50 to-indigo-50/50 dark:from-gray-950 dark:via-blue-950/20 dark:to-indigo-950/20">
               <CardHeader className="bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 border-b-2 border-blue-200 dark:border-blue-800">
                 <CardTitle className="flex items-center gap-3 text-3xl font-extrabold">
@@ -505,21 +552,83 @@ const StudentCareers = () => {
                   Interview Prep
                 </CardTitle>
                 <CardDescription className="text-base mt-2 text-muted-foreground">
-                  Coming Soon — Comprehensive interview preparation powered by Aurora
+                  Practice realistic interviews with AI-powered questions
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-8">
-                <div className="text-center py-16">
-                  <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 dark:from-blue-950/50 dark:via-indigo-950/50 dark:to-purple-950/50 rounded-2xl mb-6 shadow-lg">
-                    <Sparkles className="h-6 w-6 text-blue-600" />
-                    <span className="font-bold text-xl text-blue-700 dark:text-blue-300">Coming Soon</span>
-                  </div>
-                  <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                    Aurora will soon help you prepare for interviews with personalized coaching and practice sessions
-                  </p>
+              <CardContent className="pt-6 space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Job Role Link (Optional)</Label>
+                  <Input
+                    value={interviewJobLink}
+                    onChange={(e) => setInterviewJobLink(e.target.value)}
+                    placeholder="https://company.com/careers/role"
+                    className="h-11"
+                  />
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Or Describe the Role</Label>
+                  <Textarea
+                    value={interviewJobDesc}
+                    onChange={(e) => setInterviewJobDesc(e.target.value)}
+                    placeholder="E.g., Software Engineer at a fintech startup"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-base font-semibold">Number of Questions (1-7)</Label>
+                  <Select value={numQuestions.toString()} onValueChange={(v) => setNumQuestions(parseInt(v))}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1,2,3,4,5,6,7].map(n => (
+                        <SelectItem key={n} value={n.toString()}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  onClick={async () => {
+                    if (!interviewJobLink && !interviewJobDesc) {
+                      toast({ title: 'Missing info', description: 'Provide job link or description', variant: 'destructive' });
+                      return;
+                    }
+                    setGeneratingQuestions(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('aurora-interview-questions', {
+                        body: { jobRoleLink: interviewJobLink, jobDescription: interviewJobDesc, numQuestions }
+                      });
+                      if (error) throw error;
+                      
+                      const { data: session, error: sessionError } = await supabase
+                        .from('interview_sessions')
+                        .insert({ job_role_link: interviewJobLink, job_description: interviewJobDesc, questions: data.questions, num_questions: numQuestions })
+                        .select()
+                        .single();
+                      
+                      if (sessionError) throw sessionError;
+                      
+                      setCurrentSessionId(session.id);
+                      setCurrentQuestions(data.questions);
+                      setInInterviewRoom(true);
+                    } catch (err: any) {
+                      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+                    } finally {
+                      setGeneratingQuestions(false);
+                    }
+                  }}
+                  disabled={generatingQuestions}
+                  className="w-full h-14 text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-xl"
+                >
+                  {generatingQuestions ? <><Loader2 className="h-6 w-6 mr-2 animate-spin" />Generating...</> : <><Video className="h-6 w-6 mr-2" />Start Practice Interview</>}
+                </Button>
               </CardContent>
             </Card>
+
+            <InterviewRecordingsList />
           </TabsContent>
         </Tabs>
       </div>

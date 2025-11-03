@@ -94,10 +94,15 @@ CRITICAL HUMANIZATION RULES:
 7. Show genuine enthusiasm without sounding artificial
 
 CRITICAL FORMATTING RULES:
-1. Structure your response with clear paragraphs separated by double line breaks
-2. Use proper spacing between sections
+1. Structure your response with clear paragraphs separated by DOUBLE line breaks
+2. Use proper spacing between ALL sections - always have a blank line between paragraphs
 3. Create a clean, readable format that's easy to copy and paste
 4. Add appropriate line breaks for readability
+
+CRITICAL APPLICATION QUESTIONS FEATURE:
+- If the job role page contains specific application questions, YOU MUST extract and answer EACH question individually
+- Number each question and provide a tailored answer using information from the CV and LinkedIn profile
+- Format as: "Question 1: [question text]" followed by the answer, then blank line before next question
 
 Your task is to analyze the candidate's CV, the job role details, and any LinkedIn information, then craft exactly what they've requested in their prompt. The output should be:
 - Professional yet personable
@@ -105,11 +110,11 @@ Your task is to analyze the candidate's CV, the job role details, and any Linked
 - Highlighting relevant experience and skills
 - Authentic and human in tone
 - Free from any AI-like formatting or phrases
-- Properly formatted with clear paragraphs and spacing
+- Properly formatted with clear paragraphs and DOUBLE spacing between all sections
 
 Context provided:
 - CV information (simplified representation)
-- Job role details from web search
+- Job role details from web search (check for application questions!)
 - LinkedIn profile (if provided)
 - Candidate's specific request
 
@@ -177,7 +182,7 @@ Please create the requested application materials following all humanization gui
     // Convert Markdown links [text](url) to HTML anchors
     cleanedText = cleanedText.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:text-emerald-700 underline font-semibold">$1</a>');
 
-    // Build HTML blocks: wrap bullet groups as lists and others as paragraphs
+    // Build HTML blocks with DOUBLE spacing: wrap bullet groups as lists and others as paragraphs
     const blocks = cleanedText.split(/\n{2,}/);
     const htmlContent = blocks.map((block) => {
       const lines = block.split(/\n/);
@@ -187,7 +192,7 @@ Please create the requested application materials following all humanization gui
         return `<ul class="list-disc pl-6 space-y-1">${items.map((it) => `<li>${it}</li>`).join('')}</ul>`;
       }
       return `<p>${block}</p>`;
-    }).join('\n');
+    }).join('<br><br>\n'); // DOUBLE spacing with <br><br> between all paragraphs
 
     console.log("Application generated successfully");
 

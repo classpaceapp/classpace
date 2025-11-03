@@ -81,6 +81,86 @@ export type Database = {
           },
         ]
       }
+      interview_recordings: {
+        Row: {
+          attempt_number: number
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          question_index: number
+          question_text: string
+          session_id: string
+          time_limit_seconds: number
+          video_url: string
+        }
+        Insert: {
+          attempt_number?: number
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          question_index: number
+          question_text: string
+          session_id: string
+          time_limit_seconds: number
+          video_url: string
+        }
+        Update: {
+          attempt_number?: number
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          question_index?: number
+          question_text?: string
+          session_id?: string
+          time_limit_seconds?: number
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_recordings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          job_description: string | null
+          job_role_link: string | null
+          num_questions: number
+          questions: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_description?: string | null
+          job_role_link?: string | null
+          num_questions?: number
+          questions?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_description?: string | null
+          job_role_link?: string | null
+          num_questions?: number
+          questions?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       learning_chats: {
         Row: {
           created_at: string

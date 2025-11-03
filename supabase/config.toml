@@ -54,6 +54,9 @@ verify_jwt = true
 [functions.aurora-role-search]
 verify_jwt = true
 
+[functions.aurora-interview-questions]
+verify_jwt = true
+
 [functions.send-refund-request]
 verify_jwt = false
 
