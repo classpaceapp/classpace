@@ -603,9 +603,19 @@ const StudentCareers = () => {
                       });
                       if (error) throw error;
                       
+                      // Get current user
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (!user) throw new Error('Not authenticated');
+                      
                       const { data: session, error: sessionError } = await supabase
                         .from('interview_sessions')
-                        .insert({ job_role_link: interviewJobLink, job_description: interviewJobDesc, questions: data.questions, num_questions: numQuestions })
+                        .insert({
+                          user_id: user.id,
+                          job_role_link: interviewJobLink || null,
+                          job_description: interviewJobDesc || null,
+                          questions: data.questions,
+                          num_questions: numQuestions
+                        })
                         .select()
                         .single();
                       
