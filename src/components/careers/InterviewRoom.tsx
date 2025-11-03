@@ -345,7 +345,7 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
                     </span>
                   </div>
                   {isPreparing ? (
-                    <div className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-lg border-2 border-amber-300 animate-pulse">
+                    <div className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl shadow-lg border-2 border-amber-300">
                       <div className="flex flex-col items-center">
                         <span className="text-xs text-white font-bold mb-0.5">PREP TIME</span>
                         <span className="text-2xl font-black text-white">
@@ -373,7 +373,7 @@ const InterviewRoom = ({ sessionId, questions, onComplete, onExit }: InterviewRo
               {/* Recording Controls */}
               <div className="space-y-3">
                 {isPreparing && (
-                  <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-2xl border-2 border-amber-300 shadow-xl animate-pulse">
+                  <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 rounded-2xl border-2 border-amber-300 shadow-xl">
                     <div className="text-center">
                       <p className="text-white text-xl font-black mb-3">
                         🎯 Get Ready! Recording starts in {prepTimeRemaining} seconds
