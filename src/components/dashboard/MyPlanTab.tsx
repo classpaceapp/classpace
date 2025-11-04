@@ -92,41 +92,35 @@ export const MyPlanTab: React.FC = () => {
   const features = isStudent
     ? isPremium
       ? [
-          'Unlimited Learnspace AI chats',
-          'Unlimited flashcards in My Resources',
-          'Unlimited quizzes in My Resources',
-          'Unlimited notes in My Resources',
-          'Advanced image analysis',
-          'Phoenix AI tutor access',
-          'Aurora Application Builder',
-          'Aurora Role Search',
-          'Aurora Interview Prep',
-          'Join unlimited pods'
+          'Unlimited AI tutoring with Phoenix',
+          'Advanced homework image analysis',
+          'Personalized learning insights',
+          'Unlimited chat history storage',
+          'Priority AI response time',
+          'Early access to new features'
         ]
       : [
           'Join unlimited pods',
-          'Learnspace AI (3 chat limit)',
-          'My Resources (1 flashcard)',
-          'My Resources (1 quiz)',
-          'My Resources (1 note)',
-          'Phoenix AI tutor access'
+          'AI-powered Learnspace',
+          'Limited chat history',
+          'Core learning features',
+          'Email support'
         ]
     : isPremium
       ? [
-          'Unlimited Pods',
-          'Phoenix AI tutor access',
-          'Aurora Application Builder',
-          'Aurora Role Search',
-          'Aurora Interview Prep',
-          'All pod features (materials, quizzes, etc.)',
-          'Unlimited students per pod'
+          'Unlimited AI Pods',
+          'Advanced AI teaching assistant',
+          'Comprehensive student analytics',
+          'Priority support',
+          'Faster refresh rates',
+          'Bigger class sizes'
         ]
       : [
-          '1 Pod (fully functional)',
-          'Materials, quizzes, flashcards',
-          'Notes, whiteboards, meetings',
-          'Live sessions & chat',
-          'Unlimited students per pod'
+          '1 AI Pod',
+          'Core features enabled',
+          'Create and run sessions',
+          'Invite students',
+          'Email support'
         ];
 
   return (

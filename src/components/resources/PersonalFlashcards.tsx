@@ -21,7 +21,7 @@ interface FlashcardSet {
 }
 
 export const PersonalFlashcards = () => {
-  const { user, subscription } = useAuth();
+  const { user } = useAuth();
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -72,17 +72,11 @@ export const PersonalFlashcards = () => {
       return;
     }
 
-    // Check limit before calling API (only for free tier)
-    const isPremium = subscription?.tier === 'student_premium' || 
-                      subscription?.tier === 'teacher_premium' || 
-                      subscription?.tier === 'premium';
-    
-    if (!isPremium) {
-      const activeFlashcards = flashcardSets.filter(set => !set.archived);
-      if (activeFlashcards.length >= 1) {
-        setShowLimitMessage(true);
-        return;
-      }
+    // Check limit before calling API
+    const activeFlashcards = flashcardSets.filter(set => !set.archived);
+    if (activeFlashcards.length >= 1) {
+      setShowLimitMessage(true);
+      return;
     }
 
     setGenerating(true);

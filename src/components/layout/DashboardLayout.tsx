@@ -43,7 +43,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const teacherNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-blue-500' },
     { name: 'Pods', href: '/teacher-pods', icon: Boxes, color: 'text-indigo-500' },
-    { name: 'Careers', href: '/student-careers', icon: Rocket, color: 'text-emerald-500' },
     { name: 'Educators', href: '/educators', icon: GraduationCap, color: 'text-teal-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
@@ -92,9 +91,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
       } else {
         navigate('/dashboard');
       }
-    } else if (href === '/student-careers') {
-      // Both teachers and learners use the same careers route
-      navigate('/student-careers');
     } else {
       navigate(href);
     }

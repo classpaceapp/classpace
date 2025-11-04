@@ -14,14 +14,14 @@ const Pricing = () => {
     {
       name: "Free",
       price: "Free",
-      description: "Full-featured single pod",
+      description: "Basic but fully usable",
       icon: Star,
       features: [
-        "1 Pod (fully functional)",
-        "Materials, quizzes, flashcards",
-        "Notes, whiteboards, meetings",
-        "Live sessions & chat",
-        "Unlimited students per pod"
+        "1 AI Pod",
+        "Core features enabled",
+        "Create and run sessions",
+        "Invite students",
+        "Email support"
       ],
       buttonText: "Get Started",
       popular: false,
@@ -31,15 +31,13 @@ const Pricing = () => {
       name: "Teach +",
       price: "$7",
       period: "/month",
-      description: "Unlimited pods + career tools",
+      description: "Unlimited pods and growth",
       icon: Zap,
       features: [
-        "Unlimited Pods",
-        "Phoenix AI tutor access",
-        "Aurora Careers Toolkit",
-        "AI Application Builder",
-        "AI Role Search",
-        "AI Interview Prep",
+        "Unlimited AI Pods",
+        "Priority support",
+        "Faster refresh & checks",
+        "Bigger class sizes",
         "All Free features"
       ],
       buttonText: "Upgrade Now",
@@ -52,14 +50,14 @@ const Pricing = () => {
     {
       name: "Free",
       price: "Free",
-      description: "Join & learn essentials",
+      description: "Essential learning tools",
       icon: Star,
       features: [
         "Join unlimited pods",
-        "Learnspace AI (3 chat limit)",
-        "My Resources (1 each)",
-        "Phoenix AI tutor access",
-        "All pod features"
+        "AI-powered Learnspace",
+        "Limited chat history",
+        "Core learning features",
+        "Email support"
       ],
       buttonText: "Get Started",
       popular: false,
@@ -69,19 +67,14 @@ const Pricing = () => {
       name: "Learn +",
       price: "$7",
       period: "/month",
-      description: "Unlimited AI resources",
+      description: "Advanced AI learning",
       icon: Zap,
       features: [
-        "Unlimited Learnspace chats",
-        "Unlimited flashcards",
-        "Unlimited quizzes",
-        "Unlimited notes",
+        "Unlimited chat history",
+        "Priority AI responses",
         "Advanced image analysis",
-        "Aurora Careers Toolkit",
-        "AI Application Builder",
-        "AI Role Search",
-        "AI Interview Prep",
-        "All Free features"
+        "Personalized learning",
+        "Early feature access"
       ],
       buttonText: "Upgrade Now",
       popular: true,
@@ -91,28 +84,28 @@ const Pricing = () => {
 
   const faqs = [
     {
-      question: "What's the difference between Learn+ and Teach+ subscriptions?",
-      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, Phoenix AI tutor, and Aurora Careers Toolkit. Both provide full access to interview preparation. Both are $7/month."
+      question: "What's the difference between Learn + and Teach + subscriptions?",
+      answer: "Learn + is designed for students and includes AI tutoring with Phoenix, unlimited learning sessions, image analysis for homework help, and personalized learning insights. Teach + is for educators and provides unlimited pods, advanced analytics, AI teaching assistant, and priority support. Both are $7/month."
     },
     {
-      question: "What's included in the Learn+ subscription?",
-      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, full access to Aurora Careers Toolkit (application building, role search, interview preparation), and the ability to join unlimited pods created by teachers."
+      question: "What's included in the Learn + subscription?",
+      answer: "Learn + includes unlimited AI tutoring sessions with Phoenix (voice and text), advanced homework help with image analysis, personalized learning recommendations, access to collaborative whiteboards for interactive learning, and unlimited chat history storage."
     },
     {
-      question: "What's included in the Teach+ subscription?",
-      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+      question: "What's included in the Teach + subscription?",
+      answer: "Teach + unlocks unlimited AI pods for classroom management, advanced AI teaching assistant, comprehensive student analytics, priority support, faster refresh rates, bigger class sizes, and exclusive access to new teaching features as they're released."
     },
     {
       question: "Can I cancel my subscription anytime?",
-      answer: "Yes. You can cancel your Learn+ or Teach+ subscription anytime through My Plan in your dashboard. You'll continue to have access to premium features until the end of your current billing period."
+      answer: "Yes. You can cancel your Learn + or Teach + subscription anytime through your dashboard. You'll continue to have access to premium features until the end of your current billing period."
     },
     {
       question: "Is there a free plan available?",
-      answer: "Yes! Free plan for students includes: join unlimited pods, Learnspace AI (limited to 3 chats), My Resources (1 flashcard/quiz/note each), Phoenix AI tutor. Free plan for teachers includes: 1 pod with full features (materials, quizzes, flashcards, notes, whiteboards, meetings)."
+      answer: "Yes! Both teachers and students have access to free plans. Teachers get 1 AI Pod with core features, while students can join unlimited pods and use Learnspace with limited chat history. You can upgrade to Learn + or Teach + anytime for $7/month."
     },
     {
       question: "Do students and teachers need separate subscriptions?",
-      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms and accessing Aurora career tools. Learn+ is for students who want unlimited AI learning resources. Each subscription is tailored to different needs at the same $7/month price."
+      answer: "Yes. Teach + is specifically for educators managing classrooms and creating pods. Learn + is for students who want enhanced AI tutoring features with Phoenix and personalized learning. Each subscription is tailored to different needs and use cases."
     }
   ];
 
