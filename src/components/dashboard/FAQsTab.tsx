@@ -8,15 +8,15 @@ export const FAQsTab: React.FC = () => {
   const faqs = [
     {
       question: "What's the difference between Learn+ and Teach+ subscriptions?",
-      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats and unlimited My Resources (flashcards, quizzes, notes). Teach+ is for educators - it unlocks unlimited pods and the Aurora Careers Toolkit (application builder, role search, interview prep). Both are $7/month."
+      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, Phoenix AI tutor, and Aurora Careers Toolkit. Both provide full access to interview preparation. Both are $7/month."
     },
     {
       question: "What's included in the Learn+ subscription?",
-      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, and the ability to join unlimited pods created by teachers."
+      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, full access to Aurora Careers Toolkit (application building, role search, interview preparation), and the ability to join unlimited pods created by teachers."
     },
     {
       question: "What's included in the Teach+ subscription?",
-      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
     },
     {
       question: "Can I cancel my subscription anytime?",
@@ -28,7 +28,7 @@ export const FAQsTab: React.FC = () => {
     },
     {
       question: "Do students and teachers need separate subscriptions?",
-      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms and accessing Aurora career tools. Learn+ is for students who want unlimited AI learning resources. Each subscription is tailored to different needs at the same $7/month price."
+      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms. Learn+ is for students who want unlimited AI learning resources. Both subscriptions include full access to Aurora Careers Toolkit (including interview preparation). Each subscription is tailored to different needs at the same $7/month price."
     }
   ];
 

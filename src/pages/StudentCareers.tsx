@@ -16,8 +16,10 @@ import InterviewRecordingsList from '@/components/careers/InterviewRecordingsLis
 
 const StudentCareers = () => {
   const { toast } = useToast();
-  const { subscription } = useAuth();
+  const { subscription, profile } = useAuth();
   const [activeTab, setActiveTab] = useState('application-builder');
+  
+  const isPremium = subscription?.tier === 'student_premium' || subscription?.tier === 'teacher_premium';
   
   // Application Builder state
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -299,11 +301,11 @@ const StudentCareers = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="interview-prep" 
-              disabled={subscription?.tier !== 'teacher_premium'}
+              disabled={!isPremium}
               className="gap-1 md:gap-2 text-xs md:text-base data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg md:data-[state=active]:shadow-xl rounded-lg md:rounded-xl transition-all duration-300 font-semibold px-1 md:px-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Target className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="hidden sm:inline">Interview {subscription?.tier !== 'teacher_premium' && '🔒'}</span>
+              <span className="hidden sm:inline">Interview {!isPremium && '🔒'}</span>
             </TabsTrigger>
           </TabsList>
 

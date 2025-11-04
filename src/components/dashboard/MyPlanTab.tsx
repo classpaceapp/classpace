@@ -98,6 +98,9 @@ export const MyPlanTab: React.FC = () => {
           'Unlimited notes in My Resources',
           'Advanced image analysis',
           'Phoenix AI tutor access',
+          'Aurora Application Builder',
+          'Aurora Role Search',
+          'Aurora Interview Prep',
           'Join unlimited pods'
         ]
       : [
@@ -111,6 +114,7 @@ export const MyPlanTab: React.FC = () => {
     : isPremium
       ? [
           'Unlimited Pods',
+          'Phoenix AI tutor access',
           'Aurora Application Builder',
           'Aurora Role Search',
           'Aurora Interview Prep',
