@@ -21,61 +21,20 @@ import AssessmentHub from '@/components/nexus/AssessmentHub';
 import TimeOptimizer from '@/components/nexus/TimeOptimizer';
 import ResourceCenter from '@/components/nexus/ResourceCenter';
 import StudentProfiles from '@/components/nexus/StudentProfiles';
-import GrowthStudio from '@/components/nexus/GrowthStudio';
+
 
 const TeacherNexus: React.FC = () => {
   const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState('curriculum');
 
   const tabs = [
-    { 
-      id: 'curriculum', 
-      label: 'Curriculum', 
-      icon: BookOpen, 
-      description: 'AI-powered curriculum planning and alignment'
-    },
-    { 
-      id: 'lessons', 
-      label: 'Lessons', 
-      icon: Calendar, 
-      description: 'Intelligent lesson planning and orchestration'
-    },
-    { 
-      id: 'progress', 
-      label: 'Progress', 
-      icon: BarChart3, 
-      description: 'Real-time analytics and insights'
-    },
-    { 
-      id: 'assessments', 
-      label: 'Assessments', 
-      icon: ClipboardCheck, 
-      description: 'Smart assessment creation and grading'
-    },
-    { 
-      id: 'time', 
-      label: 'Time', 
-      icon: Clock, 
-      description: 'Optimize your teaching schedule'
-    },
-    { 
-      id: 'resources', 
-      label: 'Resources', 
-      icon: FolderOpen, 
-      description: 'Curated teaching materials library'
-    },
-    { 
-      id: 'students', 
-      label: 'Students', 
-      icon: Users, 
-      description: 'Individual student insights and tracking'
-    },
-    { 
-      id: 'growth', 
-      label: 'Growth', 
-      icon: TrendingUp, 
-      description: 'Your professional development journey'
-    }
+    { id: 'curriculum', label: 'Curriculum', icon: BookOpen, description: 'AI-powered curriculum planning' },
+    { id: 'lessons', label: 'Lessons', icon: Calendar, description: 'Intelligent lesson planning' },
+    { id: 'progress', label: 'Progress', icon: BarChart3, description: 'Real-time analytics' },
+    { id: 'assessments', label: 'Assessments', icon: ClipboardCheck, description: 'AI assessment creation' },
+    { id: 'time', label: 'Time', icon: Clock, description: 'Time optimization insights' },
+    { id: 'resources', label: 'Resources', icon: FolderOpen, description: 'Teaching materials library' },
+    { id: 'students', label: 'Students', icon: Users, description: 'Student profiles and insights' }
   ];
 
   return (
@@ -88,17 +47,17 @@ const TeacherNexus: React.FC = () => {
           </div>
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Nexus Command Center
+              Nexus
             </h1>
             <p className="text-muted-foreground mt-1">
-              Your intelligent teaching command center, powered by AI
+              Your intelligent teaching command center
             </p>
           </div>
         </div>
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-2 h-auto p-2 bg-card">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-2 h-auto p-2 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-2xl shadow-xl">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -156,10 +115,6 @@ const TeacherNexus: React.FC = () => {
 
           <TabsContent value="students" className="space-y-4">
             <StudentProfiles />
-          </TabsContent>
-
-          <TabsContent value="growth" className="space-y-4">
-            <GrowthStudio />
           </TabsContent>
         </Tabs>
       </div>

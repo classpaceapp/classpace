@@ -1,112 +1,135 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, TrendingUp, Users, Target, Award } from 'lucide-react';
+import { BarChart3, Users, Target, BookOpen, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ProgressDashboard: React.FC = () => {
-  const stats = [
-    { label: 'Total Students', value: '156', change: '+12%', icon: Users, color: 'text-blue-600' },
-    { label: 'Avg. Performance', value: '87%', change: '+5%', icon: Target, color: 'text-green-600' },
-    { label: 'Completion Rate', value: '94%', change: '+8%', icon: Award, color: 'text-purple-600' },
-    { label: 'Growth Trend', value: '+15%', change: 'Strong', icon: TrendingUp, color: 'text-emerald-600' }
-  ];
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [totalStudents, setTotalStudents] = useState(0);
+  const [totalPods, setTotalPods] = useState(0);
+  const [totalQuizzes, setTotalQuizzes] = useState(0);
+  const [totalFlashcards, setTotalFlashcards] = useState(0);
+  const [podMetrics, setPodMetrics] = useState<any[]>([]);
 
-  const classProgress = [
-    { class: 'Math 101', students: 32, avgScore: 89, trend: 'up' },
-    { class: 'Math 102', students: 28, avgScore: 85, trend: 'up' },
-    { class: 'Math 201', students: 25, avgScore: 91, trend: 'up' },
-    { class: 'Math 202', students: 30, avgScore: 82, trend: 'stable' }
+  useEffect(() => {
+    if (user?.id) fetchMetrics();
+  }, [user?.id]);
+
+  const fetchMetrics = async () => {
+    if (!user?.id) return;
+    try {
+      const { data: pods } = await supabase.from('pods').select('id, title, subject').eq('teacher_id', user.id);
+      const podIds = pods?.map(p => p.id) || [];
+      setTotalPods(pods?.length || 0);
+
+      if (podIds.length === 0) { setLoading(false); return; }
+
+      const podMetricsData = await Promise.all(pods.map(async (pod) => {
+        const [{ count: studentCount }, { count: quizCount }, { count: flashcardCount }, { count: messageCount }] = await Promise.all([
+          supabase.from('pod_members').select('*', { count: 'exact', head: true }).eq('pod_id', pod.id),
+          supabase.from('pod_quizzes').select('*', { count: 'exact', head: true }).eq('pod_id', pod.id),
+          supabase.from('pod_flashcards').select('*', { count: 'exact', head: true }).eq('pod_id', pod.id),
+          supabase.from('pod_messages').select('*', { count: 'exact', head: true }).eq('pod_id', pod.id)
+        ]);
+        return { id: pod.id, title: pod.title, subject: pod.subject, studentCount: studentCount || 0, quizCount: quizCount || 0, flashcardCount: flashcardCount || 0, messageCount: messageCount || 0 };
+      }));
+
+      setPodMetrics(podMetricsData);
+      setTotalStudents(podMetricsData.reduce((sum, pod) => sum + pod.studentCount, 0));
+      setTotalQuizzes(podMetricsData.reduce((sum, pod) => sum + pod.quizCount, 0));
+      setTotalFlashcards(podMetricsData.reduce((sum, pod) => sum + pod.flashcardCount, 0));
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <Skeleton className="h-96" />;
+  if (totalPods === 0) return (
+    <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <CardContent className="p-12 text-center">
+        <BookOpen className="h-16 w-16 text-blue-500 mx-auto mb-4" />
+        <h3 className="text-2xl font-bold mb-2">No Pods Yet</h3>
+        <p className="text-muted-foreground">Create your first pod to start tracking progress</p>
+      </CardContent>
+    </Card>
+  );
+
+  const stats = [
+    { label: 'Total Pods', value: totalPods, icon: BookOpen, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+    { label: 'Total Students', value: totalStudents, icon: Users, color: 'text-green-600', bgColor: 'bg-green-50' },
+    { label: 'Quizzes Created', value: totalQuizzes, icon: Target, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+    { label: 'Flashcard Sets', value: totalFlashcards, icon: MessageSquare, color: 'text-amber-600', bgColor: 'bg-amber-50' },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <Card key={idx}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
-                <Icon className={`h-4 w-4 ${stat.color}`} />
+            <Card key={idx} className="border-2 hover:shadow-xl transition-all">
+              <CardHeader className={`${stat.bgColor} pb-3`}>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
+                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  <span className="text-green-600 font-medium">{stat.change}</span> from last month
-                </p>
+              <CardContent className="pt-4">
+                <div className="text-3xl font-bold">{stat.value}</div>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* Class Performance */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-violet-600" />
-            Class Performance Analytics
+      <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <BarChart3 className="h-6 w-6" />
+            Pod Performance Analytics
           </CardTitle>
-          <CardDescription>
-            Real-time insights across all your classes
-          </CardDescription>
+          <CardDescription className="text-violet-100">Real-time insights across all your pods</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <div className="space-y-4">
-            {classProgress.map((cls, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg hover:border-violet-300 transition-colors">
-                <div className="flex-1">
-                  <h4 className="font-semibold">{cls.class}</h4>
-                  <p className="text-sm text-muted-foreground">{cls.students} students</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{cls.avgScore}%</div>
-                    <p className="text-xs text-muted-foreground">Average Score</p>
+            {podMetrics.map((pod) => (
+              <Card key={pod.id} className="border-2 border-violet-100 hover:shadow-lg transition-all">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">{pod.title}</CardTitle>
+                  <Badge className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">{pod.subject}</Badge>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-blue-50 rounded-xl">
+                      <Users className="h-5 w-5 text-blue-600 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-blue-600">{pod.studentCount}</div>
+                      <p className="text-xs text-muted-foreground">Students</p>
+                    </div>
+                    <div className="text-center p-3 bg-purple-50 rounded-xl">
+                      <Target className="h-5 w-5 text-purple-600 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-purple-600">{pod.quizCount}</div>
+                      <p className="text-xs text-muted-foreground">Quizzes</p>
+                    </div>
+                    <div className="text-center p-3 bg-green-50 rounded-xl">
+                      <BookOpen className="h-5 w-5 text-green-600 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-green-600">{pod.flashcardCount}</div>
+                      <p className="text-xs text-muted-foreground">Flashcards</p>
+                    </div>
+                    <div className="text-center p-3 bg-amber-50 rounded-xl">
+                      <MessageSquare className="h-5 w-5 text-amber-600 mx-auto mb-1" />
+                      <div className="text-2xl font-bold text-amber-600">{pod.messageCount}</div>
+                      <p className="text-xs text-muted-foreground">Messages</p>
+                    </div>
                   </div>
-                  <Badge 
-                    variant={cls.trend === 'up' ? 'default' : 'secondary'}
-                    className={cls.trend === 'up' ? 'bg-green-500' : ''}
-                  >
-                    {cls.trend === 'up' && <TrendingUp className="h-3 w-3 mr-1" />}
-                    {cls.trend === 'up' ? 'Improving' : 'Stable'}
-                  </Badge>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* AI Insights */}
-      <Card className="border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-violet-700">
-            <TrendingUp className="h-5 w-5" />
-            AI Insights & Recommendations
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="p-3 bg-white rounded-lg border border-violet-200">
-            <h4 className="font-semibold text-sm mb-1">Strong Performance in Math 201</h4>
-            <p className="text-sm text-muted-foreground">
-              Students are excelling in advanced concepts. Consider introducing challenge problems.
-            </p>
-          </div>
-          <div className="p-3 bg-white rounded-lg border border-violet-200">
-            <h4 className="font-semibold text-sm mb-1">Math 202 Needs Attention</h4>
-            <p className="text-sm text-muted-foreground">
-              5 students struggling with recent material. Recommended: small group intervention session.
-            </p>
-          </div>
-          <div className="p-3 bg-white rounded-lg border border-violet-200">
-            <h4 className="font-semibold text-sm mb-1">Engagement Trend</h4>
-            <p className="text-sm text-muted-foreground">
-              Participation has increased 23% after implementing interactive activities.
-            </p>
           </div>
         </CardContent>
       </Card>

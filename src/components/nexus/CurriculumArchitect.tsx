@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { BookOpen, Plus, Target, Sparkles, Download, Share2 } from 'lucide-react';
+import { Sparkles, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+const MAX_LEARNING_GOALS_LENGTH = 500;
 
 const CurriculumArchitect: React.FC = () => {
   const { toast } = useToast();
@@ -15,7 +17,7 @@ const CurriculumArchitect: React.FC = () => {
   const [gradeLevel, setGradeLevel] = useState('');
   const [duration, setDuration] = useState('');
   const [learningGoals, setLearningGoals] = useState('');
-  const [generatedCurriculum, setGeneratedCurriculum] = useState<any>(null);
+  const [generatedCurriculum, setGeneratedCurriculum] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -28,56 +30,54 @@ const CurriculumArchitect: React.FC = () => {
       return;
     }
 
-    setIsGenerating(true);
-    
-    // Simulate AI generation - In production, this would call an edge function
-    setTimeout(() => {
-      setGeneratedCurriculum({
-        title: `${subject} Curriculum - Grade ${gradeLevel}`,
-        duration: duration,
-        units: [
-          {
-            id: 1,
-            title: 'Foundation Building',
-            weeks: 4,
-            topics: ['Introduction', 'Core Concepts', 'Basic Applications'],
-            standards: ['CC.1.A', 'CC.1.B', 'CC.2.A']
-          },
-          {
-            id: 2,
-            title: 'Advanced Exploration',
-            weeks: 6,
-            topics: ['Complex Systems', 'Critical Analysis', 'Real-world Applications'],
-            standards: ['CC.3.A', 'CC.3.B', 'CC.4.A']
-          },
-          {
-            id: 3,
-            title: 'Mastery & Integration',
-            weeks: 4,
-            topics: ['Synthesis', 'Project-based Learning', 'Assessment'],
-            standards: ['CC.5.A', 'CC.5.B']
-          }
-        ]
+    if (learningGoals.length > MAX_LEARNING_GOALS_LENGTH) {
+      toast({
+        title: 'Learning Goals Too Long',
+        description: `Please limit learning goals to ${MAX_LEARNING_GOALS_LENGTH} characters`,
+        variant: 'destructive'
       });
-      setIsGenerating(false);
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedCurriculum('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('nexus-curriculum-generator', {
+        body: { subject, gradeLevel, duration, learningGoals }
+      });
+
+      if (error) throw error;
+
+      setGeneratedCurriculum(data.curriculum);
       toast({
         title: 'Curriculum Generated',
-        description: 'Your AI-powered curriculum has been created'
+        description: 'Your comprehensive curriculum plan is ready'
       });
-    }, 2000);
+    } catch (error: any) {
+      console.error('Generation error:', error);
+      toast({
+        title: 'Generation Failed',
+        description: error.message || 'Please try again',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Input Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-violet-600" />
-            Design Your Curriculum
+      <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            AI Curriculum Architect
           </CardTitle>
-          <CardDescription>
-            Let AI help you create a comprehensive, standards-aligned curriculum
+          <CardDescription className="text-violet-100">
+            Generate comprehensive, standards-aligned curriculum plans powered by AI research
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -120,94 +120,62 @@ const CurriculumArchitect: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="goals">Learning Goals & Standards (Optional)</Label>
+            <Label htmlFor="goals">
+              Learning Goals & Standards (Optional)
+              <span className="text-xs text-muted-foreground ml-2">
+                {learningGoals.length}/{MAX_LEARNING_GOALS_LENGTH}
+              </span>
+            </Label>
             <Textarea
               id="goals"
               placeholder="Describe specific learning goals or standards you want to align with..."
               value={learningGoals}
-              onChange={(e) => setLearningGoals(e.target.value)}
-              rows={3}
+              onChange={(e) => {
+                if (e.target.value.length <= MAX_LEARNING_GOALS_LENGTH) {
+                  setLearningGoals(e.target.value);
+                }
+              }}
+              rows={4}
+              className={learningGoals.length > MAX_LEARNING_GOALS_LENGTH * 0.9 ? 'border-amber-500' : ''}
             />
           </div>
 
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+            className="w-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             {isGenerating ? (
               <>
-                <Sparkles className="mr-2 h-4 w-4 animate-spin" />
-                Generating Curriculum...
+                <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                Generating Comprehensive Curriculum...
               </>
             ) : (
               <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate AI Curriculum
+                <Sparkles className="mr-2 h-5 w-5" />
+                Generate AI-Powered Curriculum
               </>
             )}
           </Button>
         </CardContent>
       </Card>
 
-      {/* Generated Curriculum Display */}
       {generatedCurriculum && (
-        <Card className="border-violet-200">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{generatedCurriculum.title}</CardTitle>
-                <CardDescription>
-                  Duration: {generatedCurriculum.duration} • {generatedCurriculum.units.length} Units
-                </CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
+        <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white rounded-t-lg">
+            <CardTitle className="text-2xl font-bold">
+              Generated Curriculum Plan
+            </CardTitle>
+            <CardDescription className="text-emerald-100">
+              {subject} • Grade {gradeLevel} • {duration}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="prose prose-lg max-w-none">
+              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                {generatedCurriculum}
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {generatedCurriculum.units.map((unit: any) => (
-              <Card key={unit.id} className="border-violet-100">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">Unit {unit.id}: {unit.title}</CardTitle>
-                      <CardDescription>{unit.weeks} weeks</CardDescription>
-                    </div>
-                    <Badge className="bg-violet-100 text-violet-700">
-                      <Target className="h-3 w-3 mr-1" />
-                      {unit.standards.length} Standards
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">Key Topics:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {unit.topics.map((topic: string, idx: number) => (
-                        <Badge key={idx} variant="secondary">{topic}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">Aligned Standards:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {unit.standards.map((standard: string, idx: number) => (
-                        <Badge key={idx} className="bg-blue-100 text-blue-700">{standard}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </CardContent>
         </Card>
       )}

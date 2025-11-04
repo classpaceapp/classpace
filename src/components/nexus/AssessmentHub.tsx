@@ -1,158 +1,224 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ClipboardCheck, Plus, FileText, BarChart, Sparkles } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ClipboardCheck, Sparkles } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+const MAX_TOPIC_LENGTH = 200;
 
 const AssessmentHub: React.FC = () => {
-  const assessments = [
-    {
-      id: 1,
-      title: 'Quadratic Equations Quiz',
-      type: 'Quiz',
-      class: 'Math 101',
-      questions: 15,
-      avgScore: 88,
-      completed: 28,
-      total: 32,
-      status: 'active'
-    },
-    {
-      id: 2,
-      title: 'Midterm Exam',
-      type: 'Exam',
-      class: 'Math 102',
-      questions: 40,
-      avgScore: null,
-      completed: 0,
-      total: 28,
-      status: 'scheduled'
-    },
-    {
-      id: 3,
-      title: 'Functions Unit Test',
-      type: 'Test',
-      class: 'Math 201',
-      questions: 25,
-      avgScore: 91,
-      completed: 25,
-      total: 25,
-      status: 'graded'
+  const { toast } = useToast();
+  const [assessmentType, setAssessmentType] = useState('');
+  const [subject, setSubject] = useState('');
+  const [gradeLevel, setGradeLevel] = useState('');
+  const [topic, setTopic] = useState('');
+  const [numQuestions, setNumQuestions] = useState('10');
+  const [curriculum, setCurriculum] = useState('');
+  const [generatedAssessment, setGeneratedAssessment] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerate = async () => {
+    if (!assessmentType || !subject || !gradeLevel || !topic || !numQuestions) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields',
+        variant: 'destructive'
+      });
+      return;
     }
-  ];
+
+    if (topic.length > MAX_TOPIC_LENGTH) {
+      toast({
+        title: 'Topic Too Long',
+        description: `Please limit topic to ${MAX_TOPIC_LENGTH} characters`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const num = parseInt(numQuestions);
+    if (isNaN(num) || num < 5 || num > 50) {
+      toast({
+        title: 'Invalid Number',
+        description: 'Please enter between 5 and 50 questions',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedAssessment('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('nexus-assessment-generator', {
+        body: { 
+          assessmentType, 
+          subject, 
+          gradeLevel, 
+          topic, 
+          numQuestions: num,
+          curriculum 
+        }
+      });
+
+      if (error) throw error;
+
+      setGeneratedAssessment(data.assessment);
+      toast({
+        title: 'Assessment Generated',
+        description: 'Your comprehensive assessment is ready'
+      });
+    } catch (error: any) {
+      console.error('Generation error:', error);
+      toast({
+        title: 'Generation Failed',
+        description: error.message || 'Please try again',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Assessment Hub</h2>
-          <p className="text-muted-foreground">Create, manage, and analyze assessments with AI assistance</p>
-        </div>
-        <Button className="bg-gradient-to-r from-violet-600 to-purple-600">
-          <Plus className="h-4 w-4 mr-2" />
-          Create Assessment
-        </Button>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-violet-200 cursor-pointer hover:border-violet-400 transition-colors">
-          <CardHeader>
-            <Sparkles className="h-8 w-8 text-violet-600 mb-2" />
-            <CardTitle className="text-lg">AI Question Generator</CardTitle>
-            <CardDescription>
-              Generate questions aligned with learning objectives
-            </CardDescription>
-          </CardHeader>
-        </Card>
-        <Card className="border-blue-200 cursor-pointer hover:border-blue-400 transition-colors">
-          <CardHeader>
-            <FileText className="h-8 w-8 text-blue-600 mb-2" />
-            <CardTitle className="text-lg">Quick Quiz Builder</CardTitle>
-            <CardDescription>
-              Create a quiz in minutes with templates
-            </CardDescription>
-          </CardHeader>
-        </Card>
-        <Card className="border-green-200 cursor-pointer hover:border-green-400 transition-colors">
-          <CardHeader>
-            <BarChart className="h-8 w-8 text-green-600 mb-2" />
-            <CardTitle className="text-lg">Auto-Grade</CardTitle>
-            <CardDescription>
-              Upload and grade assessments automatically
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Assessments List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardCheck className="h-5 w-5 text-violet-600" />
-            Active Assessments
+      <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-t-lg">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+              <ClipboardCheck className="h-6 w-6" />
+            </div>
+            AI Assessment Hub
           </CardTitle>
+          <CardDescription className="text-blue-100">
+            Create comprehensive, curriculum-aligned assessments for any subject
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {assessments.map((assessment) => (
-            <Card key={assessment.id} className="border-l-4 border-l-violet-500">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-lg">{assessment.title}</CardTitle>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <Badge variant="outline">{assessment.type}</Badge>
-                      <span>{assessment.class}</span>
-                      <span>{assessment.questions} questions</span>
-                    </div>
-                  </div>
-                  <Badge 
-                    variant={
-                      assessment.status === 'graded' ? 'default' : 
-                      assessment.status === 'active' ? 'secondary' : 
-                      'outline'
-                    }
-                    className={
-                      assessment.status === 'graded' ? 'bg-green-500' : 
-                      assessment.status === 'active' ? 'bg-blue-500' : 
-                      ''
-                    }
-                  >
-                    {assessment.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Completion</p>
-                    <p className="text-lg font-semibold">
-                      {assessment.completed}/{assessment.total}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Average Score</p>
-                    <p className="text-lg font-semibold">
-                      {assessment.avgScore ? `${assessment.avgScore}%` : '-'}
-                    </p>
-                  </div>
-                  <div className="col-span-2 flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      View Details
-                    </Button>
-                    {assessment.status === 'active' && (
-                      <Button size="sm" className="flex-1 bg-violet-500 hover:bg-violet-600">
-                        Grade Now
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <CardContent className="space-y-6 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="type">Assessment Type *</Label>
+              <Select value={assessmentType} onValueChange={setAssessmentType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="quiz">Quiz</SelectItem>
+                  <SelectItem value="test">Test</SelectItem>
+                  <SelectItem value="exam">Exam</SelectItem>
+                  <SelectItem value="practice">Practice Set</SelectItem>
+                  <SelectItem value="formative">Formative Assessment</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject *</Label>
+              <Input
+                id="subject"
+                placeholder="e.g., Mathematics, Biology"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="grade">Grade Level *</Label>
+              <Select value={gradeLevel} onValueChange={setGradeLevel}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map(grade => (
+                    <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="numQuestions">Number of Questions * (5-50)</Label>
+              <Input
+                id="numQuestions"
+                type="number"
+                min="5"
+                max="50"
+                value={numQuestions}
+                onChange={(e) => setNumQuestions(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="topic">
+              Topic/Unit *
+              <span className="text-xs text-muted-foreground ml-2">
+                {topic.length}/{MAX_TOPIC_LENGTH}
+              </span>
+            </Label>
+            <Input
+              id="topic"
+              placeholder="e.g., Quadratic Equations, Cell Biology, World War II"
+              value={topic}
+              onChange={(e) => {
+                if (e.target.value.length <= MAX_TOPIC_LENGTH) {
+                  setTopic(e.target.value);
+                }
+              }}
+              className={topic.length > MAX_TOPIC_LENGTH * 0.9 ? 'border-amber-500' : ''}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="curriculum">Curriculum Standard (Optional)</Label>
+            <Input
+              id="curriculum"
+              placeholder="e.g., Common Core, IB, AP"
+              value={curriculum}
+              onChange={(e) => setCurriculum(e.target.value)}
+            />
+          </div>
+
+          <Button 
+            onClick={handleGenerate} 
+            disabled={isGenerating}
+            className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            {isGenerating ? (
+              <>
+                <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                Generating Comprehensive Assessment...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-5 w-5" />
+                Generate AI Assessment
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
+
+      {generatedAssessment && (
+        <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white rounded-t-lg">
+            <CardTitle className="text-2xl font-bold">
+              Generated {assessmentType.charAt(0).toUpperCase() + assessmentType.slice(1)}
+            </CardTitle>
+            <CardDescription className="text-emerald-100">
+              {subject} • Grade {gradeLevel} • {numQuestions} Questions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="prose prose-lg max-w-none">
+              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                {generatedAssessment}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
