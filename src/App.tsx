@@ -45,6 +45,7 @@ import StudentCareers from "./pages/StudentCareers";
 import ExcalidrawWhiteboard from "./pages/ExcalidrawWhiteboard";
 import Investors from "./pages/Investors";
 import More from "./pages/More";
+import TeacherNexus from "./pages/TeacherNexus";
 
 const queryClient = new QueryClient();
 
@@ -194,6 +195,11 @@ const App = () => (
             <Route path="/student-careers" element={
               <ProtectedRoute>
                 <StudentCareers />
+              </ProtectedRoute>
+            } />
+            <Route path="/teacher-nexus" element={
+              <ProtectedRoute requireRole="teacher">
+                <TeacherNexus />
               </ProtectedRoute>
             } />
             <Route path="/support" element={<Support />} />
