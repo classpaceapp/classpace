@@ -259,7 +259,7 @@ const StudentCareers = () => {
   }
 
   return (
-    <DashboardLayout userRole="learner">
+    <DashboardLayout userRole={profile?.role === 'teacher' ? 'teacher' : 'learner'}>
       <div className="container mx-auto p-3 md:p-6 max-w-7xl">
         {/* Hero Section */}
         <div className="mb-4 md:mb-8 text-center">
