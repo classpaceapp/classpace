@@ -62,3 +62,9 @@ verify_jwt = false
 
 [functions.teacher-assistant]
 verify_jwt = true
+
+[functions.nexus-curriculum-generator]
+verify_jwt = true
+
+[functions.nexus-assessment-generator]
+verify_jwt = true

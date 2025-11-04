@@ -19,34 +19,107 @@ const StudentProfiles: React.FC = () => {
   const fetchStudents = async () => {
     if (!user?.id) return;
     try {
-      const { data: pods } = await supabase.from('pods').select('id, title, subject').eq('teacher_id', user.id);
+      setLoading(true);
+      
+      // Get teacher's pods
+      const { data: pods, error: podsError } = await supabase
+        .from('pods')
+        .select('id, title, subject')
+        .eq('teacher_id', user.id);
+
+      if (podsError) {
+        console.error('Pods fetch error:', podsError);
+        setLoading(false);
+        return;
+      }
+
       const podIds = pods?.map(p => p.id) || [];
-      if (podIds.length === 0) { setLoading(false); return; }
+      
+      if (podIds.length === 0) {
+        console.log('No pods found for teacher');
+        setLoading(false);
+        return;
+      }
 
-      const { data: members } = await supabase.from('pod_members').select('user_id, pod_id, profiles(first_name, last_name, avatar_url)').in('pod_id', podIds);
-      const studentData = await Promise.all((members || []).map(async (m: any) => {
-        const pod = pods?.find(p => p.id === m.pod_id);
-        const { count: messageCount } = await supabase.from('pod_messages').select('*', { count: 'exact', head: true }).eq('user_id', m.user_id).eq('pod_id', m.pod_id);
-        const { count: quizCount } = await supabase.from('quiz_responses').select('*', { count: 'exact', head: true }).eq('user_id', m.user_id);
-        return {
-          id: m.user_id,
-          name: `${m.profiles?.first_name || ''} ${m.profiles?.last_name || ''}`.trim() || 'Student',
-          avatar: m.profiles?.avatar_url,
-          podName: pod?.title || '',
-          messageCount: messageCount || 0,
-          quizCount: quizCount || 0,
-          engagement: Math.min(((messageCount || 0) + (quizCount || 0) * 2), 100)
-        };
-      }));
+      console.log('Found pods:', pods);
 
+      // Get members from all pods
+      const { data: members, error: membersError } = await supabase
+        .from('pod_members')
+        .select(`
+          user_id,
+          pod_id,
+          profiles!inner (
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `)
+        .in('pod_id', podIds);
+
+      if (membersError) {
+        console.error('Members fetch error:', membersError);
+        setLoading(false);
+        return;
+      }
+
+      console.log('Found members:', members);
+
+      if (!members || members.length === 0) {
+        console.log('No members found in pods');
+        setLoading(false);
+        return;
+      }
+
+      // Build student data with metrics
+      const studentData = await Promise.all(
+        members.map(async (m: any) => {
+          const pod = pods?.find(p => p.id === m.pod_id);
+          
+          // Get message count for this student in this pod
+          const { count: messageCount } = await supabase
+            .from('pod_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', m.user_id)
+            .eq('pod_id', m.pod_id);
+
+          // Get quiz responses count across all quizzes
+          const { count: quizCount } = await supabase
+            .from('quiz_responses')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', m.user_id);
+
+          const profile = m.profiles;
+          
+          return {
+            id: m.user_id,
+            name: profile?.first_name && profile?.last_name 
+              ? `${profile.first_name} ${profile.last_name}`.trim()
+              : profile?.first_name || profile?.last_name || 'Student',
+            avatar: profile?.avatar_url,
+            podName: pod?.title || 'Unknown Pod',
+            messageCount: messageCount || 0,
+            quizCount: quizCount || 0,
+            engagement: Math.min(((messageCount || 0) + (quizCount || 0) * 2), 100)
+          };
+        })
+      );
+
+      console.log('Student data:', studentData);
+
+      // Group by pod
       const grouped = studentData.reduce((acc: any, s) => {
-        if (!acc[s.podName]) acc[s.podName] = [];
+        if (!acc[s.podName]) {
+          acc[s.podName] = [];
+        }
         acc[s.podName].push(s);
         return acc;
       }, {});
+
+      console.log('Grouped students:', grouped);
       setStudents(Object.entries(grouped));
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching students:', error);
     } finally {
       setLoading(false);
     }

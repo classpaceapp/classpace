@@ -12,7 +12,7 @@ import {
   FolderOpen, 
   Users, 
   TrendingUp,
-  Sparkles
+  Compass
 } from 'lucide-react';
 import CurriculumArchitect from '@/components/nexus/CurriculumArchitect';
 import LessonOrchestrator from '@/components/nexus/LessonOrchestrator';
@@ -43,7 +43,7 @@ const TeacherNexus: React.FC = () => {
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shadow-lg">
-            <Sparkles className="h-8 w-8 text-white" />
+            <Compass className="h-8 w-8 text-white" />
           </div>
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
@@ -64,10 +64,10 @@ const TeacherNexus: React.FC = () => {
                 <TabsTrigger 
                   key={tab.id} 
                   value={tab.id}
-                  className="flex flex-col items-center gap-2 py-3 data-[state=active]:bg-violet-500 data-[state=active]:text-white"
+                  className="flex flex-col items-center gap-2 py-3 data-[state=active]:font-bold data-[state=active]:scale-105 data-[state=active]:shadow-2xl data-[state=active]:bg-white data-[state=active]:text-violet-700 data-[state=inactive]:text-white data-[state=inactive]:hover:bg-white/10 transition-all duration-300 rounded-xl"
                 >
                   <Icon className="h-5 w-5" />
-                  <span className="text-xs font-medium">{tab.label}</span>
+                  <span className="hidden sm:inline font-semibold text-xs md:text-sm">{tab.label}</span>
                 </TabsTrigger>
               );
             })}
