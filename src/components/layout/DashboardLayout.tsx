@@ -92,6 +92,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
       } else {
         navigate('/dashboard');
       }
+    } else if (href === '/student-careers') {
+      // Both teachers and learners use the same careers route
+      navigate('/student-careers');
     } else {
       navigate(href);
     }
