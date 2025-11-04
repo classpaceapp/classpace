@@ -69,39 +69,41 @@ const StudentCareers = () => {
   };
 
   const typeWriterEffect = async (html: string, setter: (val: string) => void) => {
-    // Types HTML by paragraphs with DOUBLE spacing, so formatting and links stay intact
+    // Types ALL content character-by-character with single line spacing between paragraphs
     setIsTyping(true);
 
     const stripTags = (s: string) => s.replace(/<[^>]+>/g, '');
-    // Split by <br><br> or paragraph tags to respect double spacing
-    const paragraphs = html.split(/(<br><br>|<\/p>\s*<p[^>]*>)/).filter(p => p.trim() && !p.match(/^<br>|^<\/p>/));
+    // Split by paragraph tags or double line breaks
+    const paragraphs = html.split(/(<\/p>\s*<p[^>]*>|<br><br>)/).filter(p => p.trim() && !p.match(/^<\/p>|^<br>/));
 
     let builtHtml = '';
     for (let i = 0; i < paragraphs.length; i++) {
       const segment = paragraphs[i];
       
-      // If it's a paragraph or content block
-      if (segment.includes('<p>') || !segment.startsWith('<')) {
-        const plain = stripTags(segment);
-        let typed = '';
-        for (let j = 0; j < plain.length; j++) {
-          typed += plain[j];
-          const current = builtHtml + (segment.includes('<p>') ? segment.replace(stripTags(segment), typed) : `<p>${typed}</p>`);
-          setter(current);
-          await new Promise((r) => setTimeout(r, 16));
-        }
-        // Add the complete formatted segment
-        builtHtml += segment;
-        setter(builtHtml);
-        
-        // Add double spacing after each paragraph
-        if (i < paragraphs.length - 1) {
-          builtHtml += '<br><br>\n';
-          setter(builtHtml);
-        }
-      } else {
-        // For other HTML elements (lists, etc.), add them directly
-        builtHtml += segment;
+      // Extract plain text from this segment
+      const plain = stripTags(segment);
+      
+      // Type out each character
+      let typed = '';
+      for (let j = 0; j < plain.length; j++) {
+        typed += plain[j];
+        // Reconstruct with original HTML tags but updated content
+        const current = builtHtml + (segment.includes('<p>') 
+          ? segment.replace(stripTags(segment), typed) 
+          : segment.includes('<a') || segment.includes('<ul') || segment.includes('<ol')
+          ? segment // Keep lists and links as-is
+          : `<p>${typed}</p>`);
+        setter(current);
+        await new Promise((r) => setTimeout(r, 16));
+      }
+      
+      // Add the complete formatted segment
+      builtHtml += segment;
+      setter(builtHtml);
+      
+      // Add single line spacing after each paragraph (one <br> only)
+      if (i < paragraphs.length - 1 && !segment.includes('</ul>') && !segment.includes('</ol>')) {
+        builtHtml += '<br>\n';
         setter(builtHtml);
       }
     }

@@ -190,6 +190,7 @@ const InterviewRecordingsList = () => {
     );
   }
 
+  return (
     <div className="space-y-4 md:space-y-6">
       <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent px-2 md:px-0">
         Your Practice Interviews

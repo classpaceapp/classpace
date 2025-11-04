@@ -83,9 +83,9 @@ serve(async (req) => {
       );
     }
 
-    // Construct search query with subtopic truncation to prevent errors
+    // Construct CONTENT-FOCUSED search query with subtopic truncation to prevent errors
     const truncatedSubtopic = subtopic ? subtopic.slice(0, 500) : "";
-    const searchQuery = `${curriculum} ${topic} ${truncatedSubtopic} educational content flashcards`.trim();
+    const searchQuery = `${curriculum} ${topic} ${truncatedSubtopic} lecture notes study guide concepts principles theory practice problems`.trim();
     logStep("Search query", { searchQuery, originalSubtopicLength: subtopic?.length });
 
     // Get Tavily API key
@@ -122,16 +122,22 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert educator creating flashcards for students. Generate exactly ${cardCount} flashcards based on the provided search results.
 
+CRITICAL CONTENT RULES:
+1. Focus ONLY on educational content, concepts, theories, and principles FROM the subject matter itself
+2. NEVER include meta-information about courses, modules, institutions, or course structures
+3. Extract technical knowledge, definitions, formulas, processes, and applications
+4. If the topic is a university module, focus on the SUBJECT CONTENT taught in that module, not the module details
+5. For degree-level content, create questions at appropriate academic depth
+
 CRITICAL FORMATTING RULES:
 1. Return ONLY valid JSON with no markdown formatting, no code blocks, no backticks
 2. Each flashcard must have:
-   - "hint": A concise question or prompt (front of card)
-   - "content": A clear, detailed answer (back of card)
+   - "hint": A concise question or prompt about the ACTUAL content (front of card)
+   - "content": A clear, detailed answer with technical/educational information (back of card)
 3. For mathematical equations, use LaTeX notation wrapped in $ for inline or $$ for display math
    Example: "The quadratic formula is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$"
 4. Remove ALL unnecessary punctuation like **, *, bullet points
-5. Make content clear, educational, and accurate
-6. Number each card sequentially
+5. Make content clear, educational, and academically appropriate
 
 Return format:
 {
@@ -150,10 +156,23 @@ Curriculum: ${curriculum}
 Topic: ${topic}
 ${promptSubtopic ? `Subtopic: ${promptSubtopic}` : ""}
 
-Use this educational content as reference:
+IMPORTANT: Extract ONLY subject matter content from the search results below. Focus on:
+- Key concepts, theories, and principles
+- Technical definitions and terminology
+- Formulas, processes, and methodologies
+- Practical applications and examples
+- Academic knowledge appropriate for the level
+
+IGNORE and EXCLUDE:
+- Information about the course/module itself
+- Institutional details or course structures
+- Generic descriptions of what the course covers
+- Administrative or meta information
+
+Educational content reference:
 ${searchContext}
 
-Generate exactly ${cardCount} flashcards with clear hints and comprehensive content. Use LaTeX for any mathematical expressions.`;
+Generate exactly ${cardCount} flashcards with technical, content-focused questions and comprehensive answers. Use LaTeX for any mathematical expressions.`;
     
     logStep("User prompt length", { length: userPrompt.length });
 
