@@ -28,6 +28,7 @@ const StudentCareers = () => {
   const [applicationRequest, setApplicationRequest] = useState('');
   const [generatingApplication, setGeneratingApplication] = useState(false);
   const [applicationResult, setApplicationResult] = useState('');
+  const [applicationResultHtml, setApplicationResultHtml] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   // Role Search state
@@ -37,6 +38,7 @@ const StudentCareers = () => {
   const [naturalQuery, setNaturalQuery] = useState('');
   const [searchingRoles, setSearchingRoles] = useState(false);
   const [roleResults, setRoleResults] = useState('');
+  const [roleResultsHtml, setRoleResultsHtml] = useState('');
 
   // Interview Prep state
   const [interviewJobLink, setInterviewJobLink] = useState('');
@@ -72,46 +74,46 @@ const StudentCareers = () => {
     setCvFile(file);
   };
 
-  const typeWriterEffect = async (html: string, setter: (val: string) => void) => {
-    // Types ALL content character-by-character with single line spacing between paragraphs
+  const typeWriterEffect = async (
+    html: string,
+    onStep: (val: string) => void,
+    onCompleteHtml: (val: string) => void
+  ) => {
     setIsTyping(true);
 
-    const stripTags = (s: string) => s.replace(/<[^>]+>/g, '');
-    // Split by paragraph tags or double line breaks
-    const paragraphs = html.split(/(<\/p>\s*<p[^>]*>|<br><br>)/).filter(p => p.trim() && !p.match(/^<\/p>|^<br>/));
+    // Convert HTML to plain text while preserving paragraph breaks
+    const plain = html
+      .replace(/<\/?p[^>]*>/gi, '\n')
+      .replace(/<br\s*\/?>(\s*<br\s*\/?>)?/gi, '\n')
+      .replace(/<li[^>]*>/gi, '• ')
+      .replace(/<\/?ul[^>]*>/gi, '\n')
+      .replace(/<\/?ol[^>]*>/gi, '\n')
+      .replace(/<h[1-6][^>]*>/gi, '')
+      .replace(/<\/h[1-6]>/gi, '\n')
+      .replace(/<blockquote[^>]*>/gi, '“')
+      .replace(/<\/blockquote>/gi, '”\n')
+      .replace(/<[^>]+>/g, '');
 
-    let builtHtml = '';
+    const paragraphs = plain.split(/\n{2,}|\r\n\r\n/g);
+    let built = '';
+
     for (let i = 0; i < paragraphs.length; i++) {
-      const segment = paragraphs[i];
-      
-      // Extract plain text from this segment
-      const plain = stripTags(segment);
-      
-      // Type out each character
-      let typed = '';
-      for (let j = 0; j < plain.length; j++) {
-        typed += plain[j];
-        // Reconstruct with original HTML tags but updated content
-        const current = builtHtml + (segment.includes('<p>') 
-          ? segment.replace(stripTags(segment), typed) 
-          : segment.includes('<a') || segment.includes('<ul') || segment.includes('<ol')
-          ? segment // Keep lists and links as-is
-          : `<p>${typed}</p>`);
-        setter(current);
+      const text = paragraphs[i].trim();
+      if (!text) continue;
+
+      let acc = '';
+      for (let j = 0; j < text.length; j++) {
+        acc += text[j];
+        onStep(built + acc);
         await new Promise((r) => setTimeout(r, 16));
       }
-      
-      // Add the complete formatted segment
-      builtHtml += segment;
-      setter(builtHtml);
-      
-      // Add single line spacing after each paragraph (one <br> only)
-      if (i < paragraphs.length - 1 && !segment.includes('</ul>') && !segment.includes('</ol>')) {
-        builtHtml += '<br>\n';
-        setter(builtHtml);
-      }
+
+      // paragraph spacing
+      built += acc + '\n\n';
+      onStep(built);
     }
 
+    onCompleteHtml(html);
     setIsTyping(false);
   };
 
@@ -127,6 +129,7 @@ const StudentCareers = () => {
 
     setGeneratingApplication(true);
     setApplicationResult('');
+    setApplicationResultHtml('');
 
     try {
       const reader = new FileReader();
@@ -149,7 +152,7 @@ const StudentCareers = () => {
           if (error) throw error;
 
           if (data?.result) {
-            await typeWriterEffect(data.result, setApplicationResult);
+            await typeWriterEffect(data.result, setApplicationResult, setApplicationResultHtml);
             toast({
               title: 'Application ready!',
               description: 'Aurora has generated your application materials',
@@ -206,6 +209,7 @@ const StudentCareers = () => {
 
     setSearchingRoles(true);
     setRoleResults('');
+    setRoleResultsHtml('');
 
     try {
       const { data, error } = await supabase.functions.invoke('aurora-role-search', {
@@ -220,7 +224,7 @@ const StudentCareers = () => {
       if (error) throw error;
 
       if (data?.result) {
-        await typeWriterEffect(data.result, setRoleResults);
+        await typeWriterEffect(data.result, setRoleResults, setRoleResultsHtml);
         toast({
           title: 'Search complete!',
           description: 'Aurora found matching opportunities',
@@ -397,7 +401,7 @@ const StudentCareers = () => {
                   )}
                 </Button>
 
-                {applicationResult && (
+                {(applicationResult || applicationResultHtml) && (
                   <Card className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 border-2 border-emerald-300 dark:border-emerald-700 shadow-xl md:shadow-2xl">
                     <CardHeader className="bg-gradient-to-r from-emerald-100/50 via-teal-100/50 to-cyan-100/50 dark:from-emerald-950/50 dark:via-teal-950/50 dark:to-cyan-950/50 p-3 md:p-6">
                       <CardTitle className="text-emerald-700 dark:text-emerald-300 flex items-center gap-2 md:gap-3 text-base md:text-xl">
@@ -408,16 +412,23 @@ const StudentCareers = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 md:pt-6 p-3 md:p-6">
-                      <div 
-                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
-                        dangerouslySetInnerHTML={{ __html: applicationResult }}
-                      />
+                      {isTyping ? (
+                        <div className="prose prose-sm md:prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
+                          {applicationResult}
+                        </div>
+                      ) : (
+                        <div 
+                          className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
+                          dangerouslySetInnerHTML={{ __html: applicationResultHtml }}
+                        />
+                      )}
                       {!isTyping && (
                         <Button
                           variant="outline"
                           className="mt-6 border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 font-semibold"
                           onClick={() => {
-                            navigator.clipboard.writeText(applicationResult.replace(/<[^>]*>/g, ''));
+                            const textToCopy = isTyping ? applicationResult : applicationResultHtml.replace(/<[^>]*>/g, '');
+                            navigator.clipboard.writeText(textToCopy);
                             toast({ title: 'Copied!', description: 'Response copied to clipboard' });
                           }}
                         >
@@ -537,10 +548,16 @@ const StudentCareers = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 md:pt-6 p-3 md:p-6">
-                      <div 
-                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
-                        dangerouslySetInnerHTML={{ __html: roleResults }}
-                      />
+                      {isTyping ? (
+                        <div className="prose prose-sm md:prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
+                          {roleResults}
+                        </div>
+                      ) : (
+                        <div 
+                          className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
+                          dangerouslySetInnerHTML={{ __html: roleResultsHtml }}
+                        />
+                      )}
                     </CardContent>
                   </Card>
                 )}
