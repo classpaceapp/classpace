@@ -190,19 +190,19 @@ const SubscriptionCard: React.FC = () => {
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-blue-500/30">
                   <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 font-bold" />
                 </div>
-                <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited AI Pods</span>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited Pods</span>
               </li>
               <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-blue-500/30">
                   <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 font-bold" />
                 </div>
-                <span className="text-sm text-foreground font-medium leading-relaxed">Advanced teaching assistant</span>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Aurora Careers Toolkit</span>
               </li>
               <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-blue-500/30">
                   <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 font-bold" />
                 </div>
-                <span className="text-sm text-foreground font-medium leading-relaxed">Comprehensive analytics</span>
+                <span className="text-sm text-foreground font-medium leading-relaxed">AI Interview Prep</span>
               </li>
             </ul>
 
