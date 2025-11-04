@@ -92,7 +92,18 @@ const PodCard: React.FC<PodCardProps> = ({ pod, userRole, basePath, isLocked = f
     },
   ];
 
-  const schemeIndex = Math.abs(pod.title.charCodeAt(0) % colorSchemes.length);
+  // Generate unique color based on pod ID for guaranteed uniqueness across all pods
+  const hashCode = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  };
+  
+  const schemeIndex = hashCode(pod.id) % colorSchemes.length;
   const scheme = colorSchemes[schemeIndex];
 
   return (

@@ -185,19 +185,31 @@ export const StudentSubscriptionCard = () => {
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
               <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
             </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited AI tutoring with Phoenix</span>
+            <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited Learnspace chats</span>
           </li>
           <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
               <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
             </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Advanced homework image analysis</span>
+            <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited My Resources</span>
           </li>
           <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
               <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
             </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Personalized learning insights</span>
+            <span className="text-sm text-foreground font-medium leading-relaxed">Advanced image analysis</span>
+          </li>
+          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+            </div>
+            <span className="text-sm text-foreground font-medium leading-relaxed">Aurora Careers Toolkit</span>
+          </li>
+          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+            </div>
+            <span className="text-sm text-foreground font-medium leading-relaxed">AI Interview Prep</span>
           </li>
         </ul>
 

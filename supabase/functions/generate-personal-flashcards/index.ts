@@ -27,30 +27,44 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) throw new Error("Authentication failed");
 
-    // Check existing flashcard count
-    const { data: existingFlashcards, error: countError } = await supabaseClient
-      .from("personal_flashcards")
-      .select("id")
+    // Check user's subscription tier
+    const { data: subscription, error: subError } = await supabaseClient
+      .from("subscriptions")
+      .select("tier")
       .eq("user_id", user.id)
-      .eq("archived", false);
+      .single();
 
-    if (countError) throw new Error("Failed to check flashcard limit");
+    if (subError) throw new Error("Failed to check subscription");
 
-    const currentCount = existingFlashcards?.length || 0;
-    const limit = 1; // Free plan limit
+    const userTier = subscription?.tier || 'free';
+    const isPremium = userTier === 'student_premium' || userTier === 'teacher_premium' || userTier === 'premium';
 
-    if (currentCount >= limit) {
-      return new Response(
-        JSON.stringify({ 
-          error: "LIMIT_REACHED", 
-          limit,
-          message: "You've reached your free plan limit of 1 flashcard set. Upgrade to create more!"
-        }),
-        { 
-          status: 403, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
-        }
-      );
+    // Check existing flashcard count only for free users
+    if (!isPremium) {
+      const { data: existingFlashcards, error: countError } = await supabaseClient
+        .from("personal_flashcards")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("archived", false);
+
+      if (countError) throw new Error("Failed to check flashcard limit");
+
+      const currentCount = existingFlashcards?.length || 0;
+      const limit = 1; // Free plan limit
+
+      if (currentCount >= limit) {
+        return new Response(
+          JSON.stringify({ 
+            error: "LIMIT_REACHED", 
+            limit,
+            message: "You've reached your free plan limit of 1 flashcard set. Upgrade to create more!"
+          }),
+          { 
+            status: 403, 
+            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          }
+        );
+      }
     }
 
     // Construct CONTENT-FOCUSED search query (avoid meta terms)

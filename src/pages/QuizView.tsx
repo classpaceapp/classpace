@@ -15,7 +15,7 @@ import { MathRenderer } from '@/components/quiz/MathRenderer';
 export default function QuizView() {
   const { quizId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [quiz, setQuiz] = useState<any>(null);
   const [answers, setAnswers] = useState<any>({});
@@ -71,7 +71,8 @@ export default function QuizView() {
 
   const handleBackToPod = () => {
     if (quiz?.pod_id) {
-      navigate(`/pod/${quiz.pod_id}?tab=quizzes`);
+      const podRoute = profile?.role === 'learner' ? `/student/pod/${quiz.pod_id}` : `/pod/${quiz.pod_id}`;
+      navigate(`${podRoute}?tab=quizzes`);
     } else {
       navigate(-1);
     }
@@ -80,7 +81,7 @@ export default function QuizView() {
   if (!quiz) return <div>Loading...</div>;
 
   return (
-    <DashboardLayout userRole="learner">
+    <DashboardLayout userRole={profile?.role === 'learner' ? 'learner' : 'teacher'}>
       <div className="container mx-auto px-3 md:px-4 py-4 md:py-8 max-w-4xl">
         <Button variant="outline" onClick={handleBackToPod} className="mb-4 md:mb-6 h-9 md:h-10">
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Pod

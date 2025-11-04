@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,10 @@ import InterviewRecordingsList from '@/components/careers/InterviewRecordingsLis
 
 const StudentCareers = () => {
   const { toast } = useToast();
+  const { subscription, profile } = useAuth();
   const [activeTab, setActiveTab] = useState('application-builder');
+  
+  const isPremium = subscription?.tier === 'student_premium' || subscription?.tier === 'teacher_premium';
   
   // Application Builder state
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -68,43 +72,59 @@ const StudentCareers = () => {
     setCvFile(file);
   };
 
-  const typeWriterEffect = async (html: string, setter: (val: string) => void) => {
-    // Types ALL content character-by-character with single line spacing between paragraphs
+  const typeWriterEffect = async (
+    html: string,
+    onStep: (val: string) => void
+  ) => {
     setIsTyping(true);
 
-    const stripTags = (s: string) => s.replace(/<[^>]+>/g, '');
-    // Split by paragraph tags or double line breaks
-    const paragraphs = html.split(/(<\/p>\s*<p[^>]*>|<br><br>)/).filter(p => p.trim() && !p.match(/^<\/p>|^<br>/));
+    // Parse HTML into structured content preserving links
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const paragraphs = Array.from(doc.body.children);
 
-    let builtHtml = '';
-    for (let i = 0; i < paragraphs.length; i++) {
-      const segment = paragraphs[i];
-      
-      // Extract plain text from this segment
-      const plain = stripTags(segment);
-      
-      // Type out each character
-      let typed = '';
-      for (let j = 0; j < plain.length; j++) {
-        typed += plain[j];
-        // Reconstruct with original HTML tags but updated content
-        const current = builtHtml + (segment.includes('<p>') 
-          ? segment.replace(stripTags(segment), typed) 
-          : segment.includes('<a') || segment.includes('<ul') || segment.includes('<ol')
-          ? segment // Keep lists and links as-is
-          : `<p>${typed}</p>`);
-        setter(current);
-        await new Promise((r) => setTimeout(r, 16));
-      }
-      
-      // Add the complete formatted segment
-      builtHtml += segment;
-      setter(builtHtml);
-      
-      // Add single line spacing after each paragraph (one <br> only)
-      if (i < paragraphs.length - 1 && !segment.includes('</ul>') && !segment.includes('</ol>')) {
-        builtHtml += '<br>\n';
-        setter(builtHtml);
+    let accumulatedHTML = '';
+
+    for (const para of paragraphs) {
+      if (para.tagName === 'P' || para.tagName === 'DIV') {
+        const nodes = Array.from(para.childNodes);
+        let paragraphHTML = '<p>';
+
+        for (const node of nodes) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            // Type out text character by character
+            const text = node.textContent || '';
+            for (let i = 0; i < text.length; i++) {
+              paragraphHTML += text[i];
+              onStep(accumulatedHTML + paragraphHTML + '</p>');
+              await new Promise((r) => setTimeout(r, 16));
+            }
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element;
+            if (element.tagName === 'A') {
+              // Add link immediately (makes it clickable)
+              paragraphHTML += element.outerHTML;
+              onStep(accumulatedHTML + paragraphHTML + '</p>');
+              await new Promise((r) => setTimeout(r, 100)); // Brief pause after link
+            } else if (element.tagName === 'STRONG' || element.tagName === 'EM') {
+              // Type formatted text
+              const formattedText = element.textContent || '';
+              const openTag = element.tagName === 'STRONG' ? '<strong>' : '<em>';
+              const closeTag = element.tagName === 'STRONG' ? '</strong>' : '</em>';
+              paragraphHTML += openTag;
+              for (let i = 0; i < formattedText.length; i++) {
+                paragraphHTML += formattedText[i];
+                onStep(accumulatedHTML + paragraphHTML + closeTag + '</p>');
+                await new Promise((r) => setTimeout(r, 16));
+              }
+              paragraphHTML += closeTag;
+            }
+          }
+        }
+
+        paragraphHTML += '</p>';
+        accumulatedHTML += paragraphHTML;
+        onStep(accumulatedHTML);
       }
     }
 
@@ -255,7 +275,7 @@ const StudentCareers = () => {
   }
 
   return (
-    <DashboardLayout userRole="learner">
+    <DashboardLayout userRole={profile?.role === 'teacher' ? 'teacher' : 'learner'}>
       <div className="container mx-auto p-3 md:p-6 max-w-7xl">
         {/* Hero Section */}
         <div className="mb-4 md:mb-8 text-center">
@@ -297,10 +317,11 @@ const StudentCareers = () => {
             </TabsTrigger>
             <TabsTrigger 
               value="interview-prep" 
-              className="gap-1 md:gap-2 text-xs md:text-base data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg md:data-[state=active]:shadow-xl rounded-lg md:rounded-xl transition-all duration-300 font-semibold px-1 md:px-3"
+              disabled={!isPremium}
+              className="gap-1 md:gap-2 text-xs md:text-base data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=active]:shadow-lg md:data-[state=active]:shadow-xl rounded-lg md:rounded-xl transition-all duration-300 font-semibold px-1 md:px-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Target className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="hidden sm:inline">Interview</span>
+              <span className="hidden sm:inline">Interview {!isPremium && '🔒'}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -404,7 +425,7 @@ const StudentCareers = () => {
                     </CardHeader>
                     <CardContent className="pt-4 md:pt-6 p-3 md:p-6">
                       <div 
-                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
+                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold [&_a]:cursor-pointer"
                         dangerouslySetInnerHTML={{ __html: applicationResult }}
                       />
                       {!isTyping && (
@@ -412,7 +433,10 @@ const StudentCareers = () => {
                           variant="outline"
                           className="mt-6 border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 font-semibold"
                           onClick={() => {
-                            navigator.clipboard.writeText(applicationResult.replace(/<[^>]*>/g, ''));
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = applicationResult;
+                            const textToCopy = tempDiv.textContent || '';
+                            navigator.clipboard.writeText(textToCopy);
                             toast({ title: 'Copied!', description: 'Response copied to clipboard' });
                           }}
                         >
@@ -437,31 +461,32 @@ const StudentCareers = () => {
                   <span className="text-lg md:text-3xl">Role Search</span>
                 </CardTitle>
                 <CardDescription className="text-sm md:text-base mt-1 md:mt-2 text-muted-foreground">
-                  Tell Aurora what you're looking for — get perfectly matched opportunities
+                  Discover opportunities from company career pages
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-4 md:pt-6 space-y-4 md:space-y-6 p-4 md:p-6">
-                <div className="flex gap-2 md:gap-4">
-                  <Button
-                    variant={searchMode === 'structured' ? 'default' : 'outline'}
-                    onClick={() => setSearchMode('structured')}
-                    className="flex-1 h-9 md:h-10 text-xs md:text-base"
-                  >
-                    <Briefcase className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                    Structured
-                  </Button>
-                  <Button
-                    variant={searchMode === 'natural' ? 'default' : 'outline'}
-                    onClick={() => setSearchMode('natural')}
-                    className="flex-1 h-9 md:h-10 text-xs md:text-base"
-                  >
-                    <Sparkles className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                    Natural
-                  </Button>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-sm md:text-base font-semibold">Search Mode</Label>
+                  <div className="grid grid-cols-2 gap-2 md:gap-4">
+                    <Button
+                      variant={searchMode === 'structured' ? 'default' : 'outline'}
+                      onClick={() => setSearchMode('structured')}
+                      className={searchMode === 'structured' ? 'bg-gradient-to-r from-teal-500 to-cyan-500' : ''}
+                    >
+                      Structured
+                    </Button>
+                    <Button
+                      variant={searchMode === 'natural' ? 'default' : 'outline'}
+                      onClick={() => setSearchMode('natural')}
+                      className={searchMode === 'natural' ? 'bg-gradient-to-r from-teal-500 to-cyan-500' : ''}
+                    >
+                      Natural
+                    </Button>
+                  </div>
                 </div>
 
                 {searchMode === 'structured' ? (
-                  <div className="grid md:grid-cols-2 gap-3 md:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-sm md:text-base font-semibold">Industry *</Label>
                       <Select value={industry} onValueChange={setIndustry}>
@@ -474,9 +499,6 @@ const StudentCareers = () => {
                           <SelectItem value="healthcare">Healthcare</SelectItem>
                           <SelectItem value="education">Education</SelectItem>
                           <SelectItem value="consulting">Consulting</SelectItem>
-                          <SelectItem value="marketing">Marketing</SelectItem>
-                          <SelectItem value="engineering">Engineering</SelectItem>
-                          <SelectItem value="design">Design</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -485,7 +507,7 @@ const StudentCareers = () => {
                       <Input
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        placeholder="e.g., London, UK"
+                        placeholder="e.g., New York, Remote"
                         className="h-10 md:h-11 text-sm"
                       />
                     </div>
@@ -496,9 +518,9 @@ const StudentCareers = () => {
                     <Textarea
                       value={naturalQuery}
                       onChange={(e) => setNaturalQuery(e.target.value)}
-                      placeholder="E.g., 'I'm looking for software engineering roles in London for someone with a UK work visa, interested in AI and machine learning'"
-                      rows={4}
-                      className="resize-none text-sm md:text-base md:rows-5"
+                      placeholder="E.g., 'Software engineering roles in fintech startups in San Francisco'"
+                      rows={3}
+                      className="text-sm"
                     />
                   </div>
                 )}
@@ -511,12 +533,12 @@ const StudentCareers = () => {
                   {searchingRoles ? (
                     <>
                       <Loader2 className="h-5 w-5 md:h-6 md:w-6 mr-2 animate-spin" />
-                      <span className="text-xs md:text-lg">Aurora is searching...</span>
+                      <span className="text-xs md:text-lg">Searching...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                      <span className="text-xs md:text-lg">Search with Aurora</span>
+                      <Search className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                      <span className="text-xs md:text-lg">Find Roles</span>
                     </>
                   )}
                 </Button>
@@ -526,16 +548,31 @@ const StudentCareers = () => {
                     <CardHeader className="bg-gradient-to-r from-teal-100/50 via-cyan-100/50 to-blue-100/50 dark:from-teal-950/50 dark:via-cyan-950/50 dark:to-blue-950/50 p-3 md:p-6">
                       <CardTitle className="text-teal-700 dark:text-teal-300 flex items-center gap-2 md:gap-3 text-base md:text-xl">
                         <div className="p-1.5 md:p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg">
-                          <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                          <Search className="h-4 w-4 md:h-5 md:w-5 text-white" />
                         </div>
-                        Aurora's Results
+                        Role Opportunities
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 md:pt-6 p-3 md:p-6">
                       <div 
-                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
+                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold [&_a]:cursor-pointer"
                         dangerouslySetInnerHTML={{ __html: roleResults }}
                       />
+                      {!isTyping && (
+                        <Button
+                          variant="outline"
+                          className="mt-6 border-2 border-teal-500 text-teal-700 hover:bg-teal-100 dark:hover:bg-teal-950/50 font-semibold"
+                          onClick={() => {
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = roleResults;
+                            const textToCopy = tempDiv.textContent || '';
+                            navigator.clipboard.writeText(textToCopy);
+                            toast({ title: 'Copied!', description: 'Results copied to clipboard' });
+                          }}
+                        >
+                          Copy to Clipboard
+                        </Button>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -606,7 +643,6 @@ const StudentCareers = () => {
                       });
                       if (error) throw error;
                       
-                      // Get current user
                       const { data: { user } } = await supabase.auth.getUser();
                       if (!user) throw new Error('Not authenticated');
                       
@@ -628,20 +664,34 @@ const StudentCareers = () => {
                       setCurrentQuestions(data.questions);
                       setInInterviewRoom(true);
                     } catch (err: any) {
-                      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+                      console.error('Error generating questions:', err);
+                      toast({ title: 'Failed', description: err.message || 'Please try again', variant: 'destructive' });
                     } finally {
                       setGeneratingQuestions(false);
                     }
                   }}
                   disabled={generatingQuestions}
-                  className="w-full h-11 md:h-14 text-sm md:text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg md:shadow-xl"
+                  className="w-full h-11 md:h-14 text-sm md:text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg md:shadow-xl hover:shadow-xl md:hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
                 >
-                  {generatingQuestions ? <><Loader2 className="h-5 w-5 md:h-6 md:w-6 mr-2 animate-spin" /><span className="text-xs md:text-lg">Generating...</span></> : <><Video className="h-5 w-5 md:h-6 md:w-6 mr-2" /><span className="text-xs md:text-lg">Start Practice Interview</span></>}
+                  {generatingQuestions ? (
+                    <>
+                      <Loader2 className="h-5 w-5 md:h-6 md:w-6 mr-2 animate-spin" />
+                      <span className="text-xs md:text-lg">Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Video className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                      <span className="text-xs md:text-lg">Start Interview Prep</span>
+                    </>
+                  )}
                 </Button>
+
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Your Interview Recordings</h3>
+                  <InterviewRecordingsList />
+                </div>
               </CardContent>
             </Card>
-
-            <InterviewRecordingsList />
           </TabsContent>
         </Tabs>
       </div>
