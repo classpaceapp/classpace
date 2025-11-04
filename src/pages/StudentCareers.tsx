@@ -28,7 +28,6 @@ const StudentCareers = () => {
   const [applicationRequest, setApplicationRequest] = useState('');
   const [generatingApplication, setGeneratingApplication] = useState(false);
   const [applicationResult, setApplicationResult] = useState('');
-  const [applicationResultHtml, setApplicationResultHtml] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   // Role Search state
@@ -38,7 +37,6 @@ const StudentCareers = () => {
   const [naturalQuery, setNaturalQuery] = useState('');
   const [searchingRoles, setSearchingRoles] = useState(false);
   const [roleResults, setRoleResults] = useState('');
-  const [roleResultsHtml, setRoleResultsHtml] = useState('');
 
   // Interview Prep state
   const [interviewJobLink, setInterviewJobLink] = useState('');
@@ -76,44 +74,60 @@ const StudentCareers = () => {
 
   const typeWriterEffect = async (
     html: string,
-    onStep: (val: string) => void,
-    onCompleteHtml: (val: string) => void
+    onStep: (val: string) => void
   ) => {
     setIsTyping(true);
 
-    // Convert HTML to plain text while preserving paragraph breaks
-    const plain = html
-      .replace(/<\/?p[^>]*>/gi, '\n')
-      .replace(/<br\s*\/?>(\s*<br\s*\/?>)?/gi, '\n')
-      .replace(/<li[^>]*>/gi, '• ')
-      .replace(/<\/?ul[^>]*>/gi, '\n')
-      .replace(/<\/?ol[^>]*>/gi, '\n')
-      .replace(/<h[1-6][^>]*>/gi, '')
-      .replace(/<\/h[1-6]>/gi, '\n')
-      .replace(/<blockquote[^>]*>/gi, '“')
-      .replace(/<\/blockquote>/gi, '”\n')
-      .replace(/<[^>]+>/g, '');
+    // Parse HTML into structured content preserving links
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const paragraphs = Array.from(doc.body.children);
 
-    const paragraphs = plain.split(/\n{2,}|\r\n\r\n/g);
-    let built = '';
+    let accumulatedHTML = '';
 
-    for (let i = 0; i < paragraphs.length; i++) {
-      const text = paragraphs[i].trim();
-      if (!text) continue;
+    for (const para of paragraphs) {
+      if (para.tagName === 'P' || para.tagName === 'DIV') {
+        const nodes = Array.from(para.childNodes);
+        let paragraphHTML = '<p>';
 
-      let acc = '';
-      for (let j = 0; j < text.length; j++) {
-        acc += text[j];
-        onStep(built + acc);
-        await new Promise((r) => setTimeout(r, 16));
+        for (const node of nodes) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            // Type out text character by character
+            const text = node.textContent || '';
+            for (let i = 0; i < text.length; i++) {
+              paragraphHTML += text[i];
+              onStep(accumulatedHTML + paragraphHTML + '</p>');
+              await new Promise((r) => setTimeout(r, 16));
+            }
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element;
+            if (element.tagName === 'A') {
+              // Add link immediately (makes it clickable)
+              paragraphHTML += element.outerHTML;
+              onStep(accumulatedHTML + paragraphHTML + '</p>');
+              await new Promise((r) => setTimeout(r, 100)); // Brief pause after link
+            } else if (element.tagName === 'STRONG' || element.tagName === 'EM') {
+              // Type formatted text
+              const formattedText = element.textContent || '';
+              const openTag = element.tagName === 'STRONG' ? '<strong>' : '<em>';
+              const closeTag = element.tagName === 'STRONG' ? '</strong>' : '</em>';
+              paragraphHTML += openTag;
+              for (let i = 0; i < formattedText.length; i++) {
+                paragraphHTML += formattedText[i];
+                onStep(accumulatedHTML + paragraphHTML + closeTag + '</p>');
+                await new Promise((r) => setTimeout(r, 16));
+              }
+              paragraphHTML += closeTag;
+            }
+          }
+        }
+
+        paragraphHTML += '</p>';
+        accumulatedHTML += paragraphHTML;
+        onStep(accumulatedHTML);
       }
-
-      // paragraph spacing
-      built += acc + '\n\n';
-      onStep(built);
     }
 
-    onCompleteHtml(html);
     setIsTyping(false);
   };
 
@@ -129,7 +143,6 @@ const StudentCareers = () => {
 
     setGeneratingApplication(true);
     setApplicationResult('');
-    setApplicationResultHtml('');
 
     try {
       const reader = new FileReader();
@@ -152,7 +165,7 @@ const StudentCareers = () => {
           if (error) throw error;
 
           if (data?.result) {
-            await typeWriterEffect(data.result, setApplicationResult, setApplicationResultHtml);
+            await typeWriterEffect(data.result, setApplicationResult);
             toast({
               title: 'Application ready!',
               description: 'Aurora has generated your application materials',
@@ -209,7 +222,6 @@ const StudentCareers = () => {
 
     setSearchingRoles(true);
     setRoleResults('');
-    setRoleResultsHtml('');
 
     try {
       const { data, error } = await supabase.functions.invoke('aurora-role-search', {
@@ -224,7 +236,7 @@ const StudentCareers = () => {
       if (error) throw error;
 
       if (data?.result) {
-        await typeWriterEffect(data.result, setRoleResults, setRoleResultsHtml);
+        await typeWriterEffect(data.result, setRoleResults);
         toast({
           title: 'Search complete!',
           description: 'Aurora found matching opportunities',
@@ -401,7 +413,7 @@ const StudentCareers = () => {
                   )}
                 </Button>
 
-                {(applicationResult || applicationResultHtml) && (
+                {applicationResult && (
                   <Card className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-cyan-950/30 border-2 border-emerald-300 dark:border-emerald-700 shadow-xl md:shadow-2xl">
                     <CardHeader className="bg-gradient-to-r from-emerald-100/50 via-teal-100/50 to-cyan-100/50 dark:from-emerald-950/50 dark:via-teal-950/50 dark:to-cyan-950/50 p-3 md:p-6">
                       <CardTitle className="text-emerald-700 dark:text-emerald-300 flex items-center gap-2 md:gap-3 text-base md:text-xl">
@@ -412,22 +424,18 @@ const StudentCareers = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 md:pt-6 p-3 md:p-6">
-                      {isTyping ? (
-                        <div className="prose prose-sm md:prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
-                          {applicationResult}
-                        </div>
-                      ) : (
-                        <div 
-                          className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
-                          dangerouslySetInnerHTML={{ __html: applicationResultHtml }}
-                        />
-                      )}
+                      <div 
+                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold [&_a]:cursor-pointer"
+                        dangerouslySetInnerHTML={{ __html: applicationResult }}
+                      />
                       {!isTyping && (
                         <Button
                           variant="outline"
                           className="mt-6 border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 font-semibold"
                           onClick={() => {
-                            const textToCopy = isTyping ? applicationResult : applicationResultHtml.replace(/<[^>]*>/g, '');
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = applicationResult;
+                            const textToCopy = tempDiv.textContent || '';
                             navigator.clipboard.writeText(textToCopy);
                             toast({ title: 'Copied!', description: 'Response copied to clipboard' });
                           }}
@@ -453,31 +461,32 @@ const StudentCareers = () => {
                   <span className="text-lg md:text-3xl">Role Search</span>
                 </CardTitle>
                 <CardDescription className="text-sm md:text-base mt-1 md:mt-2 text-muted-foreground">
-                  Tell Aurora what you're looking for — get perfectly matched opportunities
+                  Discover opportunities from company career pages
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-4 md:pt-6 space-y-4 md:space-y-6 p-4 md:p-6">
-                <div className="flex gap-2 md:gap-4">
-                  <Button
-                    variant={searchMode === 'structured' ? 'default' : 'outline'}
-                    onClick={() => setSearchMode('structured')}
-                    className="flex-1 h-9 md:h-10 text-xs md:text-base"
-                  >
-                    <Briefcase className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                    Structured
-                  </Button>
-                  <Button
-                    variant={searchMode === 'natural' ? 'default' : 'outline'}
-                    onClick={() => setSearchMode('natural')}
-                    className="flex-1 h-9 md:h-10 text-xs md:text-base"
-                  >
-                    <Sparkles className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                    Natural
-                  </Button>
+                <div className="space-y-1.5 md:space-y-2">
+                  <Label className="text-sm md:text-base font-semibold">Search Mode</Label>
+                  <div className="grid grid-cols-2 gap-2 md:gap-4">
+                    <Button
+                      variant={searchMode === 'structured' ? 'default' : 'outline'}
+                      onClick={() => setSearchMode('structured')}
+                      className={searchMode === 'structured' ? 'bg-gradient-to-r from-teal-500 to-cyan-500' : ''}
+                    >
+                      Structured
+                    </Button>
+                    <Button
+                      variant={searchMode === 'natural' ? 'default' : 'outline'}
+                      onClick={() => setSearchMode('natural')}
+                      className={searchMode === 'natural' ? 'bg-gradient-to-r from-teal-500 to-cyan-500' : ''}
+                    >
+                      Natural
+                    </Button>
+                  </div>
                 </div>
 
                 {searchMode === 'structured' ? (
-                  <div className="grid md:grid-cols-2 gap-3 md:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5 md:space-y-2">
                       <Label className="text-sm md:text-base font-semibold">Industry *</Label>
                       <Select value={industry} onValueChange={setIndustry}>
@@ -490,9 +499,6 @@ const StudentCareers = () => {
                           <SelectItem value="healthcare">Healthcare</SelectItem>
                           <SelectItem value="education">Education</SelectItem>
                           <SelectItem value="consulting">Consulting</SelectItem>
-                          <SelectItem value="marketing">Marketing</SelectItem>
-                          <SelectItem value="engineering">Engineering</SelectItem>
-                          <SelectItem value="design">Design</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -501,7 +507,7 @@ const StudentCareers = () => {
                       <Input
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        placeholder="e.g., London, UK"
+                        placeholder="e.g., New York, Remote"
                         className="h-10 md:h-11 text-sm"
                       />
                     </div>
@@ -512,9 +518,9 @@ const StudentCareers = () => {
                     <Textarea
                       value={naturalQuery}
                       onChange={(e) => setNaturalQuery(e.target.value)}
-                      placeholder="E.g., 'I'm looking for software engineering roles in London for someone with a UK work visa, interested in AI and machine learning'"
-                      rows={4}
-                      className="resize-none text-sm md:text-base md:rows-5"
+                      placeholder="E.g., 'Software engineering roles in fintech startups in San Francisco'"
+                      rows={3}
+                      className="text-sm"
                     />
                   </div>
                 )}
@@ -527,12 +533,12 @@ const StudentCareers = () => {
                   {searchingRoles ? (
                     <>
                       <Loader2 className="h-5 w-5 md:h-6 md:w-6 mr-2 animate-spin" />
-                      <span className="text-xs md:text-lg">Aurora is searching...</span>
+                      <span className="text-xs md:text-lg">Searching...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                      <span className="text-xs md:text-lg">Search with Aurora</span>
+                      <Search className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                      <span className="text-xs md:text-lg">Find Roles</span>
                     </>
                   )}
                 </Button>
@@ -542,21 +548,30 @@ const StudentCareers = () => {
                     <CardHeader className="bg-gradient-to-r from-teal-100/50 via-cyan-100/50 to-blue-100/50 dark:from-teal-950/50 dark:via-cyan-950/50 dark:to-blue-950/50 p-3 md:p-6">
                       <CardTitle className="text-teal-700 dark:text-teal-300 flex items-center gap-2 md:gap-3 text-base md:text-xl">
                         <div className="p-1.5 md:p-2 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg">
-                          <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                          <Search className="h-4 w-4 md:h-5 md:w-5 text-white" />
                         </div>
-                        Aurora's Results
+                        Role Opportunities
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 md:pt-6 p-3 md:p-6">
-                      {isTyping ? (
-                        <div className="prose prose-sm md:prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
-                          {roleResults}
-                        </div>
-                      ) : (
-                        <div 
-                          className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold"
-                          dangerouslySetInnerHTML={{ __html: roleResultsHtml }}
-                        />
+                      <div 
+                        className="prose prose-sm md:prose-lg dark:prose-invert max-w-none [&_a]:text-teal-600 [&_a]:hover:text-teal-700 [&_a]:underline [&_a]:font-semibold [&_a]:cursor-pointer"
+                        dangerouslySetInnerHTML={{ __html: roleResults }}
+                      />
+                      {!isTyping && (
+                        <Button
+                          variant="outline"
+                          className="mt-6 border-2 border-teal-500 text-teal-700 hover:bg-teal-100 dark:hover:bg-teal-950/50 font-semibold"
+                          onClick={() => {
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = roleResults;
+                            const textToCopy = tempDiv.textContent || '';
+                            navigator.clipboard.writeText(textToCopy);
+                            toast({ title: 'Copied!', description: 'Results copied to clipboard' });
+                          }}
+                        >
+                          Copy to Clipboard
+                        </Button>
                       )}
                     </CardContent>
                   </Card>
@@ -628,7 +643,6 @@ const StudentCareers = () => {
                       });
                       if (error) throw error;
                       
-                      // Get current user
                       const { data: { user } } = await supabase.auth.getUser();
                       if (!user) throw new Error('Not authenticated');
                       
@@ -650,20 +664,34 @@ const StudentCareers = () => {
                       setCurrentQuestions(data.questions);
                       setInInterviewRoom(true);
                     } catch (err: any) {
-                      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+                      console.error('Error generating questions:', err);
+                      toast({ title: 'Failed', description: err.message || 'Please try again', variant: 'destructive' });
                     } finally {
                       setGeneratingQuestions(false);
                     }
                   }}
                   disabled={generatingQuestions}
-                  className="w-full h-11 md:h-14 text-sm md:text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg md:shadow-xl"
+                  className="w-full h-11 md:h-14 text-sm md:text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 shadow-lg md:shadow-xl hover:shadow-xl md:hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
                 >
-                  {generatingQuestions ? <><Loader2 className="h-5 w-5 md:h-6 md:w-6 mr-2 animate-spin" /><span className="text-xs md:text-lg">Generating...</span></> : <><Video className="h-5 w-5 md:h-6 md:w-6 mr-2" /><span className="text-xs md:text-lg">Start Practice Interview</span></>}
+                  {generatingQuestions ? (
+                    <>
+                      <Loader2 className="h-5 w-5 md:h-6 md:w-6 mr-2 animate-spin" />
+                      <span className="text-xs md:text-lg">Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Video className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                      <span className="text-xs md:text-lg">Start Interview Prep</span>
+                    </>
+                  )}
                 </Button>
+
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold mb-4">Your Interview Recordings</h3>
+                  <InterviewRecordingsList />
+                </div>
               </CardContent>
             </Card>
-
-            <InterviewRecordingsList />
           </TabsContent>
         </Tabs>
       </div>
