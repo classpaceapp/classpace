@@ -146,19 +146,19 @@ const StudentProfiles: React.FC = () => {
   return (
     <div className="space-y-6">
       {students.map(([podName, studentList]: [string, any]) => (
-        <Card key={podName} className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-t-lg">
-            <CardTitle className="text-xl">{podName}</CardTitle>
+        <Card key={podName} className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-600 text-white rounded-t-lg p-6">
+            <CardTitle className="text-2xl">{podName}</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {studentList.map((student: any) => (
-                <Card key={student.id} className="border-2 border-violet-100 hover:shadow-lg transition-all">
+                <Card key={student.id} className="border-2 border-purple-100 hover:shadow-lg transition-all">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12">
                         <AvatarImage src={student.avatar} />
-                        <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-600 text-white font-bold">
                           {student.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>

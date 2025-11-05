@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sparkles, BookOpen } from 'lucide-react';
+import { Sparkles, BookOpen, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -68,19 +68,19 @@ const CurriculumArchitect: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-              <BookOpen className="h-6 w-6" />
+      <Card className="border-2 border-pink-200 bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50 shadow-2xl">
+        <CardHeader className="bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-600 text-white rounded-t-lg p-8">
+          <CardTitle className="flex items-center gap-3 text-3xl">
+            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm shadow-lg">
+              <BookOpen className="h-8 w-8" />
             </div>
             AI Curriculum Architect
           </CardTitle>
-          <CardDescription className="text-violet-100">
-            Generate comprehensive, standards-aligned curriculum plans powered by AI research
+          <CardDescription className="text-pink-100 text-base mt-2">
+            Generate comprehensive, standards-aligned curriculum plans powered by advanced AI research
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-8 mt-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="subject">Subject *</Label>
@@ -143,7 +143,7 @@ const CurriculumArchitect: React.FC = () => {
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className="w-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+            className="w-full bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-600 hover:from-pink-600 hover:via-rose-600 hover:to-fuchsia-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             {isGenerating ? (
               <>
@@ -161,18 +161,34 @@ const CurriculumArchitect: React.FC = () => {
       </Card>
 
       {generatedCurriculum && (
-        <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-2xl">
-          <CardHeader className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white rounded-t-lg">
-            <CardTitle className="text-2xl font-bold">
-              Generated Curriculum Plan
-            </CardTitle>
-            <CardDescription className="text-emerald-100">
-              {subject} • Grade {gradeLevel} • {duration}
-            </CardDescription>
+        <Card className="border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-50 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 text-white rounded-t-lg p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-bold mb-2">
+                  Generated Curriculum Plan
+                </CardTitle>
+                <CardDescription className="text-cyan-100 text-base">
+                  {subject} • Grade {gradeLevel} • {duration}
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedCurriculum);
+                  toast({ title: "Copied!", description: "Curriculum copied to clipboard" });
+                }}
+                variant="secondary"
+                size="sm"
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="p-8">
-            <div className="prose prose-lg max-w-none">
-              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+            <div className="prose prose-lg max-w-none bg-white rounded-xl p-6 shadow-inner">
+              <div className="whitespace-pre-wrap text-foreground leading-relaxed font-serif text-base">
                 {generatedCurriculum}
               </div>
             </div>

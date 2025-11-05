@@ -68,3 +68,6 @@ verify_jwt = true
 
 [functions.nexus-assessment-generator]
 verify_jwt = true
+
+[functions.nexus-lesson-generator]
+verify_jwt = true

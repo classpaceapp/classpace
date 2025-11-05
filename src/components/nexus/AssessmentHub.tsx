@@ -248,13 +248,15 @@ const AssessmentHub: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Generator Card */}
-      <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 shadow-2xl">
-        <CardHeader className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-t-lg">
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Sparkles className="h-6 w-6" />
+      <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 shadow-2xl">
+        <CardHeader className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white rounded-t-lg p-8">
+          <CardTitle className="flex items-center gap-3 text-3xl">
+            <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm shadow-lg">
+              <Sparkles className="h-8 w-8" />
+            </div>
             AI-Powered Assessment Generator
           </CardTitle>
-          <CardDescription className="text-violet-100">
+          <CardDescription className="text-amber-100 text-base mt-2">
             Create comprehensive, curriculum-aligned assessments with advanced AI research
           </CardDescription>
         </CardHeader>
@@ -364,7 +366,7 @@ const AssessmentHub: React.FC = () => {
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating}
-            className="w-full bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
+            className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:from-amber-600 hover:via-orange-600 hover:to-red-700 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             {isGenerating ? (
               <>
@@ -383,9 +385,9 @@ const AssessmentHub: React.FC = () => {
 
       {/* Assessments List */}
       {assessments.length > 0 && (
-        <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 shadow-xl">
-          <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
-            <CardTitle>Your Assessments</CardTitle>
+        <Card className="border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-t-lg p-6">
+            <CardTitle className="text-2xl">Your Assessments</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 gap-4">

@@ -1154,6 +1154,81 @@ export type Database = {
           },
         ]
       }
+      saved_curriculums: {
+        Row: {
+          created_at: string
+          curriculum_content: string
+          duration: string
+          grade_level: string
+          id: string
+          learning_goals: string | null
+          subject: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          curriculum_content: string
+          duration: string
+          grade_level: string
+          id?: string
+          learning_goals?: string | null
+          subject: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          curriculum_content?: string
+          duration?: string
+          grade_level?: string
+          id?: string
+          learning_goals?: string | null
+          subject?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_lessons: {
+        Row: {
+          created_at: string
+          curriculum: string
+          duration: string
+          grade_level: string
+          id: string
+          lesson_content: string
+          subject: string
+          teacher_id: string
+          topic: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          curriculum: string
+          duration: string
+          grade_level: string
+          id?: string
+          lesson_content: string
+          subject: string
+          teacher_id: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          curriculum?: string
+          duration?: string
+          grade_level?: string
+          id?: string
+          lesson_content?: string
+          subject?: string
+          teacher_id?: string
+          topic?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       session_messages: {
         Row: {
           created_at: string

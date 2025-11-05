@@ -88,13 +88,13 @@ const ProgressDashboard: React.FC = () => {
         })}
       </div>
 
-      <Card className="border-2 border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-t-lg">
+      <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-xl">
+        <CardHeader className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white rounded-t-lg p-6">
           <CardTitle className="flex items-center gap-3 text-2xl">
-            <BarChart3 className="h-6 w-6" />
+            <BarChart3 className="h-7 w-7" />
             Pod Performance Analytics
           </CardTitle>
-          <CardDescription className="text-violet-100">Real-time insights across all your pods</CardDescription>
+          <CardDescription className="text-emerald-100 text-base">Real-time insights across all your pods</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
@@ -102,7 +102,7 @@ const ProgressDashboard: React.FC = () => {
               <Card key={pod.id} className="border-2 border-violet-100 hover:shadow-lg transition-all">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">{pod.title}</CardTitle>
-                  <Badge className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">{pod.subject}</Badge>
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">{pod.subject}</Badge>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
