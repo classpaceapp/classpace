@@ -313,7 +313,7 @@ const CurriculumArchitect: React.FC = () => {
           </CardHeader>
           <CardContent className="p-8">
             <div className="prose prose-lg max-w-none bg-white rounded-xl p-8 shadow-inner">
-              <div className="whitespace-pre-wrap text-foreground leading-relaxed font-serif text-base">
+              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
                 {generatedCurriculum}
                 {isGenerating && (
                   <span className="inline-block w-2 h-5 bg-pink-500 animate-pulse ml-1" />
@@ -376,7 +376,7 @@ const CurriculumArchitect: React.FC = () => {
                       </Button>
                     </div>
                     <div className="prose prose-sm max-w-none bg-slate-50 rounded-lg p-6">
-                      <div className="whitespace-pre-wrap text-foreground leading-relaxed font-serif">
+                      <div className="whitespace-pre-wrap text-foreground leading-relaxed">
                         {curriculum.curriculum_content}
                       </div>
                     </div>

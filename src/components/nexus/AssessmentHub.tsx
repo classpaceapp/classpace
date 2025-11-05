@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sparkles, Copy, ExternalLink, Edit2, Save, Trash2, Eye } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sparkles, Copy, ExternalLink, Edit2, Save, Trash2, Eye, ChevronDown } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 
@@ -31,11 +31,10 @@ const AssessmentHub: React.FC = () => {
   
   // Assessment state
   const [assessments, setAssessments] = useState<any[]>([]);
-  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
+  const [expandedAssessment, setExpandedAssessment] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [responses, setResponses] = useState<any[]>([]);
+  const [responses, setResponses] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
     if (user?.id) fetchAssessments();
@@ -159,32 +158,37 @@ const AssessmentHub: React.FC = () => {
     });
   };
 
-  const viewAssessment = async (assessment: any) => {
-    setSelectedAssessment(assessment);
-    setEditedContent(assessment.questions);
-    setIsEditing(false);
-    
-    // Fetch responses
-    const { data, error } = await supabase
-      .from('assessment_responses')
-      .select('*')
-      .eq('assessment_id', assessment.id)
-      .order('submitted_at', { ascending: false });
+  const toggleAssessment = async (assessment: any) => {
+    if (expandedAssessment === assessment.id) {
+      setExpandedAssessment(null);
+      setIsEditing(false);
+    } else {
+      setExpandedAssessment(assessment.id);
+      setEditedContent(assessment.questions);
+      setIsEditing(false);
+      
+      // Fetch responses if not already fetched
+      if (!responses[assessment.id]) {
+        const { data, error } = await supabase
+          .from('assessment_responses')
+          .select('*')
+          .eq('assessment_id', assessment.id)
+          .order('submitted_at', { ascending: false });
 
-    if (!error) {
-      setResponses(data || []);
+        if (!error) {
+          setResponses(prev => ({ ...prev, [assessment.id]: data || [] }));
+        }
+      }
     }
-
-    setViewDialogOpen(true);
   };
 
   const saveEdit = async () => {
-    if (!selectedAssessment) return;
+    if (!expandedAssessment) return;
 
     const { error } = await supabase
       .from('nexus_assessments')
       .update({ questions: editedContent })
-      .eq('id', selectedAssessment.id);
+      .eq('id', expandedAssessment);
 
     if (error) {
       toast({
@@ -202,7 +206,6 @@ const AssessmentHub: React.FC = () => {
 
     setIsEditing(false);
     fetchAssessments();
-    setSelectedAssessment({ ...selectedAssessment, questions: editedContent });
   };
 
   const deleteAssessment = async (id: string) => {
@@ -226,7 +229,7 @@ const AssessmentHub: React.FC = () => {
     });
 
     fetchAssessments();
-    setViewDialogOpen(false);
+    setExpandedAssessment(null);
   };
 
   const renderMathContent = (text: string) => {
@@ -247,21 +250,6 @@ const AssessmentHub: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card className="border-none shadow-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white p-6">
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-              <Sparkles className="h-6 w-6" />
-            </div>
-            Assessments
-          </CardTitle>
-          <CardDescription className="text-emerald-100 text-base">
-            AI assessment creation
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
       {/* Generator Card */}
       <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 shadow-2xl">
         <CardHeader className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white rounded-t-lg p-8">
@@ -405,12 +393,19 @@ const AssessmentHub: React.FC = () => {
             <CardTitle className="text-2xl">Your Assessments</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 gap-4">
+            <Accordion type="single" collapsible className="space-y-4" value={expandedAssessment || undefined} onValueChange={(value) => {
+              const assessment = assessments.find(a => a.id === value);
+              if (assessment) toggleAssessment(assessment);
+            }}>
               {assessments.map((assessment) => (
-                <Card key={assessment.id} className="border-2 border-purple-100 hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
+                <AccordionItem 
+                  key={assessment.id} 
+                  value={assessment.id}
+                  className="border-2 border-purple-100 rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center justify-between w-full pr-4">
+                      <div className="text-left">
                         <h3 className="font-bold text-lg">{assessment.title}</h3>
                         <p className="text-sm text-muted-foreground">
                           {assessment.assessment_type} • {assessment.num_questions} questions • {assessment.total_marks} marks
@@ -419,119 +414,94 @@ const AssessmentHub: React.FC = () => {
                           {assessment.curriculum} • Year {assessment.year_level}
                         </p>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => viewAssessment(assessment)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => copyPublicLink(assessment.public_link_code)}
-                        >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Copy Link
-                        </Button>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-6 pb-4">
+                    <div className="flex gap-2 mb-4">
+                      {isEditing && expandedAssessment === assessment.id ? (
+                        <>
+                          <Button size="sm" onClick={saveEdit}>
+                            <Save className="h-4 w-4 mr-1" />
+                            Save
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                            <Edit2 className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => copyPublicLink(assessment.public_link_code)}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Share
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => deleteAssessment(assessment.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    
+                    {isEditing && expandedAssessment === assessment.id ? (
+                      <Textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                        rows={25}
+                        className="font-mono text-sm"
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="prose prose-sm max-w-none bg-slate-50 rounded-lg p-6">
+                          <div className="whitespace-pre-wrap leading-relaxed">
+                            {renderMathContent(assessment.questions || '')}
+                          </div>
+                        </div>
+
+                        {responses[assessment.id] && responses[assessment.id].length > 0 && (
+                          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+                            <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4">
+                              <CardTitle className="text-lg">Student Responses ({responses[assessment.id].length})</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                              {responses[assessment.id].map((response) => (
+                                <div key={response.id} className="border-b pb-3 mb-3 last:border-0">
+                                  <p className="font-semibold">
+                                    {response.student_name || 'Anonymous Student'}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Submitted: {new Date(response.submitted_at).toLocaleString()}
+                                  </p>
+                                  {response.score && (
+                                    <p className="text-sm font-medium text-green-600">
+                                      Score: {response.score}/{assessment.total_marks}
+                                    </p>
+                                  )}
+                                </div>
+                              ))}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           </CardContent>
         </Card>
       )}
-
-      {/* View Assessment Dialog */}
-      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>{selectedAssessment?.title}</span>
-              <div className="flex gap-2">
-                {isEditing ? (
-                  <>
-                    <Button size="sm" onClick={saveEdit}>
-                      <Save className="h-4 w-4 mr-1" />
-                      Save
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                      <Edit2 className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => copyPublicLink(selectedAssessment?.public_link_code)}
-                    >
-                      <ExternalLink className="h-4 w-4 mr-1" />
-                      Share
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="destructive"
-                      onClick={() => deleteAssessment(selectedAssessment?.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </>
-                )}
-              </div>
-            </DialogTitle>
-          </DialogHeader>
-
-          {isEditing ? (
-            <Textarea
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-              rows={25}
-              className="font-mono text-sm"
-            />
-          ) : (
-            <div className="space-y-4">
-              <div className="whitespace-pre-wrap font-serif leading-relaxed">
-                {renderMathContent(selectedAssessment?.questions || '')}
-              </div>
-
-              {responses.length > 0 && (
-                <Card className="mt-6 border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
-                  <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-                    <CardTitle>Student Responses ({responses.length})</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    {responses.map((response) => (
-                      <div key={response.id} className="border-b pb-3 mb-3 last:border-0">
-                        <p className="font-semibold">
-                          {response.student_name || 'Anonymous Student'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Submitted: {new Date(response.submitted_at).toLocaleString()}
-                        </p>
-                        {response.score && (
-                          <p className="text-sm font-medium text-green-600">
-                            Score: {response.score}/{selectedAssessment?.total_marks}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

@@ -333,7 +333,7 @@ const LessonOrchestrator: React.FC = () => {
           </CardHeader>
           <CardContent className="p-8">
             <div className="prose prose-lg max-w-none bg-white rounded-xl p-8 shadow-inner">
-              <div className="whitespace-pre-wrap text-foreground leading-relaxed font-serif text-base">
+              <div className="whitespace-pre-wrap text-foreground leading-relaxed">
                 {lessonContent}
                 {isGenerating && (
                   <span className="inline-block w-2 h-5 bg-indigo-500 animate-pulse ml-1" />
@@ -396,7 +396,7 @@ const LessonOrchestrator: React.FC = () => {
                       </Button>
                     </div>
                     <div className="prose prose-sm max-w-none bg-slate-50 rounded-lg p-6">
-                      <div className="whitespace-pre-wrap text-foreground leading-relaxed font-serif">
+                      <div className="whitespace-pre-wrap text-foreground leading-relaxed">
                         {lesson.lesson_content}
                       </div>
                     </div>

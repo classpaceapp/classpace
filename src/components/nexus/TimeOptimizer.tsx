@@ -98,21 +98,6 @@ const TimeOptimizer: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card className="border-none shadow-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-white p-6">
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-              <Clock className="h-6 w-6" />
-            </div>
-            Time
-          </CardTitle>
-          <CardDescription className="text-amber-100 text-base">
-            Time optimization insights
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-xl transition-shadow">
