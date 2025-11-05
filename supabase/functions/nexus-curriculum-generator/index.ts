@@ -87,7 +87,7 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert curriculum designer. Create detailed, practical curriculum plans that are standards-aligned and ready for classroom implementation. Format responses with clear structure using headers and lists.' 
+            content: 'You are an expert curriculum designer. Create detailed, practical curriculum plans that are standards-aligned and ready for classroom implementation. Format responses using ONLY plain text with clear structure - NO markdown, NO asterisks, NO special formatting characters. Use simple line breaks and indentation for structure.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -101,7 +101,18 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
     }
 
     const aiData = await aiResponse.json();
-    const curriculum = aiData.choices[0]?.message?.content || '';
+    let curriculum = aiData.choices[0]?.message?.content || '';
+
+    // Aggressively clean the response
+    curriculum = curriculum
+      .replace(/\*\*/g, '')  // Remove bold markdown
+      .replace(/\*/g, '')    // Remove all asterisks
+      .replace(/#{1,6}\s/g, '') // Remove markdown headers
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove markdown links
+      .replace(/`{1,3}/g, '') // Remove code blocks
+      .replace(/_{2}/g, '')   // Remove underscores
+      .replace(/~/g, '')      // Remove strikethrough
+      .trim();
 
     return new Response(
       JSON.stringify({ curriculum }),
