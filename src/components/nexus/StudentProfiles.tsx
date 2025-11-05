@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Users, TrendingUp, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
@@ -145,6 +145,21 @@ const StudentProfiles: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <Card className="border-none shadow-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-600 text-white p-6">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+              <Users className="h-6 w-6" />
+            </div>
+            Students
+          </CardTitle>
+          <CardDescription className="text-violet-100 text-base">
+            Student profiles and insights
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
       {students.map(([podName, studentList]: [string, any]) => (
         <Card key={podName} className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-600 text-white rounded-t-lg p-6">

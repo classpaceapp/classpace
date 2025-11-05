@@ -69,6 +69,21 @@ const ProgressDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <Card className="border-none shadow-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white p-6">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+              <BarChart3 className="h-6 w-6" />
+            </div>
+            Progress
+          </CardTitle>
+          <CardDescription className="text-blue-100 text-base">
+            Real-time analytics
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;

@@ -247,6 +247,21 @@ const AssessmentHub: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <Card className="border-none shadow-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white p-6">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            Assessments
+          </CardTitle>
+          <CardDescription className="text-emerald-100 text-base">
+            AI assessment creation
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
       {/* Generator Card */}
       <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 shadow-2xl">
         <CardHeader className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white rounded-t-lg p-8">

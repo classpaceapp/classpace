@@ -317,7 +317,7 @@ const LessonOrchestrator: React.FC = () => {
                   Generated Lesson Plan
                 </CardTitle>
                 <CardDescription className="text-emerald-100 text-base">
-                  {subject} • Grade {gradeLevel} • {duration}
+                  {subject} • {curriculum} • Grade {gradeLevel} • {duration}
                 </CardDescription>
               </div>
               <Button

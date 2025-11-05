@@ -51,7 +51,7 @@ serve(async (req) => {
       .join('\n\n')
       .slice(0, 3000);
 
-    // Now use Lovable AI to generate comprehensive curriculum
+    // Now use Lovable AI to generate comprehensive curriculum with streaming
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
@@ -91,6 +91,7 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
           },
           { role: 'user', content: prompt }
         ],
+        stream: true,
       }),
     });
 
@@ -100,24 +101,73 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
       throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
-    const aiData = await aiResponse.json();
-    let curriculum = aiData.choices[0]?.message?.content || '';
+    // Create a ReadableStream to handle the streaming response
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = aiResponse.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
 
-    // Aggressively clean the response
-    curriculum = curriculum
-      .replace(/\*\*/g, '')  // Remove bold markdown
-      .replace(/\*/g, '')    // Remove all asterisks
-      .replace(/#{1,6}\s/g, '') // Remove markdown headers
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove markdown links
-      .replace(/`{1,3}/g, '') // Remove code blocks
-      .replace(/_{2}/g, '')   // Remove underscores
-      .replace(/~/g, '')      // Remove strikethrough
-      .trim();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-    return new Response(
-      JSON.stringify({ curriculum }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  let content = parsed.choices?.[0]?.delta?.content || '';
+                  
+                  // Aggressively clean the content as it streams
+                  content = content
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/#{1,6}\s/g, '')
+                    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+                    .replace(/`{1,3}/g, '')
+                    .replace(/_{2}/g, '')
+                    .replace(/~/g, '');
+
+                  if (content) {
+                    const sseData = `data: ${JSON.stringify({ content })}\n\n`;
+                    controller.enqueue(new TextEncoder().encode(sseData));
+                  }
+                } catch (e) {
+                  console.error('Parse error:', e);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Streaming error:', error);
+        } finally {
+          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
 
   } catch (error) {
     console.error('Curriculum generation error:', error);
