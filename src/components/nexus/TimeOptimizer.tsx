@@ -98,6 +98,26 @@ const TimeOptimizer: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header Card */}
+      <Card className="border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-2xl overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 via-teal-400/10 to-cyan-400/10"></div>
+        <CardContent className="p-8 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+              <Clock className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent mb-1">
+                Time Optimizer
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Track your teaching time and optimize your workflow
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="border-2 border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 hover:shadow-xl transition-shadow">

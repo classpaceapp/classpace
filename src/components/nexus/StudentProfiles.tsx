@@ -133,7 +133,30 @@ const StudentProfiles: React.FC = () => {
   };
 
   if (loading) return <Skeleton className="h-96" />;
-  if (students.length === 0) return (
+
+  return (
+    <div className="space-y-6">
+      {/* Header Card */}
+      <Card className="border-2 border-pink-200 bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50 shadow-2xl overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-400/10 via-rose-400/10 to-fuchsia-400/10"></div>
+        <CardContent className="p-8 relative z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 via-rose-500 to-fuchsia-600 flex items-center justify-center shadow-lg">
+              <Users className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-pink-600 via-rose-600 to-fuchsia-600 bg-clip-text text-transparent mb-1">
+                Student Profiles
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                View and analyze your students' learning journey and engagement
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+  {students.length === 0 ? (
     <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
       <CardContent className="p-12 text-center">
         <Users className="h-16 w-16 text-blue-500 mx-auto mb-4" />
@@ -141,10 +164,8 @@ const StudentProfiles: React.FC = () => {
         <p className="text-muted-foreground">Students will appear once they join your pods</p>
       </CardContent>
     </Card>
-  );
-
-  return (
-    <div className="space-y-6">
+  ) : (
+      <>
       {students.map(([podName, studentList]: [string, any]) => (
         <Card key={podName} className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-fuchsia-50 to-pink-50 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-600 text-white rounded-t-lg p-6">
@@ -183,6 +204,8 @@ const StudentProfiles: React.FC = () => {
           </CardContent>
         </Card>
       ))}
+      </>
+  )}
     </div>
   );
 };

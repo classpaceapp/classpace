@@ -474,21 +474,26 @@ const AssessmentHub: React.FC = () => {
                             <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4">
                               <CardTitle className="text-lg">Student Responses ({responses[assessment.id].length})</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 space-y-3">
                               {responses[assessment.id].map((response) => (
-                                <div key={response.id} className="border-b pb-3 mb-3 last:border-0">
-                                  <p className="font-semibold">
-                                    {response.student_name || 'Anonymous Student'}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    Submitted: {new Date(response.submitted_at).toLocaleString()}
-                                  </p>
-                                  {response.score && (
-                                    <p className="text-sm font-medium text-green-600">
-                                      Score: {response.score}/{assessment.total_marks}
-                                    </p>
-                                  )}
-                                </div>
+                                <Card key={response.id} className="border-indigo-200 bg-white shadow-sm">
+                                  <CardContent className="p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                      <div>
+                                        <p className="font-semibold text-lg">{response.student_name || 'Anonymous'}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                          Submitted: {new Date(response.submitted_at).toLocaleString()}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                      <p className="text-sm font-semibold text-slate-700 mb-2">Student's Answer:</p>
+                                      <p className="text-sm whitespace-pre-wrap text-slate-600">
+                                        {response.answers?.response || 'No response provided'}
+                                      </p>
+                                    </div>
+                                  </CardContent>
+                                </Card>
                               ))}
                             </CardContent>
                           </Card>
