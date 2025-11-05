@@ -46,6 +46,7 @@ import ExcalidrawWhiteboard from "./pages/ExcalidrawWhiteboard";
 import Investors from "./pages/Investors";
 import More from "./pages/More";
 import TeacherNexus from "./pages/TeacherNexus";
+import PublicAssessment from "./pages/PublicAssessment";
 
 const queryClient = new QueryClient();
 
@@ -233,6 +234,7 @@ const App = () => (
                 <More />
               </ProtectedRoute>
             } />
+            <Route path="/assessment/:code" element={<PublicAssessment />} />
             <Route 
               path="/quiz/:quizId" 
               element={

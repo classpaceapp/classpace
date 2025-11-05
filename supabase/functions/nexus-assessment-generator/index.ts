@@ -17,10 +17,11 @@ serve(async (req) => {
       gradeLevel, 
       topic, 
       numQuestions,
+      totalMarks,
       curriculum 
     } = await req.json();
     
-    if (!assessmentType || !subject || !gradeLevel || !topic || !numQuestions) {
+    if (!assessmentType || !subject || !gradeLevel || !topic || !numQuestions || !totalMarks || !curriculum) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -32,9 +33,13 @@ serve(async (req) => {
       throw new Error('TAVILY_API_KEY is not configured');
     }
 
-    // Research the topic using Tavily
-    const searchQuery = `${subject} ${topic} ${gradeLevel} ${assessmentType} questions teaching assessment`;
+    console.log('Starting assessment generation with Tavily research...');
+
+    // Perform detailed web search using Tavily for curriculum-specific content
+    const searchQuery = `${curriculum} ${gradeLevel} ${subject} ${topic} ${assessmentType} academic questions exam problems curriculum standards teaching materials`;
     
+    console.log('Search query:', searchQuery);
+
     const tavilyResponse = await fetch('https://api.tavily.com/search', {
       method: 'POST',
       headers: {
@@ -44,49 +49,81 @@ serve(async (req) => {
         api_key: TAVILY_API_KEY,
         query: searchQuery,
         search_depth: 'advanced',
-        max_results: 5,
+        max_results: 8,
+        include_answer: true,
+        include_raw_content: false,
       }),
     });
 
     if (!tavilyResponse.ok) {
+      console.error('Tavily API error:', tavilyResponse.status);
       throw new Error(`Tavily API error: ${tavilyResponse.status}`);
     }
 
     const tavilyData = await tavilyResponse.json();
+    console.log('Tavily research completed, results:', tavilyData.results?.length || 0);
+    
     const researchContext = tavilyData.results
       ?.map((r: any) => r.content)
       .join('\n\n')
-      .slice(0, 2500);
+      .slice(0, 4000);
 
-    // Generate assessment with Lovable AI
+    // Generate assessment with Lovable AI using curriculum-specific research
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const prompt = `Based on this educational context:
+    const prompt = `Using this curriculum-specific educational research:
 
 ${researchContext}
 
-Create a comprehensive ${assessmentType} assessment with ${numQuestions} questions for:
+Create a comprehensive, academically rigorous ${assessmentType} for ${curriculum} curriculum:
+
+ASSESSMENT DETAILS:
 - Subject: ${subject}
 - Topic: ${topic}
 - Grade Level: ${gradeLevel}
-${curriculum ? `- Curriculum: ${curriculum}` : ''}
+- Number of Questions: ${numQuestions}
+- Total Marks: ${totalMarks}
+- Assessment Type: ${assessmentType}
 
-Requirements:
-1. Mix of difficulty levels (easy, medium, hard)
-2. Variety of question types (multiple choice, short answer, problem-solving)
-3. Clear, age-appropriate language
-4. Include answer key with explanations
-5. Align with curriculum standards
+CRITICAL REQUIREMENTS:
+1. ALL questions must be directly related to ${topic} in ${subject}
+2. Questions must align with ${curriculum} curriculum standards for grade ${gradeLevel}
+3. Distribute ${totalMarks} marks appropriately across ${numQuestions} questions
+4. Include varied difficulty levels (30% easy, 50% medium, 20% challenging)
+5. Mix question types: multiple choice, short answer, problem-solving, essay
+6. For mathematical content: Use LaTeX notation wrapped in $ symbols (inline: $x^2$, display: $$x^2$$)
+7. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
+8. Each question must have clear mark allocation
+9. Include detailed marking rubric/answer key at the end
 
-Format mathematical expressions clearly using proper notation.
-Structure the output with:
-- Assessment title
-- Instructions for students
-- Questions (numbered)
-- Answer key at the end`;
+FORMAT:
+Assessment Title: [Clear, specific title]
+
+Instructions for Students:
+- Time allocation
+- Total marks
+- Exam rules
+
+QUESTIONS:
+[Number each question clearly with mark allocation]
+
+Question 1 (X marks):
+[Question text with proper mathematical formatting using LaTeX where needed]
+
+Question 2 (X marks):
+[Question text]
+
+... continue for all ${numQuestions} questions
+
+MARKING RUBRIC & ANSWER KEY:
+[Detailed answers and marking criteria for each question]
+
+IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #, etc.). Use proper capitalization and punctuation for emphasis.`;
+
+    console.log('Sending to AI for generation...');
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -99,7 +136,7 @@ Structure the output with:
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert educational assessment creator. Generate comprehensive, curriculum-aligned assessments with clear questions, varied difficulty, and detailed answer keys. Ensure all mathematical content is properly formatted. Avoid using markdown symbols like asterisks for emphasis - use plain text with proper capitalization and punctuation instead.' 
+            content: 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. Use ONLY plain text and LaTeX - absolutely NO markdown symbols (*, **, #, _, `, etc.). All emphasis should be through proper capitalization and punctuation only.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -115,15 +152,25 @@ Structure the output with:
     const aiData = await aiResponse.json();
     let assessment = aiData.choices[0]?.message?.content || '';
 
-    // Clean up the response - remove markdown formatting and unnecessary symbols
+    console.log('Assessment generated, cleaning response...');
+
+    // Aggressive cleaning - remove ALL markdown and unnecessary formatting characters
     assessment = assessment
-      .replace(/\*\*/g, '') // Remove bold markers
-      .replace(/\*/g, '') // Remove emphasis markers
+      .replace(/\*\*\*/g, '') // Remove triple asterisks
+      .replace(/\*\*/g, '')   // Remove bold markers
+      .replace(/\*/g, '')     // Remove all remaining asterisks
       .replace(/#{1,6}\s/g, '') // Remove markdown headers
-      .replace(/`{1,3}/g, '') // Remove code markers
-      .replace(/_{2}/g, '') // Remove underline markers
-      .replace(/_/g, '') // Remove emphasis underscores
+      .replace(/`{3}[\s\S]*?`{3}/g, '') // Remove code blocks
+      .replace(/`{1,2}/g, '') // Remove inline code markers
+      .replace(/_{2,}/g, '')  // Remove underline markers
+      .replace(/_([^_\s])_/g, '$1') // Remove emphasis underscores
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove markdown links
+      .replace(/^\s*[-*+]\s/gm, '') // Remove list markers
+      .replace(/^\s*\d+\.\s/gm, (match) => match.replace(/\s+$/, ' ')) // Clean numbered lists
+      .replace(/\n{3,}/g, '\n\n') // Normalize whitespace
       .trim();
+
+    console.log('Assessment cleaned and ready');
 
     return new Response(
       JSON.stringify({ assessment }),

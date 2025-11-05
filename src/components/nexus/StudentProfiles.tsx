@@ -43,18 +43,10 @@ const StudentProfiles: React.FC = () => {
 
       console.log('Found pods:', pods);
 
-      // Get members from all pods
+      // Get all unique user IDs from pod members
       const { data: members, error: membersError } = await supabase
         .from('pod_members')
-        .select(`
-          user_id,
-          pod_id,
-          profiles!inner (
-            first_name,
-            last_name,
-            avatar_url
-          )
-        `)
+        .select('user_id, pod_id')
         .in('pod_id', podIds);
 
       if (membersError) {
@@ -71,10 +63,27 @@ const StudentProfiles: React.FC = () => {
         return;
       }
 
+      // Get unique user IDs
+      const userIds = [...new Set(members.map(m => m.user_id))];
+      console.log('Unique user IDs:', userIds);
+
+      // Fetch profiles separately
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Profiles fetch error:', profilesError);
+      }
+
+      console.log('Fetched profiles:', profiles);
+
       // Build student data with metrics
       const studentData = await Promise.all(
         members.map(async (m: any) => {
           const pod = pods?.find(p => p.id === m.pod_id);
+          const profile = profiles?.find(p => p.id === m.user_id);
           
           // Get message count for this student in this pod
           const { count: messageCount } = await supabase
@@ -88,8 +97,6 @@ const StudentProfiles: React.FC = () => {
             .from('quiz_responses')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', m.user_id);
-
-          const profile = m.profiles;
           
           return {
             id: m.user_id,

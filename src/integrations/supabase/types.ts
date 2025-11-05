@@ -46,6 +46,44 @@ export type Database = {
           },
         ]
       }
+      assessment_responses: {
+        Row: {
+          answers: Json
+          assessment_id: string
+          id: string
+          score: number | null
+          student_name: string | null
+          submitted_at: string
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json
+          assessment_id: string
+          id?: string
+          score?: number | null
+          student_name?: string | null
+          submitted_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json
+          assessment_id?: string
+          id?: string
+          score?: number | null
+          student_name?: string | null
+          submitted_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_responses_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "nexus_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flashcard_cards: {
         Row: {
           card_order: number
@@ -365,6 +403,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      nexus_assessments: {
+        Row: {
+          assessment_type: string
+          created_at: string
+          curriculum: string
+          id: string
+          num_questions: number
+          public_link_code: string
+          questions: Json
+          subject: string
+          teacher_id: string
+          title: string
+          total_marks: number
+          updated_at: string
+          year_level: string
+        }
+        Insert: {
+          assessment_type: string
+          created_at?: string
+          curriculum: string
+          id?: string
+          num_questions: number
+          public_link_code?: string
+          questions?: Json
+          subject: string
+          teacher_id: string
+          title: string
+          total_marks: number
+          updated_at?: string
+          year_level: string
+        }
+        Update: {
+          assessment_type?: string
+          created_at?: string
+          curriculum?: string
+          id?: string
+          num_questions?: number
+          public_link_code?: string
+          questions?: Json
+          subject?: string
+          teacher_id?: string
+          title?: string
+          total_marks?: number
+          updated_at?: string
+          year_level?: string
+        }
+        Relationships: []
       }
       personal_flashcard_cards: {
         Row: {
