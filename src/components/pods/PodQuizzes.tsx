@@ -267,12 +267,12 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Quiz Type</Label>
+                <Label>Quiz Type</Label>
                   <Select value={formData.quizType} onValueChange={(value: 'mcq' | 'essay') => setFormData({ ...formData, quizType: value })}>
                     <SelectTrigger className="border-indigo-500/30">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent side="bottom">
                       <SelectItem value="mcq">Multiple Choice (MCQ)</SelectItem>
                       <SelectItem value="essay">Essay Type</SelectItem>
                     </SelectContent>

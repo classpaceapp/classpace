@@ -235,7 +235,7 @@ const CurriculumArchitect: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select grade" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="1">Year 1 (Primary)</SelectItem>
                   <SelectItem value="2">Year 2 (Primary)</SelectItem>
                   <SelectItem value="3">Year 3 (Primary)</SelectItem>
@@ -261,7 +261,7 @@ const CurriculumArchitect: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select duration" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="semester">One Semester</SelectItem>
                   <SelectItem value="year">Full Year</SelectItem>
                   <SelectItem value="quarter">Quarter</SelectItem>

@@ -241,7 +241,7 @@ const LessonOrchestrator: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select curriculum" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="IB">International Baccalaureate (IB)</SelectItem>
                   <SelectItem value="IGCSE">IGCSE</SelectItem>
                   <SelectItem value="CBSE">CBSE</SelectItem>
@@ -251,6 +251,7 @@ const LessonOrchestrator: React.FC = () => {
                   <SelectItem value="Common Core">Common Core</SelectItem>
                   <SelectItem value="Australian">Australian Curriculum</SelectItem>
                   <SelectItem value="UK National">UK National Curriculum</SelectItem>
+                  <SelectItem value="Higher Education">Higher Education</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -260,7 +261,7 @@ const LessonOrchestrator: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select grade" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="K">Kindergarten</SelectItem>
                   <SelectItem value="1">Year 1 (Primary)</SelectItem>
                   <SelectItem value="2">Year 2 (Primary)</SelectItem>
@@ -286,7 +287,7 @@ const LessonOrchestrator: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select duration" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="30 minutes">30 minutes</SelectItem>
                   <SelectItem value="45 minutes">45 minutes</SelectItem>
                   <SelectItem value="60 minutes">60 minutes</SelectItem>

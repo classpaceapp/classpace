@@ -286,7 +286,7 @@ const AssessmentHub: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="Quiz">Quiz</SelectItem>
                   <SelectItem value="Test">Test</SelectItem>
                   <SelectItem value="Exam">Exam</SelectItem>
@@ -311,7 +311,7 @@ const AssessmentHub: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select curriculum" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="IB">International Baccalaureate (IB)</SelectItem>
                   <SelectItem value="IGCSE">IGCSE</SelectItem>
                   <SelectItem value="CBSE">CBSE</SelectItem>
@@ -321,6 +321,7 @@ const AssessmentHub: React.FC = () => {
                   <SelectItem value="Common Core">Common Core</SelectItem>
                   <SelectItem value="Australian">Australian Curriculum</SelectItem>
                   <SelectItem value="UK National">UK National Curriculum</SelectItem>
+                  <SelectItem value="Higher Education">Higher Education</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -331,7 +332,7 @@ const AssessmentHub: React.FC = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent side="bottom">
                   <SelectItem value="1">Year 1 (Primary)</SelectItem>
                   <SelectItem value="2">Year 2 (Primary)</SelectItem>
                   <SelectItem value="3">Year 3 (Primary)</SelectItem>
