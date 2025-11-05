@@ -87,7 +87,7 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert curriculum designer. Create detailed, practical curriculum plans that are standards-aligned and ready for classroom implementation. Format responses with clear structure using headers and lists.' 
+            content: 'You are an expert curriculum designer. Create detailed, practical curriculum plans that are standards-aligned and ready for classroom implementation. Use ONLY plain text with proper capitalization and punctuation for emphasis - absolutely NO markdown symbols (*, **, #, _, `, etc.).' 
           },
           { role: 'user', content: prompt }
         ],
@@ -101,7 +101,27 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
     }
 
     const aiData = await aiResponse.json();
-    const curriculum = aiData.choices[0]?.message?.content || '';
+    let curriculum = aiData.choices[0]?.message?.content || '';
+
+    console.log('Curriculum generated, cleaning response...');
+
+    // Aggressive cleaning - remove ALL markdown and unnecessary formatting characters
+    curriculum = curriculum
+      .replace(/\*\*\*/g, '') // Remove triple asterisks
+      .replace(/\*\*/g, '')   // Remove bold markers
+      .replace(/\*/g, '')     // Remove all remaining asterisks
+      .replace(/#{1,6}\s/g, '') // Remove markdown headers
+      .replace(/`{3}[\s\S]*?`{3}/g, '') // Remove code blocks
+      .replace(/`{1,2}/g, '') // Remove inline code markers
+      .replace(/_{2,}/g, '')  // Remove underline markers
+      .replace(/_([^_\s])_/g, '$1') // Remove emphasis underscores
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove markdown links
+      .replace(/^\s*[-*+]\s/gm, '') // Remove list markers
+      .replace(/^\s*\d+\.\s/gm, (match) => match.replace(/\s+$/, ' ')) // Clean numbered lists
+      .replace(/\n{3,}/g, '\n\n') // Normalize whitespace
+      .trim();
+
+    console.log('Curriculum cleaned and ready');
 
     return new Response(
       JSON.stringify({ curriculum }),

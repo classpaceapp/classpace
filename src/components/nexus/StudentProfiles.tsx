@@ -70,7 +70,7 @@ const StudentProfiles: React.FC = () => {
       // Fetch profiles separately
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, avatar_url')
+        .select('id, first_name, last_name, avatar_url, email')
         .in('id', userIds);
 
       if (profilesError) {
@@ -98,11 +98,13 @@ const StudentProfiles: React.FC = () => {
             .select('*', { count: 'exact', head: true })
             .eq('user_id', m.user_id);
           
+          const fullName = profile?.first_name && profile?.last_name 
+            ? `${profile.first_name} ${profile.last_name}`.trim()
+            : profile?.first_name || profile?.last_name;
+          
           return {
             id: m.user_id,
-            name: profile?.first_name && profile?.last_name 
-              ? `${profile.first_name} ${profile.last_name}`.trim()
-              : profile?.first_name || profile?.last_name || 'Student',
+            name: fullName || profile?.email || 'Student',
             avatar: profile?.avatar_url,
             podName: pod?.title || 'Unknown Pod',
             messageCount: messageCount || 0,
