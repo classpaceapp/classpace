@@ -170,6 +170,25 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
       .replace(/\n{3,}/g, '\n\n') // Normalize whitespace
       .trim();
 
+    // CRITICAL: Strip the answer key section to prevent answer leak in public assessments
+    // Find and remove everything after "MARKING RUBRIC", "ANSWER KEY", or similar headers
+    const answerSectionPatterns = [
+      /MARKING RUBRIC[\s\S]*/i,
+      /ANSWER KEY[\s\S]*/i,
+      /ANSWERS[\s\S]*/i,
+      /MARKING SCHEME[\s\S]*/i,
+      /MARK SCHEME[\s\S]*/i,
+      /SOLUTIONS[\s\S]*/i
+    ];
+
+    for (const pattern of answerSectionPatterns) {
+      if (pattern.test(assessment)) {
+        assessment = assessment.replace(pattern, '').trim();
+        console.log('Removed answer section for security');
+        break;
+      }
+    }
+
     console.log('Assessment cleaned and ready');
 
     return new Response(
@@ -179,8 +198,27 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
 
   } catch (error) {
     console.error('Assessment generation error:', error);
+    
+    // Provide user-friendly error messages
+    let userMessage = 'Failed to generate assessment';
+    let errorDetails = error instanceof Error ? error.message : 'Unknown error';
+    
+    if (errorDetails.includes('Tavily') || errorDetails.includes('search')) {
+      userMessage = 'INPUT_TOO_LONG';
+      errorDetails = 'The topic or parameters provided are too detailed. Please simplify your input and try again with a shorter, more focused topic description (under 100 words).';
+    } else if (errorDetails.includes('429') || errorDetails.includes('rate limit')) {
+      userMessage = 'RATE_LIMIT';
+      errorDetails = 'Too many requests. Please wait a moment before generating another assessment.';
+    } else if (errorDetails.includes('LOVABLE_API_KEY') || errorDetails.includes('TAVILY_API_KEY')) {
+      userMessage = 'CONFIGURATION_ERROR';
+      errorDetails = 'System configuration error. Please contact support.';
+    }
+    
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ 
+        error: userMessage,
+        details: errorDetails
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

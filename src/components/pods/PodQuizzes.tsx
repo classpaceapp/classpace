@@ -130,9 +130,22 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
       fetchQuizzes();
     } catch (error: any) {
       console.error('Quiz generation error:', error);
+      
+      // Graceful error handling
+      let errorTitle = "Generation Failed";
+      let errorDescription = "Failed to generate quiz. Please try again.";
+      
+      if (error?.message?.includes('INPUT_TOO_LONG') || error?.message?.includes('too long')) {
+        errorTitle = "Input Too Detailed";
+        errorDescription = "Please simplify your topic/subtopic. Keep it under 100 words.";
+      } else if (error?.message?.includes('RATE_LIMIT') || error?.message?.includes('429')) {
+        errorTitle = "Please Wait";
+        errorDescription = "Too many requests. Please wait before generating another quiz.";
+      }
+      
       toast({ 
-        title: 'Failed to generate quiz', 
-        description: error.message || 'Please try again',
+        title: errorTitle, 
+        description: errorDescription,
         variant: 'destructive' 
       });
     } finally {
@@ -204,7 +217,7 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
                     <Label htmlFor="curriculum">Curriculum</Label>
                     <Input
                       id="curriculum"
-                      placeholder="e.g., IB, AP, A-Level"
+                      placeholder="e.g., IB, AP, A-Level, CBSE, ICSE"
                       value={formData.curriculum}
                       onChange={(e) => setFormData({ ...formData, curriculum: e.target.value })}
                       className="border-indigo-500/30"
@@ -214,7 +227,7 @@ export const PodQuizzes: React.FC<{ podId: string; isTeacher: boolean }> = ({ po
                     <Label htmlFor="yearLevel">Year Level</Label>
                     <Input
                       id="yearLevel"
-                      placeholder="e.g., Year 12, Grade 11"
+                      placeholder="e.g., Year 10, Grade 11, Undergraduate"
                       value={formData.yearLevel}
                       onChange={(e) => setFormData({ ...formData, yearLevel: e.target.value })}
                       className="border-indigo-500/30"

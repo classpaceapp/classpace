@@ -106,7 +106,19 @@ export const PersonalNotes = () => {
       }
     } catch (error: any) {
       console.error("Error generating notes:", error);
-      toast.error(error.message || "Failed to generate notes");
+      
+      // Graceful error handling
+      let errorMessage = "Failed to generate notes";
+      
+      if (error?.message?.includes('INPUT_TOO_LONG') || error?.message?.includes('too long')) {
+        errorMessage = "Topic too detailed. Please simplify to under 100 words.";
+      } else if (error?.message?.includes('RATE_LIMIT') || error?.message?.includes('429')) {
+        errorMessage = "Too many requests. Please wait before generating more notes.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setGenerating(false);
     }
@@ -232,6 +244,7 @@ export const PersonalNotes = () => {
                   You've created 1 note set on the free plan. Upgrade to unlock unlimited note generation and advanced features!
                 </p>
                 <Button
+                  onClick={() => window.location.href = "/my-plan"}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
                 >
                   Upgrade Now
@@ -264,7 +277,7 @@ export const PersonalNotes = () => {
                 <Label htmlFor="curriculum">Curriculum *</Label>
                 <Input
                   id="curriculum"
-                  placeholder="e.g., IGCSE, IB, A-Level"
+                  placeholder="e.g., IGCSE, IB, A-Level, CBSE, ICSE"
                   value={formData.curriculum}
                   onChange={(e) => setFormData({ ...formData, curriculum: e.target.value })}
                   className="bg-background/50"

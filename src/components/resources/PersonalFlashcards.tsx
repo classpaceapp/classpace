@@ -118,7 +118,19 @@ export const PersonalFlashcards = () => {
       }
     } catch (error: any) {
       console.error("Error generating flashcards:", error);
-      toast.error(error.message || "Failed to generate flashcards");
+      
+      // Graceful error handling
+      let errorMessage = "Failed to generate flashcards";
+      
+      if (error?.message?.includes('INPUT_TOO_LONG') || error?.message?.includes('too long')) {
+        errorMessage = "Topic too detailed. Please simplify to under 100 words.";
+      } else if (error?.message?.includes('RATE_LIMIT') || error?.message?.includes('429')) {
+        errorMessage = "Too many requests. Please wait before generating more.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setGenerating(false);
     }
@@ -244,6 +256,7 @@ export const PersonalFlashcards = () => {
                   You've created 1 flashcard set on the free plan. Upgrade to unlock unlimited flashcard generation and advanced features!
                 </p>
                 <Button
+                  onClick={() => window.location.href = "/my-plan"}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
                 >
                   Upgrade Now
@@ -276,7 +289,7 @@ export const PersonalFlashcards = () => {
                 <Label htmlFor="curriculum">Curriculum *</Label>
                 <Input
                   id="curriculum"
-                  placeholder="e.g., IGCSE, IB, A-Level"
+                  placeholder="e.g., IGCSE, IB, A-Level, CBSE, ICSE"
                   value={formData.curriculum}
                   onChange={(e) => setFormData({ ...formData, curriculum: e.target.value })}
                   className="bg-background/50"

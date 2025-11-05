@@ -137,11 +137,26 @@ const AssessmentHub: React.FC = () => {
       setCurriculum('');
       setYearLevel('');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Generation error:', error);
+      
+      // Graceful error handling with helpful messages
+      let errorTitle = "Generation Failed";
+      let errorDescription = "Failed to generate assessment. Please try again.";
+      
+      if (error?.message?.includes('INPUT_TOO_LONG') || error?.error === 'INPUT_TOO_LONG') {
+        errorTitle = "Topic Too Detailed";
+        errorDescription = "Please simplify your topic to under 100 words. Keep it focused and concise.";
+      } else if (error?.message?.includes('RATE_LIMIT') || error?.error === 'RATE_LIMIT') {
+        errorTitle = "Please Wait";
+        errorDescription = "Too many requests. Please wait a moment before generating another assessment.";
+      } else if (error?.details) {
+        errorDescription = error.details;
+      }
+      
       toast({
-        title: "Generation Failed",
-        description: error instanceof Error ? error.message : "Failed to generate assessment",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive"
       });
     } finally {
@@ -299,6 +314,8 @@ const AssessmentHub: React.FC = () => {
                 <SelectContent>
                   <SelectItem value="IB">International Baccalaureate (IB)</SelectItem>
                   <SelectItem value="IGCSE">IGCSE</SelectItem>
+                  <SelectItem value="CBSE">CBSE</SelectItem>
+                  <SelectItem value="ICSE">ICSE</SelectItem>
                   <SelectItem value="A-Level">A-Level</SelectItem>
                   <SelectItem value="AP">Advanced Placement (AP)</SelectItem>
                   <SelectItem value="Common Core">Common Core</SelectItem>
@@ -315,9 +332,21 @@ const AssessmentHub: React.FC = () => {
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {['7', '8', '9', '10', '11', '12'].map(year => (
-                    <SelectItem key={year} value={year}>Year {year}</SelectItem>
-                  ))}
+                  <SelectItem value="1">Year 1 (Primary)</SelectItem>
+                  <SelectItem value="2">Year 2 (Primary)</SelectItem>
+                  <SelectItem value="3">Year 3 (Primary)</SelectItem>
+                  <SelectItem value="4">Year 4 (Primary)</SelectItem>
+                  <SelectItem value="5">Year 5 (Primary)</SelectItem>
+                  <SelectItem value="6">Year 6</SelectItem>
+                  <SelectItem value="7">Year 7</SelectItem>
+                  <SelectItem value="8">Year 8</SelectItem>
+                  <SelectItem value="9">Year 9</SelectItem>
+                  <SelectItem value="10">Year 10</SelectItem>
+                  <SelectItem value="11">Year 11</SelectItem>
+                  <SelectItem value="12">Year 12</SelectItem>
+                  <SelectItem value="Undergraduate">Undergraduate</SelectItem>
+                  <SelectItem value="Graduate">Graduate/Master's</SelectItem>
+                  <SelectItem value="PhD">PhD/Doctorate</SelectItem>
                 </SelectContent>
               </Select>
             </div>
