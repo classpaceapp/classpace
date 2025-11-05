@@ -73,8 +73,7 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
             content: prompt
           }
         ],
-        temperature: 0.3,
-        max_tokens: 2000
+        max_completion_tokens: 2000
       }),
     });
 
