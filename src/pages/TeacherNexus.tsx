@@ -73,21 +73,6 @@ const TeacherNexus: React.FC = () => {
             })}
           </TabsList>
 
-          {/* Tab Descriptions */}
-          <Card className="border-violet-200 bg-gradient-to-r from-violet-50 to-purple-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-violet-700">
-                {React.createElement(tabs.find(t => t.id === activeTab)?.icon || BookOpen, { 
-                  className: "h-5 w-5" 
-                })}
-                {tabs.find(t => t.id === activeTab)?.label}
-              </CardTitle>
-              <CardDescription className="text-violet-600">
-                {tabs.find(t => t.id === activeTab)?.description}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
           {/* Tab Contents */}
           <TabsContent value="curriculum" className="space-y-4">
             <CurriculumArchitect />
