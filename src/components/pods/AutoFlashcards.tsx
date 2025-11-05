@@ -25,7 +25,7 @@ interface AutoFlashcardsProps {
 }
 
 export const AutoFlashcards = ({ podId }: AutoFlashcardsProps) => {
-  const { user, profile } = useAuth();
+  const { user, profile, subscription } = useAuth();
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -42,7 +42,8 @@ export const AutoFlashcards = ({ podId }: AutoFlashcardsProps) => {
   });
 
   const isTeacher = profile?.role === "teacher";
-  const limit = isTeacher ? 1 : 6;
+  const isPremium = subscription?.tier === "teacher_premium" || subscription?.tier === "student_premium";
+  const limit = isPremium ? 999 : (isTeacher ? 1 : 2);
 
   useEffect(() => {
     fetchFlashcards();
@@ -204,6 +205,7 @@ export const AutoFlashcards = ({ podId }: AutoFlashcardsProps) => {
                     : "You've reached your limit of 6 flashcard sets. Upgrade to create unlimited flashcards and unlock premium features!"}
                 </p>
                 <Button
+                  onClick={() => window.location.href = "/my-plan"}
                   className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
                 >
                   Upgrade Now

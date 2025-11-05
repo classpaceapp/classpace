@@ -40,15 +40,24 @@ serve(async (req) => {
     
     logStep("User authenticated", { userId: user.id });
 
-    // Get user's profile to check role
+    // Get user's profile and subscription status
     const { data: profile } = await supabaseClient
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
 
+    const { data: subscription } = await supabaseClient
+      .from("subscriptions")
+      .select("tier")
+      .eq("user_id", user.id)
+      .single();
+
     const isTeacher = profile?.role === "teacher";
-    const limit = isTeacher ? 1 : 6;
+    const isPremium = subscription?.tier === "teacher_premium" || subscription?.tier === "student_premium";
+    const limit = isPremium ? 999 : (isTeacher ? 1 : 2);
+
+    logStep("User limits", { isTeacher, isPremium, tier: subscription?.tier, limit });
 
     // Check existing flashcard count for this user in this pod
     const { data: existingFlashcards, error: countError } = await supabaseClient
@@ -63,7 +72,7 @@ serve(async (req) => {
     }
 
     const currentCount = existingFlashcards?.length || 0;
-    logStep("Current flashcard count", { currentCount, limit, isTeacher });
+    logStep("Current flashcard count", { currentCount, limit, isTeacher, isPremium });
 
     if (currentCount >= limit) {
       logStep("User reached limit");
@@ -73,8 +82,8 @@ serve(async (req) => {
           limit,
           isTeacher,
           message: isTeacher 
-            ? "You've reached your free plan limit of 1 flashcard set. Upgrade to create more!"
-            : "You've reached your limit of 6 flashcard sets. Upgrade to create more!"
+            ? "You've reached your free plan limit of 1 flashcard set. Upgrade to Teach+ to create unlimited flashcards!"
+            : "You've reached your limit of 2 flashcard sets. Upgrade to create unlimited flashcards!"
         }),
         { 
           status: 403, 
