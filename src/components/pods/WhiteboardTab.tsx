@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, ExternalLink, Trash2, Calendar, Palette } from 'lucide-react';
+import { Plus, ExternalLink, Trash2, Calendar, Palette, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Whiteboard {
@@ -223,44 +223,18 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
               </CardDescription>
             </div>
           </div>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 font-semibold shadow-md">
-                <Plus className="h-4 w-4 mr-2" />
-                New Whiteboard
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create New Whiteboard</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Whiteboard Title</Label>
-                  <Input
-                    id="title"
-                    value={newWhiteboardTitle}
-                    onChange={(e) => setNewWhiteboardTitle(e.target.value)}
-                    placeholder="e.g., Math Problem Solving Session"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !creating) {
-                        createWhiteboard();
-                      }
-                    }}
-                  />
-                </div>
+          <div className="relative">
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm border-2 border-white/40 rounded-xl flex items-center justify-center pointer-events-none z-10">
+              <div className="text-center">
+                <Sparkles className="h-6 w-6 text-white mx-auto mb-2 animate-pulse" />
+                <p className="text-white font-bold text-sm">Coming Soon</p>
               </div>
-              <DialogFooter>
-                <Button
-                  onClick={createWhiteboard}
-                  disabled={creating || !newWhiteboardTitle.trim()}
-                  className="w-full"
-                >
-                  {creating ? 'Creating...' : 'Create & Open'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            </div>
+            <Button disabled className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-semibold shadow-md opacity-50">
+              <Plus className="h-4 w-4 mr-2" />
+              New Whiteboard
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-6">

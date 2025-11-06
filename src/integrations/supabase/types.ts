@@ -1374,6 +1374,57 @@ export type Database = {
         }
         Relationships: []
       }
+      teaching_resources: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          download_count: number | null
+          external_link: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          resource_type: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          download_count?: number | null
+          external_link?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          resource_type: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          download_count?: number | null
+          external_link?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          resource_type?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       whiteboards: {
         Row: {
           created_at: string

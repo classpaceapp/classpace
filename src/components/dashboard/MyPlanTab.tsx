@@ -114,6 +114,13 @@ export const MyPlanTab: React.FC = () => {
     : isPremium
       ? [
           'Unlimited Pods',
+          'Nexus AI Command Center (full access)',
+          'AI Curriculum Architect',
+          'AI Lesson Orchestrator',
+          'AI Assessment Hub with auto-grading',
+          'Progress Analytics Dashboard',
+          'Global Resource Library',
+          'Student Profile Analytics',
           'Phoenix AI tutor access',
           'Aurora Application Builder',
           'Aurora Role Search',

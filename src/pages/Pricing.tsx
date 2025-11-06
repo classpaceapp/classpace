@@ -35,11 +35,14 @@ const Pricing = () => {
       icon: Zap,
       features: [
         "Unlimited Pods",
+        "Nexus AI Command Center",
+        "AI Curriculum Architect",
+        "AI Lesson Orchestrator", 
+        "AI Assessment Hub",
+        "Progress Analytics Dashboard",
+        "Global Resource Library",
         "Phoenix AI tutor access",
         "Aurora Careers Toolkit",
-        "AI Application Builder",
-        "AI Role Search",
-        "AI Interview Prep",
         "All Free features"
       ],
       buttonText: "Upgrade Now",
@@ -100,7 +103,7 @@ const Pricing = () => {
     },
     {
       question: "What's included in the Teach+ subscription?",
-      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), full Nexus AI teaching command center (AI curriculum architect, lesson orchestrator, assessment hub, progress dashboard, time optimizer, global resource library, student profiles), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
     },
     {
       question: "Can I cancel my subscription anytime?",

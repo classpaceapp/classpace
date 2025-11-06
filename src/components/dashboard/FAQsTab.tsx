@@ -8,15 +8,19 @@ export const FAQsTab: React.FC = () => {
   const faqs = [
     {
       question: "What's the difference between Learn+ and Teach+ subscriptions?",
-      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, Phoenix AI tutor, and Aurora Careers Toolkit. Both provide full access to interview preparation. Both are $7/month."
+      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, full Nexus AI teaching command center (curriculum planning, lesson generation, assessments, analytics, resource library), Phoenix AI tutor, and Aurora Careers Toolkit. Both are $7/month."
     },
     {
       question: "What's included in the Learn+ subscription?",
-      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, full access to Aurora Careers Toolkit (application building, role search, interview preparation), and the ability to join unlimited pods created by teachers."
+      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, full access to Aurora Careers Toolkit (application building, role search, interview preparation), access to global resource library, and the ability to join unlimited pods created by teachers."
     },
     {
       question: "What's included in the Teach+ subscription?",
-      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), full Nexus AI teaching command center (AI curriculum architect, lesson orchestrator, assessment hub, progress dashboard, time optimizer, global resource library, student profiles), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+    },
+    {
+      question: "What is Nexus and who can access it?",
+      answer: "Nexus is an intelligent teaching command center exclusive to Teach+ subscribers. It includes: AI Curriculum Architect for planning courses, AI Lesson Orchestrator for creating lessons, Assessment Hub for generating tests, Progress Dashboard for analytics, Time Optimizer for workload insights, Resource Library for sharing teaching materials globally, and Student Profiles for tracking individual progress. Free teacher accounts can view Nexus but need Teach+ to use the features."
     },
     {
       question: "Can I cancel my subscription anytime?",

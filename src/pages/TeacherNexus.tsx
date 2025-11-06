@@ -21,11 +21,14 @@ import AssessmentHub from '@/components/nexus/AssessmentHub';
 import TimeOptimizer from '@/components/nexus/TimeOptimizer';
 import ResourceCenter from '@/components/nexus/ResourceCenter';
 import StudentProfiles from '@/components/nexus/StudentProfiles';
+import UpgradeOverlay from '@/components/nexus/UpgradeOverlay';
 
 
 const TeacherNexus: React.FC = () => {
-  const { profile } = useAuth();
+  const { profile, subscription } = useAuth();
   const [activeTab, setActiveTab] = useState('curriculum');
+  
+  const isPremium = subscription?.subscribed && subscription.tier === 'teacher_premium';
 
   const tabs = [
     { id: 'curriculum', label: 'Curriculum', icon: BookOpen, description: 'AI-powered curriculum planning' },
@@ -75,30 +78,121 @@ const TeacherNexus: React.FC = () => {
 
           {/* Tab Contents */}
           <TabsContent value="curriculum" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Curriculum Architect"
+                features={[
+                  "Generate comprehensive curriculum plans with AI",
+                  "Align with standards and learning outcomes",
+                  "Create year-long, semester, or unit plans",
+                  "Customize for different grade levels and subjects",
+                  "Export and share curriculum templates",
+                  "Integrate seamlessly with your lessons"
+                ]}
+              />
+            ) : null}
             <CurriculumArchitect />
           </TabsContent>
 
           <TabsContent value="lessons" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Lesson Orchestrator"
+                features={[
+                  "AI-powered lesson plan generation",
+                  "Create engaging activities and assessments",
+                  "Generate differentiated instruction materials",
+                  "Include multimedia resources automatically",
+                  "Save time with smart templates",
+                  "Customize for your teaching style"
+                ]}
+              />
+            ) : null}
             <LessonOrchestrator />
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Progress Dashboard"
+                features={[
+                  "Real-time analytics on student performance",
+                  "Track engagement across all pods",
+                  "Visualize quiz and assessment results",
+                  "Monitor resource usage and effectiveness",
+                  "Identify students needing support",
+                  "Generate progress reports instantly"
+                ]}
+              />
+            ) : null}
             <ProgressDashboard />
           </TabsContent>
 
           <TabsContent value="assessments" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Assessment Hub"
+                features={[
+                  "AI-generated assessments and quizzes",
+                  "Automatic grading and feedback",
+                  "Create rubrics and marking schemes",
+                  "Generate public assessment links",
+                  "Track student responses in real-time",
+                  "Export results and analytics"
+                ]}
+              />
+            ) : null}
             <AssessmentHub />
           </TabsContent>
 
           <TabsContent value="time" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Time Optimizer"
+                features={[
+                  "Analyze time spent on teaching tasks",
+                  "Get insights on workload distribution",
+                  "Identify time-saving opportunities",
+                  "Track pod management efficiency",
+                  "Optimize resource creation workflow",
+                  "Balance teaching and administrative work"
+                ]}
+              />
+            ) : null}
             <TimeOptimizer />
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Resource Center"
+                features={[
+                  "Upload and share teaching resources globally",
+                  "Access thousands of educator-created materials",
+                  "Search by subject, grade level, and type",
+                  "Download PDFs, presentations, and documents",
+                  "Organize your resource library",
+                  "Contribute to the teaching community"
+                ]}
+              />
+            ) : null}
             <ResourceCenter />
           </TabsContent>
 
           <TabsContent value="students" className="space-y-4">
+            {!isPremium ? (
+              <UpgradeOverlay 
+                title="Student Profiles"
+                features={[
+                  "View detailed student engagement metrics",
+                  "Track participation across all pods",
+                  "Monitor quiz performance and progress",
+                  "Identify at-risk students early",
+                  "Access individual learning analytics",
+                  "Support personalized instruction"
+                ]}
+              />
+            ) : null}
             <StudentProfiles />
           </TabsContent>
         </Tabs>
