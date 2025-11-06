@@ -17,7 +17,8 @@ import {
   GraduationCap,
   Library,
   Rocket,
-  Compass
+  Compass,
+  FolderOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
