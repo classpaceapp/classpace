@@ -35,15 +35,17 @@ const Pricing = () => {
       icon: Zap,
       features: [
         "Unlimited Pods",
-        "Nexus AI Command Center",
+        "Nexus AI Command Center (full access)",
         "AI Curriculum Architect",
         "AI Lesson Orchestrator", 
-        "AI Assessment Hub",
+        "AI Assessment Hub with auto-grading",
         "Progress Analytics Dashboard",
         "Global Resource Library",
-        "Phoenix AI tutor access",
-        "Aurora Careers Toolkit",
-        "All Free features"
+        "Student Profile Analytics",
+        "All pod features",
+        "Aurora Application Builder",
+        "Aurora Role Search",
+        "Aurora Interview Prep"
       ],
       buttonText: "Upgrade Now",
       popular: true,
@@ -80,11 +82,11 @@ const Pricing = () => {
         "Unlimited quizzes",
         "Unlimited notes",
         "Advanced image analysis",
-        "Aurora Careers Toolkit",
-        "AI Application Builder",
-        "AI Role Search",
-        "AI Interview Prep",
-        "All Free features"
+        "Phoenix AI tutor access",
+        "Access to Global Resource Library",
+        "Aurora Application Builder",
+        "Aurora Role Search",
+        "Aurora Interview Prep"
       ],
       buttonText: "Upgrade Now",
       popular: true,
@@ -94,16 +96,16 @@ const Pricing = () => {
 
   const faqs = [
     {
+      question: "What makes Classpace different from using ChatGPT or other AI tools?",
+      answer: "While AI chatbots provide general information, Classpace is purpose-built for education with context-aware features. Phoenix AI remembers your study sessions and provides personalized tutoring. The platform integrates seamlessly with teacher-created courses (Pods), tracking progress across materials and assignments. You get structured learning paths, collaborative tools, and educator support—all in one unified interface, not scattered across multiple apps."
+    },
+    {
       question: "What's the difference between Learn+ and Teach+ subscriptions?",
-      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, Phoenix AI tutor, and Aurora Careers Toolkit. Both provide full access to interview preparation. Both are $7/month."
+      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), Phoenix AI tutor, global resource library access, and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, full Nexus AI teaching command center (curriculum planning, lesson generation, auto-grading, analytics, resource library), and Aurora Careers Toolkit. Both provide comprehensive educational ecosystems at $7/month."
     },
     {
-      question: "What's included in the Learn+ subscription?",
-      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, full access to Aurora Careers Toolkit (application building, role search, interview preparation), and the ability to join unlimited pods created by teachers."
-    },
-    {
-      question: "What's included in the Teach+ subscription?",
-      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), full Nexus AI teaching command center (AI curriculum architect, lesson orchestrator, assessment hub, progress dashboard, time optimizer, global resource library, student profiles), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+      question: "What is Nexus and who can access it?",
+      answer: "Nexus is an AI-powered teaching command center exclusively for Teach+ subscribers. It includes: AI Curriculum Architect for course design, AI Lesson Orchestrator for daily planning, AI Assessment Hub with auto-grading, Progress Dashboard for student analytics, Global Resource Library for sharing materials, and Student Profile Analytics. Free plan teachers can view Nexus modules to understand capabilities, but need Teach+ to access the full functionality."
     },
     {
       question: "Can I cancel my subscription anytime?",
@@ -115,7 +117,7 @@ const Pricing = () => {
     },
     {
       question: "Do students and teachers need separate subscriptions?",
-      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms and accessing Aurora career tools. Learn+ is for students who want unlimited AI learning resources. Each subscription is tailored to different needs at the same $7/month price."
+      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms and accessing comprehensive teaching tools. Learn+ is for students who want unlimited AI learning resources and career preparation. Each subscription is tailored to different educational needs at the same $7/month price."
     }
   ];
 

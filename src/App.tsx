@@ -47,6 +47,7 @@ import Investors from "./pages/Investors";
 import More from "./pages/More";
 import TeacherNexus from "./pages/TeacherNexus";
 import PublicAssessment from "./pages/PublicAssessment";
+import AllResources from "./pages/AllResources";
 
 const queryClient = new QueryClient();
 
@@ -191,6 +192,11 @@ const App = () => (
             <Route path="/my-resources" element={
               <ProtectedRoute requireRole="learner">
                 <MyResources />
+              </ProtectedRoute>
+            } />
+            <Route path="/all-resources" element={
+              <ProtectedRoute requireRole="learner">
+                <AllResources />
               </ProtectedRoute>
             } />
             <Route path="/student-careers" element={

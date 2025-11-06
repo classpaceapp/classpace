@@ -98,10 +98,10 @@ export const MyPlanTab: React.FC = () => {
           'Unlimited notes in My Resources',
           'Advanced image analysis',
           'Phoenix AI tutor access',
+          'Join unlimited pods',
           'Aurora Application Builder',
           'Aurora Role Search',
-          'Aurora Interview Prep',
-          'Join unlimited pods'
+          'Aurora Interview Prep'
         ]
       : [
           'Join unlimited pods',
@@ -121,12 +121,11 @@ export const MyPlanTab: React.FC = () => {
           'Progress Analytics Dashboard',
           'Global Resource Library',
           'Student Profile Analytics',
-          'Phoenix AI tutor access',
+          'All pod features (materials, quizzes, etc.)',
+          'Unlimited students per pod',
           'Aurora Application Builder',
           'Aurora Role Search',
-          'Aurora Interview Prep',
-          'All pod features (materials, quizzes, etc.)',
-          'Unlimited students per pod'
+          'Aurora Interview Prep'
         ]
       : [
           '1 Pod (fully functional)',

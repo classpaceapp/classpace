@@ -7,32 +7,52 @@ export const FAQsTab: React.FC = () => {
 
   const faqs = [
     {
-      question: "What's the difference between Learn+ and Teach+ subscriptions?",
-      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, full Nexus AI teaching command center (curriculum planning, lesson generation, assessments, analytics, resource library), Phoenix AI tutor, and Aurora Careers Toolkit. Both are $7/month."
+      question: "What makes Classpace different from using ChatGPT or other AI tools?",
+      answer: "While AI chatbots provide general information, Classpace is purpose-built for education with context-aware features that understand your learning journey. Phoenix AI remembers your study sessions and provides personalized tutoring. Our platform integrates seamlessly with teacher-created courses (Pods), tracking your progress across materials, quizzes, and assignments. You get structured learning paths, collaborative tools, and educator support—all in one place, not scattered across multiple apps and tabs."
     },
     {
-      question: "What's included in the Learn+ subscription?",
-      answer: "Learn+ includes unlimited Learnspace AI chats (with image analysis), unlimited personal flashcards, quizzes, and notes generation in My Resources, Phoenix AI tutor access, full access to Aurora Careers Toolkit (application building, role search, interview preparation), access to global resource library, and the ability to join unlimited pods created by teachers."
-    },
-    {
-      question: "What's included in the Teach+ subscription?",
-      answer: "Teach+ unlocks unlimited pod creation (including materials, quizzes, flashcards, notes, whiteboards, live meetings, chat), full Nexus AI teaching command center (AI curriculum architect, lesson orchestrator, assessment hub, progress dashboard, time optimizer, global resource library, student profiles), Phoenix AI tutor access, and full access to Aurora Careers Toolkit with AI-powered application building, role search, and interview preparation tools."
+      question: "How does Classpace serve both students and teachers?",
+      answer: "For students, Classpace offers Phoenix AI tutor (24/7 homework help), Learnspace (AI study assistant), organized class pods, collaborative tools, and career prep resources. For teachers, we provide Nexus (AI command center for lesson planning, assessments, and analytics), unlimited pod creation, student progress tracking, and a global resource library. Both roles benefit from seamless integration between teaching and learning tools."
     },
     {
       question: "What is Nexus and who can access it?",
-      answer: "Nexus is an intelligent teaching command center exclusive to Teach+ subscribers. It includes: AI Curriculum Architect for planning courses, AI Lesson Orchestrator for creating lessons, Assessment Hub for generating tests, Progress Dashboard for analytics, Time Optimizer for workload insights, Resource Library for sharing teaching materials globally, and Student Profiles for tracking individual progress. Free teacher accounts can view Nexus but need Teach+ to use the features."
+      answer: "Nexus is an AI-powered command center exclusively for Teach+ subscribers. It includes: AI Curriculum Architect for course design, AI Lesson Orchestrator for daily planning, AI Assessment Hub with auto-grading, Progress Dashboard for student analytics, Global Resource Library for sharing materials, and Student Profile Analytics. Free plan teachers can see Nexus modules but need to upgrade to access the full functionality."
     },
     {
-      question: "Can I cancel my subscription anytime?",
-      answer: "Yes. You can cancel your Learn+ or Teach+ subscription anytime through My Plan in your dashboard. You'll continue to have access to premium features until the end of your current billing period."
+      question: "What are the subscription plans and pricing?",
+      answer: "Students: Free (join unlimited pods, 3 Learnspace AI chats, 1 resource each, Phoenix access) or Learn+ at $7/month (unlimited AI tutoring, resources, image analysis, career tools). Teachers: Free (1 fully functional pod, all collaboration tools) or Teach+ at $7/month (unlimited pods, full Nexus access, AI curriculum/lesson tools, auto-grading assessments, global resource library, career tools)."
     },
     {
-      question: "Is there a free plan available?",
-      answer: "Yes! Free plan for students includes: join unlimited pods, Learnspace AI (limited to 3 chats), My Resources (1 flashcard/quiz/note each), Phoenix AI tutor. Free plan for teachers includes: 1 pod with full features (materials, quizzes, flashcards, notes, whiteboards, meetings)."
+      question: "How do Pods work?",
+      answer: "Pods are virtual classrooms where teachers organize course content and students collaborate. Teachers create pods, share a 6-character join code, and upload materials, quizzes, flashcards, and assignments. Students join using the code and access materials, chat with classmates, take collaborative notes, use shared whiteboards, and participate in live meetings. Each pod has dedicated tabs for different activities."
     },
     {
-      question: "Do students and teachers need separate subscriptions?",
-      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms. Learn+ is for students who want unlimited AI learning resources. Both subscriptions include full access to Aurora Careers Toolkit (including interview preparation). Each subscription is tailored to different needs at the same $7/month price."
+      question: "What is Phoenix and how is it different from Learnspace?",
+      answer: "Phoenix is your personal AI tutor designed for one-on-one homework help. It offers voice and text interaction, step-by-step problem solving, image analysis for diagrams, and personalized explanations. Learnspace is a broader AI study assistant for generating notes, flashcards, and quizzes from your materials—it's about creating study resources while Phoenix is about interactive tutoring."
+    },
+    {
+      question: "Can I use Classpace features offline or do I need internet?",
+      answer: "Classpace requires an internet connection for all AI features, real-time collaboration (chat, whiteboard), and accessing cloud-stored materials. However, you can view downloaded materials offline. We're designed as a connected platform to enable collaboration and instant AI assistance."
+    },
+    {
+      question: "How does the Global Resource Library work?",
+      answer: "Available to Teach+ teachers and all students via 'All Resources', this is an open-source library where educators upload and share teaching materials (PDFs, Word docs, PowerPoints, links). Teachers can contribute resources and download others' materials. Students can search, filter by category/type, and download resources to supplement their learning—think of it as a collaborative educational repository."
+    },
+    {
+      question: "What career tools does Classpace offer?",
+      answer: "Both Learn+ and Teach+ subscribers get access to Aurora, our AI-powered career suite: Application Builder (resume, cover letter generation), Role Search (discover career paths), and Interview Prep (practice questions, feedback). These tools help students and educators explore opportunities, prepare applications, and ace interviews."
+    },
+    {
+      question: "How do I cancel my subscription?",
+      answer: "Go to 'My Plan' in the left sidebar and click 'Cancel Subscription'. You'll retain access to premium features until the end of your billing period. You can re-upgrade anytime if you change your mind."
+    },
+    {
+      question: "Is my data secure on Classpace?",
+      answer: "Yes. We use enterprise-grade encryption for data storage and transmission. User authentication is handled securely, and we never share your personal information or learning data with third parties. Your uploaded materials, conversations with AI tutors, and pod content are private to you and your authorized pod members."
+    },
+    {
+      question: "Why can't I access certain features in Nexus?",
+      answer: "Nexus is a premium feature for Teach+ subscribers. Free plan teachers can view the Nexus modules to understand their capabilities, but accessing the full AI command center (curriculum design, lesson planning, auto-grading, analytics) requires upgrading to Teach+. This ensures teachers get the most powerful tools while we maintain platform sustainability."
     }
   ];
 
