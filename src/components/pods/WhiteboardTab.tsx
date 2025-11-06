@@ -223,14 +223,14 @@ export const WhiteboardTab: React.FC<WhiteboardTabProps> = ({ podId, isTeacher }
               </CardDescription>
             </div>
           </div>
-          <div className="relative">
-            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm border-2 border-white/40 rounded-xl flex items-center justify-center pointer-events-none z-10">
+          <div className="relative min-w-[180px] h-[100px]">
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm border-2 border-white/40 rounded-xl flex items-center justify-center pointer-events-none z-10 p-4">
               <div className="text-center">
-                <Sparkles className="h-6 w-6 text-white mx-auto mb-2 animate-pulse" />
+                <Sparkles className="h-8 w-8 text-white mx-auto mb-2 animate-pulse" />
                 <p className="text-white font-bold text-sm">Coming Soon</p>
               </div>
             </div>
-            <Button disabled className="bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-semibold shadow-md opacity-50">
+            <Button disabled className="w-full h-full bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-semibold shadow-md opacity-50">
               <Plus className="h-4 w-4 mr-2" />
               New Whiteboard
             </Button>

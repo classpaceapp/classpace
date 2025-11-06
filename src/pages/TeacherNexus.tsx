@@ -90,8 +90,9 @@ const TeacherNexus: React.FC = () => {
                   "Integrate seamlessly with your lessons"
                 ]}
               />
-            ) : null}
-            <CurriculumArchitect />
+            ) : (
+              <CurriculumArchitect />
+            )}
           </TabsContent>
 
           <TabsContent value="lessons" className="space-y-4">
@@ -107,8 +108,9 @@ const TeacherNexus: React.FC = () => {
                   "Customize for your teaching style"
                 ]}
               />
-            ) : null}
-            <LessonOrchestrator />
+            ) : (
+              <LessonOrchestrator />
+            )}
           </TabsContent>
 
           <TabsContent value="progress" className="space-y-4">
@@ -124,8 +126,9 @@ const TeacherNexus: React.FC = () => {
                   "Generate progress reports instantly"
                 ]}
               />
-            ) : null}
-            <ProgressDashboard />
+            ) : (
+              <ProgressDashboard />
+            )}
           </TabsContent>
 
           <TabsContent value="assessments" className="space-y-4">
@@ -141,8 +144,9 @@ const TeacherNexus: React.FC = () => {
                   "Export results and analytics"
                 ]}
               />
-            ) : null}
-            <AssessmentHub />
+            ) : (
+              <AssessmentHub />
+            )}
           </TabsContent>
 
           <TabsContent value="time" className="space-y-4">
@@ -158,8 +162,9 @@ const TeacherNexus: React.FC = () => {
                   "Balance teaching and administrative work"
                 ]}
               />
-            ) : null}
-            <TimeOptimizer />
+            ) : (
+              <TimeOptimizer />
+            )}
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-4">
@@ -175,8 +180,9 @@ const TeacherNexus: React.FC = () => {
                   "Contribute to the teaching community"
                 ]}
               />
-            ) : null}
-            <ResourceCenter />
+            ) : (
+              <ResourceCenter />
+            )}
           </TabsContent>
 
           <TabsContent value="students" className="space-y-4">
@@ -192,8 +198,9 @@ const TeacherNexus: React.FC = () => {
                   "Support personalized instruction"
                 ]}
               />
-            ) : null}
-            <StudentProfiles />
+            ) : (
+              <StudentProfiles />
+            )}
           </TabsContent>
         </Tabs>
       </div>
