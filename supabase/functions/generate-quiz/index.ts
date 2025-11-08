@@ -172,8 +172,12 @@ Use the web search results below to inform your questions and ensure they align 
 
     const aiData = await aiResponse.json();
     
-    // Clean the AI response content to remove control characters
+    // Clean the AI response content to remove control characters and markdown code blocks
     let content = aiData.choices[0].message.content;
+    
+    // Remove markdown code block formatting (```json and ```)
+    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
     // Remove control characters except newlines and tabs
     content = content.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
     
