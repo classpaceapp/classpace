@@ -32,14 +32,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Construct search query based on mode
     let searchQuery = '';
     if (mode === 'structured') {
-      searchQuery = `${industry} careers jobs hiring ${location} 2025 apply now company career pages`;
+      searchQuery = `${industry} careers jobs hiring ${location} 2025 apply now company career pages site:careers OR site:jobs`;
     } else {
       searchQuery = naturalQuery || '';
     }
 
     console.log("Executing deep web search with query:", searchQuery);
 
-    // Step 1: Deep web search using Tavily - NO domain restrictions to find company career pages
+    // Step 1: Deep web search using Tavily - EXCLUDE generic job boards, prioritize company career pages
     const searchResponse = await fetch("https://api.tavily.com/search", {
       method: "POST",
       headers: {
@@ -51,6 +51,24 @@ const handler = async (req: Request): Promise<Response> => {
         search_depth: "advanced",
         max_results: 15,
         include_raw_content: true,
+        exclude_domains: [
+          "indeed.com",
+          "indeed.co.uk",
+          "glassdoor.com",
+          "glassdoor.co.uk",
+          "monster.com",
+          "careerbuilder.com",
+          "ziprecruiter.com",
+          "totaljobs.com",
+          "reed.co.uk"
+        ],
+        include_domains: [
+          "brightnetwork.co.uk",
+          "targetjobs.co.uk",
+          "milkround.com",
+          "gradcracker.com",
+          "linkedin.com/jobs"
+        ]
       }),
     });
 
@@ -62,7 +80,15 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Found ${searchData.results?.length || 0} potential matches`);
 
     // Step 2: Use Aurora AI to analyze and format results
-    const systemPrompt = `You are Aurora, an expert career advisor and opportunity finder. Your role is to help candidates discover perfectly matched job opportunities.
+    const systemPrompt = `You are Aurora, an expert career advisor and opportunity finder. Your role is to help candidates discover perfectly matched job opportunities directly on company career pages.
+
+CRITICAL SOURCING RULES:
+1. ONLY present opportunities from direct company career pages or reputable job aggregators (Bright Network, TargetJobs, LinkedIn, etc.)
+2. NEVER include links from Indeed, Glassdoor, Monster, or other generic job boards
+3. If you see a result from Indeed/Glassdoor, you MUST perform a deep web search to find the same role on the company's official career page
+4. Search pattern: "[Company Name] [Job Title] careers apply" to find the official company application link
+5. If you cannot find the company's direct application page, do NOT include that opportunity
+6. Prioritize quality over quantity - only show roles with direct company application links
 
 CRITICAL HUMANIZATION RULES:
 1. NEVER use em dashes (—) in your writing
@@ -80,14 +106,15 @@ CRITICAL FORMATTING RULES:
 5. Add DOUBLE spacing between each opportunity listing
 6. Create a clean, scannable format with clear blank lines between sections
 
-Your task is to analyze the search results and present the most relevant opportunities. For each role:
+Your task is to analyze the search results and present the most relevant opportunities with DIRECT COMPANY APPLICATION LINKS ONLY. For each role:
 - Provide the job title and company (bolded)
-- Include the direct application link as a properly formatted HTML anchor (with target="_blank")
+- Include the DIRECT COMPANY application link as a properly formatted HTML anchor (with target="_blank")
 - Explain why this role matches the candidate's criteria
 - Note any standout features or requirements
 - Be honest if it's not a perfect match but still worth considering
+- Mention that you've verified this is the company's official application page
 
-Format your response as a well-organized list with DOUBLE spacing and clickable links that open in new tabs. Make it feel like advice from a knowledgeable friend, not a robot.`;
+Format your response as a well-organized list with DOUBLE spacing and clickable links that open in new tabs. Make it feel like advice from a knowledgeable friend who has done the legwork to find direct company application pages, not a robot.`;
 
     const userPrompt = `Search Criteria:
 ${mode === 'structured' ? `Industry: ${industry}
