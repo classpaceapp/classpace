@@ -12,6 +12,7 @@ import { Upload, Download, FileText, Trash2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { AutoFlashcards } from './AutoFlashcards';
+import { PodNotes } from './PodNotes';
 
 interface Material {
   id: string;
@@ -288,11 +289,8 @@ export const PodMaterials: React.FC<PodMaterialsProps> = ({ podId, isTeacher }) 
 
   return (
     <>
-      {/* Auto Flashcards Module */}
-      <AutoFlashcards podId={podId} />
-
       {/* Learning Materials */}
-      <Card className="border-2 border-rose-500/30 shadow-2xl bg-gradient-to-br from-rose-100/90 via-pink-100/90 to-red-100/90 dark:from-rose-900/40 dark:via-pink-900/40 dark:to-red-900/40 backdrop-blur-sm mt-6">
+      <Card className="border-2 border-rose-500/30 shadow-2xl bg-gradient-to-br from-rose-100/90 via-pink-100/90 to-red-100/90 dark:from-rose-900/40 dark:via-pink-900/40 dark:to-red-900/40 backdrop-blur-sm">
         <CardHeader className="bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 border-b-2 border-rose-400/50 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -531,6 +529,14 @@ export const PodMaterials: React.FC<PodMaterialsProps> = ({ podId, isTeacher }) 
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* AI Flashcards Module */}
+      <AutoFlashcards podId={podId} />
+
+      {/* AI Study Notes */}
+      <div className="mt-6">
+        <PodNotes podId={podId} isTeacher={isTeacher} />
+      </div>
     </>
   );
 };

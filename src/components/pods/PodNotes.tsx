@@ -1,25 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, StickyNote } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, Plus, Loader2, Archive, Eye, Sparkles, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { PersonalNotesViewer } from "@/components/resources/PersonalNotesViewer";
 
 interface Note {
   id: string;
   pod_id: string;
-  created_by: string;
+  user_id: string;
   title: string;
+  curriculum: string;
+  topic: string;
+  subtopic: string | null;
+  additional_details: string | null;
   content: string;
-  color: string;
+  archived: boolean;
   created_at: string;
-  author_name?: string;
-  is_teacher?: boolean;
+  profiles?: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 interface PodNotesProps {
@@ -27,296 +32,449 @@ interface PodNotesProps {
   isTeacher: boolean;
 }
 
-const noteColors = [
-  { name: 'yellow', bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-900' },
-  { name: 'blue', bg: 'bg-blue-100', border: 'border-blue-300', text: 'text-blue-900' },
-  { name: 'green', bg: 'bg-green-100', border: 'border-green-300', text: 'text-green-900' },
-  { name: 'pink', bg: 'bg-pink-100', border: 'border-pink-300', text: 'text-pink-900' },
-  { name: 'purple', bg: 'bg-purple-100', border: 'border-purple-300', text: 'text-purple-900' },
-];
-
-export const PodNotes: React.FC<PodNotesProps> = ({ podId, isTeacher }) => {
-  const { user } = useAuth();
-  const { toast } = useToast();
+export const PodNotes = ({ podId, isTeacher }: PodNotesProps) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newNote, setNewNote] = useState({ title: '', content: '', color: 'yellow' });
-  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    curriculum: "",
+    topic: "",
+    subtopic: "",
+    additionalDetails: "",
+  });
 
   const fetchNotes = async () => {
+    setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('pod_notes')
-        .select('*')
-        .eq('pod_id', podId)
-        .order('created_at', { ascending: false });
+      const query = supabase
+        .from("pod_notes" as any)
+        .select("*")
+        .eq("pod_id", podId)
+        .eq("archived", showArchived)
+        .order("created_at", { ascending: false });
+
+      const { data: notesData, error } = await query;
 
       if (error) throw error;
 
-      // Fetch pod teacher ID
-      const { data: podData } = await supabase
-        .from('pods')
-        .select('teacher_id')
-        .eq('id', podId)
-        .single();
+      // Fetch profiles for each note
+      if (notesData && notesData.length > 0) {
+        const userIds = [...new Set(notesData.map((n: any) => n.user_id))];
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, first_name, last_name")
+          .in("id", userIds);
 
-      // Fetch author profiles
-      const notesData = data || [];
-      const authorIds = [...new Set(notesData.map(n => n.created_by))];
-      
-      let profilesMap: Record<string, { first_name: string | null; last_name: string | null }> = {};
-      if (authorIds.length) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name')
-          .in('id', authorIds);
-        
-        if (profiles) {
-          profilesMap = Object.fromEntries(
-            profiles.map((p: any) => [p.id, { first_name: p.first_name, last_name: p.last_name }])
-          );
-        }
-      }
-
-      const notesWithAuthors = notesData.map(note => {
-        const profile = profilesMap[note.created_by];
-        return {
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        const enrichedNotes = notesData.map((note: any) => ({
           ...note,
-          author_name: profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown' : 'Unknown',
-          is_teacher: podData?.teacher_id === note.created_by
-        };
-      });
-
-      setNotes(notesWithAuthors);
-    } catch (error: any) {
-      console.error('Error fetching notes:', error);
-      toast({
-        title: 'Failed to load notes',
-        description: error.message,
-        variant: 'destructive',
-      });
+          profiles: profilesMap.get(note.user_id),
+        }));
+        
+        setNotes(enrichedNotes);
+      } else {
+        setNotes([]);
+      }
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+      toast.error("Failed to load notes");
     } finally {
       setLoading(false);
     }
   };
 
-  const createNote = async () => {
-    if (!newNote.title.trim() || !newNote.content.trim() || !user?.id) return;
-
-    try {
-      const { error } = await supabase.from('pod_notes').insert({
-        pod_id: podId,
-        created_by: user.id,
-        title: newNote.title.trim(),
-        content: newNote.content.trim(),
-        color: newNote.color,
-      });
-
-      if (error) throw error;
-
-      toast({ title: 'Note created successfully!' });
-      setNewNote({ title: '', content: '', color: 'yellow' });
-      setIsDialogOpen(false);
-      fetchNotes();
-    } catch (error: any) {
-      toast({
-        title: 'Failed to create note',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const deleteNote = async (noteId: string) => {
-    try {
-      const { error } = await supabase.from('pod_notes').delete().eq('id', noteId);
-
-      if (error) throw error;
-
-      toast({ title: 'Note deleted successfully!' });
-      setNotes(notes.filter((n) => n.id !== noteId));
-      setNoteToDelete(null);
-    } catch (error: any) {
-      toast({
-        title: 'Failed to delete note',
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
-
   useEffect(() => {
     fetchNotes();
-  }, [podId]);
+  }, [podId, showArchived]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleGenerate = async () => {
+    if (!formData.title || !formData.curriculum || !formData.topic) {
+      toast.error("Please fill in title, curriculum, and topic");
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase.functions.invoke("generate-personal-notes", {
+        body: {
+          title: formData.title,
+          curriculum: formData.curriculum,
+          topic: formData.topic,
+          subtopic: formData.subtopic || null,
+          additionalDetails: formData.additionalDetails || null,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.noteId) {
+        // Fetch the generated note content
+        const { data: generatedNote, error: fetchError } = await supabase
+          .from("personal_notes")
+          .select("content")
+          .eq("id", data.noteId)
+          .single();
+
+        if (fetchError) throw fetchError;
+
+        // Insert into pod_notes
+        const { error: insertError } = await supabase
+          .from("pod_notes")
+          .insert([{
+            pod_id: podId,
+            user_id: user.id,
+            title: formData.title,
+            curriculum: formData.curriculum,
+            topic: formData.topic,
+            subtopic: formData.subtopic || null,
+            additional_details: formData.additionalDetails || null,
+            content: generatedNote.content,
+            archived: false,
+          }] as any);
+
+        if (insertError) throw insertError;
+
+        // Delete the temporary personal note
+        await supabase
+          .from("personal_notes")
+          .delete()
+          .eq("id", data.noteId);
+
+        toast.success("Notes generated successfully!");
+        setFormData({
+          title: "",
+          curriculum: "",
+          topic: "",
+          subtopic: "",
+          additionalDetails: "",
+        });
+        setShowForm(false);
+        fetchNotes();
+      }
+    } catch (error: any) {
+      console.error("Error generating notes:", error);
+      
+      let errorMessage = "Failed to generate notes";
+      
+      if (error?.message?.includes('INPUT_TOO_LONG') || error?.message?.includes('too long')) {
+        errorMessage = "Topic too detailed. Please simplify to under 100 words.";
+      } else if (error?.message?.includes('RATE_LIMIT') || error?.message?.includes('429')) {
+        errorMessage = "Too many requests. Please wait before generating more notes.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleArchive = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("pod_notes")
+        .update({ archived: true } as any)
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success("Notes archived");
+      fetchNotes();
+    } catch (error) {
+      toast.error("Failed to archive notes");
+    }
+  };
+
+  const handleUnarchive = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("pod_notes")
+        .update({ archived: false } as any)
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success("Notes restored");
+      fetchNotes();
+    } catch (error) {
+      toast.error("Failed to restore notes");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("pod_notes")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success("Notes deleted");
+      fetchNotes();
+    } catch (error) {
+      toast.error("Failed to delete notes");
+    }
+  };
+
+  const getGradientClass = (index: number) => {
+    const gradients = [
+      "from-emerald-500 via-teal-500 to-cyan-500",
+      "from-blue-500 via-indigo-500 to-purple-500",
+      "from-orange-500 via-amber-500 to-yellow-500",
+      "from-pink-500 via-rose-500 to-red-500",
+      "from-violet-500 via-purple-500 to-fuchsia-500",
+      "from-lime-500 via-green-500 to-emerald-500",
+    ];
+    return gradients[index % gradients.length];
+  };
 
   if (loading) {
     return (
-      <Card className="border-2 border-amber-500/30 shadow-2xl bg-gradient-to-br from-amber-100/90 via-yellow-100/90 to-orange-100/90 dark:from-amber-900/40 dark:via-yellow-900/40 dark:to-orange-900/40 backdrop-blur-sm">
-        <CardContent className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+      <Card className="border-2 border-emerald-500/30 shadow-2xl bg-gradient-to-br from-emerald-100/90 via-teal-100/90 to-cyan-100/90 backdrop-blur-sm">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          </div>
         </CardContent>
       </Card>
     );
   }
 
-  const getColorClasses = (colorName: string) => {
-    return noteColors.find((c) => c.name === colorName) || noteColors[0];
-  };
+  if (selectedNote) {
+    return (
+      <PersonalNotesViewer
+        noteId={selectedNote}
+        onClose={() => {
+          setSelectedNote(null);
+          fetchNotes();
+        }}
+      />
+    );
+  }
 
   return (
-    <>
-      <Card className="border-2 border-amber-500/30 shadow-2xl bg-gradient-to-br from-amber-100/90 via-yellow-100/90 to-orange-100/90 dark:from-amber-900/40 dark:via-yellow-900/40 dark:to-orange-900/40 backdrop-blur-sm">
-        <CardHeader className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 border-b-2 border-amber-400/50 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30">
-                <StickyNote className="h-6 w-6 md:h-7 md:w-7 text-white" />
-              </div>
-              <CardTitle className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Class Notes</CardTitle>
+    <Card className="border-2 border-border/50 shadow-2xl bg-white/80 backdrop-blur-xl">
+      <CardHeader className="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border-b border-border/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
+              <FileText className="h-6 w-6 text-white" />
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="gap-2 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white hover:bg-white/30 hover:border-white/60 font-semibold shadow-md h-10 md:h-9 px-4">
-                    <Plus className="h-5 w-5 md:h-4 md:w-4" />
-                    <span className="text-sm md:text-sm">Add Note</span>
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle>Create New Note</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Title</label>
-                      <Input
-                        value={newNote.title}
-                        onChange={(e) =>
-                          setNewNote({ ...newNote, title: e.target.value })
-                        }
-                        placeholder="Note title..."
-                        className="border-primary/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Content</label>
-                      <Textarea
-                        value={newNote.content}
-                        onChange={(e) =>
-                          setNewNote({ ...newNote, content: e.target.value })
-                        }
-                        placeholder="Write your note here..."
-                        rows={5}
-                        className="border-primary/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Color</label>
-                      <div className="flex gap-2">
-                        {noteColors.map((color) => (
-                          <button
-                            key={color.name}
-                            type="button"
-                            onClick={() => setNewNote({ ...newNote, color: color.name })}
-                            className={`w-10 h-10 rounded-lg ${color.bg} ${color.border} border-2 ${
-                              newNote.color === color.name ? 'ring-2 ring-primary ring-offset-2' : ''
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={createNote}
-                      disabled={!newNote.title.trim() || !newNote.content.trim()}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      Create Note
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+            <div>
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                AI Study Notes
+              </CardTitle>
+              <CardDescription>
+                Generate comprehensive study notes with AI-powered web search
+              </CardDescription>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          {notes.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              No notes yet. Create your first note!
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {notes.map((note) => {
-                const colorClasses = getColorClasses(note.color);
-                return (
-                  <div
-                    key={note.id}
-                    className={`${colorClasses.bg} ${colorClasses.border} ${colorClasses.text} border-2 rounded-lg p-4 shadow-lg transform hover:scale-105 transition-transform duration-200 relative`}
-                    style={{
-                      transform: `rotate(${Math.random() * 4 - 2}deg)`,
-                    }}
-                  >
-                    {/* Author badge at the top */}
-                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-current/20">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                          {note.author_name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-xs">{note.author_name}</span>
-                          {note.is_teacher && (
-                            <span className="px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold rounded-full shadow-sm">
-                              TEACHER
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {(isTeacher || note.created_by === user?.id) && (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6 hover:bg-black/10"
-                          onClick={() => setNoteToDelete(note.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">{note.title}</h3>
-                    <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <AlertDialog open={!!noteToDelete} onOpenChange={() => setNoteToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Note</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this note? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => noteToDelete && deleteNote(noteToDelete)}
-              className="bg-destructive hover:bg-destructive/90"
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowArchived(!showArchived)}
+              variant="outline"
+              className="border-2"
             >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+              {showArchived ? <Eye className="h-4 w-4 mr-2" /> : <Archive className="h-4 w-4 mr-2" />}
+              {showArchived ? "View Active" : "View Archived"}
+            </Button>
+            {!showForm && !showArchived && (
+              <Button
+                onClick={() => setShowForm(true)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Generate Notes
+              </Button>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-6 space-y-6">
+        {showForm && (
+          <div className="p-6 rounded-xl bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border-2 border-emerald-500/20 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="h-5 w-5 text-emerald-500" />
+              <h3 className="text-lg font-semibold">Create New Study Notes</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="title">Notes Title *</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g., Calculus Fundamentals"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="bg-background/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="curriculum">Curriculum *</Label>
+                <Input
+                  id="curriculum"
+                  placeholder="e.g., IGCSE, IB, A-Level, CBSE, ICSE"
+                  value={formData.curriculum}
+                  onChange={(e) => setFormData({ ...formData, curriculum: e.target.value })}
+                  className="bg-background/50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="topic">Topic *</Label>
+                <Input
+                  id="topic"
+                  placeholder="e.g., Differentiation"
+                  value={formData.topic}
+                  onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                  className="bg-background/50"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="subtopic">Subtopic (Optional)</Label>
+                <Input
+                  id="subtopic"
+                  placeholder="e.g., Chain Rule"
+                  value={formData.subtopic}
+                  onChange={(e) => setFormData({ ...formData, subtopic: e.target.value })}
+                  className="bg-background/50"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="additionalDetails">Additional Details (Optional)</Label>
+                <Textarea
+                  id="additionalDetails"
+                  placeholder="Specify format preferences: e.g., bullet points, detailed paragraphs, include examples, etc."
+                  value={formData.additionalDetails}
+                  onChange={(e) => setFormData({ ...formData, additionalDetails: e.target.value })}
+                  className="bg-background/50 min-h-[100px]"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={handleGenerate}
+                disabled={generating}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg"
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Notes
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={() => setShowForm(false)}
+                variant="outline"
+                disabled={generating}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {notes.length > 0 ? (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <FileText className="h-5 w-5 text-emerald-500" />
+              {showArchived ? "Archived Notes" : "Pod Study Notes"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {notes.map((note, index) => (
+                <div
+                  key={note.id}
+                  className="group relative overflow-hidden rounded-xl border-2 border-border/50 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/20"
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(index)} opacity-10 group-hover:opacity-20 transition-opacity`} />
+                  <div className="relative p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-semibold text-lg text-foreground">
+                        {note.title}
+                      </h4>
+                    </div>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <p>{note.curriculum} • {note.topic}</p>
+                      {note.subtopic && <p className="text-xs">{note.subtopic}</p>}
+                      <p className="text-xs text-emerald-600">
+                        By {note.profiles?.first_name} {note.profiles?.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Created {new Date(note.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        onClick={() => setSelectedNote(note.id)}
+                        className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white"
+                        size="sm"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        onClick={() => showArchived ? handleUnarchive(note.id) : handleArchive(note.id)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Archive className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => handleDelete(note.id)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : !showForm && (
+          <div className="text-center py-12">
+            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-4">
+              <FileText className="h-8 w-8 text-emerald-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              {showArchived ? "No archived notes" : "No notes yet"}
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {showArchived 
+                ? "You haven't archived any notes"
+                : "Generate AI-powered study notes to enhance learning"}
+            </p>
+            {!showArchived && (
+              <Button
+                onClick={() => setShowForm(true)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Your First Notes
+              </Button>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
