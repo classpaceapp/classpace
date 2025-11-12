@@ -158,11 +158,17 @@ ${contextData}
 
 CRITICAL FORMATTING RULES:
 1. Create detailed, well-structured notes with clear hierarchy
-2. Use ### for main headings, #### for subheadings
-3. For mathematical expressions, use LaTeX notation wrapped in $...$ for inline or $$...$$ for display
-4. Example: "The quadratic formula is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$"
+2. Use ## for main headings, ### for subheadings
+3. For ALL mathematical expressions, use LaTeX notation:
+   - Inline math: $x = 5$
+   - Display equations: $$E = mc^2$$
+   - Use \\times for multiplication (NOT * or x)
+   - Use \\frac{a}{b} for fractions
+   - Use \\sqrt{x} for square roots
+   - Example: "The quadratic formula is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$"
+4. For underlined text, use <u>text</u> HTML tags
 5. DO NOT use asterisks (*) for emphasis or bullets
-6. Use proper markdown: # for headings, - for bullet points
+6. Use proper markdown: ## for headings, - for bullet points
 7. Remove ALL improper characters like ** or * * around text
 8. Make content comprehensive, clear, and educational
 9. Include examples where relevant
@@ -202,11 +208,19 @@ Generate the notes in clean markdown format now:`;
 
     // Clean and sanitize content
     notesContent = notesContent
-      .replace(/\*\*\*/g, '') // Remove triple asterisks
-      .replace(/\*\*/g, '') // Remove double asterisks (bold markers)
-      .replace(/\* \*/g, '') // Remove spaced asterisks
-      .replace(/\*\s+\*/g, '') // Remove asterisks with spaces
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // Normalize multiple newlines
+      // Remove markdown code blocks
+      .replace(/```markdown\s*/g, '')
+      .replace(/```\s*/g, '')
+      // Remove all hashtags that aren't at start of lines (preserve headings)
+      .replace(/(?<!^|\n)(#{1,6})(?!\s)/gm, '')
+      // Remove bold/italic markdown (but preserve headings and lists)
+      .replace(/\*\*\*(.+?)\*\*\*/g, '$1')
+      .replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/(?<!\$)\*(?!\$)(.+?)(?<!\$)\*(?!\$)/g, '$1')
+      // Remove control characters but keep newlines, tabs, and LaTeX
+      .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '')
+      // Normalize multiple newlines
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
 
     // Save to database

@@ -93,6 +93,13 @@ REQUIRED question types:
 - Problem-solving questions with specific numerical or analytical challenges
 - Conceptual understanding questions
 
+CRITICAL MATHEMATICAL FORMATTING:
+- For ALL mathematical expressions, use LaTeX notation
+- Inline math: $x = 5$
+- Display math: $$E = mc^2$$
+- Use \\times for multiplication, \\frac{a}{b} for fractions, \\sqrt{x} for roots
+- For underlined numbers/text, use <u>text</u> HTML tags
+
 Based on the provided curriculum information and web search results, create a comprehensive quiz with 10 high-quality CONTENT-BASED questions.
 The questions should test actual understanding of the subject matter for the specified curriculum, year level, and topic.
 

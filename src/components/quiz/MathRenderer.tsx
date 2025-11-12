@@ -8,52 +8,64 @@ interface MathRendererProps {
 }
 
 export const MathRenderer: React.FC<MathRendererProps> = ({ text, className = '' }) => {
-  // Split text by LaTeX delimiters and render appropriately
-  const renderWithMath = (input: string) => {
+  // Split text by LaTeX delimiters and HTML tags, then render appropriately
+  const renderWithMathAndFormatting = (input: string) => {
     const parts: React.ReactNode[] = [];
     let currentIndex = 0;
     
-    // Match both inline $...$ and display $$...$$ and also \\(...\\) and \\[...\\]
-    const regex = /(\$\$[\s\S]*?\$\$|\$[^$\n]*?\$|\\\\[\[\(][\s\S]*?\\\\[\]\)])/g;
+    // Match LaTeX delimiters and HTML underline tags
+    const regex = /(\$\$[\s\S]*?\$\$|\$[^$\n]*?\$|\\\\[\[\(][\s\S]*?\\\\[\]\)]|<u>[\s\S]*?<\/u>)/g;
     let match;
     
     while ((match = regex.exec(input)) !== null) {
-      // Add text before the math
+      // Add text before the match
       if (match.index > currentIndex) {
         parts.push(input.substring(currentIndex, match.index));
       }
       
-      const mathContent = match[0];
-      let latex = mathContent;
-      let isBlock = false;
+      const matchContent = match[0];
       
-      // Determine type and extract content
-      if (mathContent.startsWith('$$') && mathContent.endsWith('$$')) {
-        latex = mathContent.slice(2, -2);
-        isBlock = true;
-      } else if (mathContent.startsWith('$') && mathContent.endsWith('$')) {
-        latex = mathContent.slice(1, -1);
-      } else if (mathContent.startsWith('\\[') && mathContent.endsWith('\\]')) {
-        latex = mathContent.slice(2, -2);
-        isBlock = true;
-      } else if (mathContent.startsWith('\\(') && mathContent.endsWith('\\)')) {
-        latex = mathContent.slice(2, -2);
-      }
-      
-      try {
+      // Handle underline tags
+      if (matchContent.startsWith('<u>') && matchContent.endsWith('</u>')) {
+        const underlinedText = matchContent.slice(3, -4);
         parts.push(
-          isBlock ? (
-            <BlockMath key={match.index} math={latex} />
-          ) : (
-            <InlineMath key={match.index} math={latex} />
-          )
+          <u key={match.index} className="decoration-2 underline-offset-2">
+            {underlinedText}
+          </u>
         );
-      } catch (e) {
-        // If LaTeX parsing fails, show original text
-        parts.push(mathContent);
+      } else {
+        // Handle LaTeX
+        let latex = matchContent;
+        let isBlock = false;
+        
+        // Determine type and extract content
+        if (matchContent.startsWith('$$') && matchContent.endsWith('$$')) {
+          latex = matchContent.slice(2, -2);
+          isBlock = true;
+        } else if (matchContent.startsWith('$') && matchContent.endsWith('$')) {
+          latex = matchContent.slice(1, -1);
+        } else if (matchContent.startsWith('\\[') && matchContent.endsWith('\\]')) {
+          latex = matchContent.slice(2, -2);
+          isBlock = true;
+        } else if (matchContent.startsWith('\\(') && matchContent.endsWith('\\)')) {
+          latex = matchContent.slice(2, -2);
+        }
+        
+        try {
+          parts.push(
+            isBlock ? (
+              <BlockMath key={match.index} math={latex} />
+            ) : (
+              <InlineMath key={match.index} math={latex} />
+            )
+          );
+        } catch (e) {
+          // If LaTeX parsing fails, show original text
+          parts.push(matchContent);
+        }
       }
       
-      currentIndex = match.index + mathContent.length;
+      currentIndex = match.index + matchContent.length;
     }
     
     // Add remaining text
@@ -64,5 +76,5 @@ export const MathRenderer: React.FC<MathRendererProps> = ({ text, className = ''
     return parts.length > 0 ? parts : input;
   };
   
-  return <span className={className}>{renderWithMath(text)}</span>;
+  return <span className={className}>{renderWithMathAndFormatting(text)}</span>;
 };

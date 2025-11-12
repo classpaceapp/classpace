@@ -134,11 +134,18 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
         pdf.setTextColor(139, 69, 19);
         pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
 
-        // Question content (remove LaTeX for PDF - plain text)
-        const cleanHint = card.hint.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
+        // Question content - convert LaTeX to readable format
+        const readableHint = card.hint
+          .replace(/\$\$(.+?)\$\$/g, '[$1]')
+          .replace(/\$(.+?)\$/g, '$1')
+          .replace(/\\times/g, '×')
+          .replace(/\\frac\{(.+?)\}\{(.+?)\}/g, '($1/$2)')
+          .replace(/\\sqrt\{(.+?)\}/g, '√($1)')
+          .replace(/\\pm/g, '±')
+          .replace(/\\(.)/g, '$1');
         pdf.setFontSize(16);
         pdf.setTextColor(51, 51, 51);
-        const hintLines = pdf.splitTextToSize(cleanHint, contentWidth - 20);
+        const hintLines = pdf.splitTextToSize(readableHint, contentWidth - 20);
         pdf.text(hintLines, pageWidth / 2, margin + 50, { align: 'center', maxWidth: contentWidth - 20 });
 
         // Add new page for answer
@@ -165,11 +172,18 @@ export const FlashcardViewer = ({ flashcardSetId, onClose }: FlashcardViewerProp
         pdf.setTextColor(139, 69, 19);
         pdf.text(`Card ${card.card_order}`, pageWidth / 2, margin + 27, { align: 'center' });
 
-        // Answer content (remove LaTeX for PDF - plain text)
-        const cleanContent = card.content.replace(/\$\$?/g, '').replace(/\\[a-z]+\{?/g, '');
+        // Answer content - convert LaTeX to readable format
+        const readableContent = card.content
+          .replace(/\$\$(.+?)\$\$/g, '[$1]')
+          .replace(/\$(.+?)\$/g, '$1')
+          .replace(/\\times/g, '×')
+          .replace(/\\frac\{(.+?)\}\{(.+?)\}/g, '($1/$2)')
+          .replace(/\\sqrt\{(.+?)\}/g, '√($1)')
+          .replace(/\\pm/g, '±')
+          .replace(/\\(.)/g, '$1');
         pdf.setFontSize(14);
         pdf.setTextColor(51, 51, 51);
-        const contentLines = pdf.splitTextToSize(cleanContent, contentWidth - 20);
+        const contentLines = pdf.splitTextToSize(readableContent, contentWidth - 20);
         
         let yPosition = margin + 50;
         const lineHeight = 7;

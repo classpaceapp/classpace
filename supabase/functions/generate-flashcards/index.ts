@@ -143,9 +143,14 @@ CRITICAL FORMATTING RULES:
 2. Each flashcard must have:
    - "hint": A concise question or prompt about the ACTUAL content (front of card)
    - "content": A clear, detailed answer with technical/educational information (back of card)
-3. For mathematical equations, use LaTeX notation wrapped in $ for inline or $$ for display math
-   Example: "The quadratic formula is $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$"
-4. Remove ALL unnecessary punctuation like **, *, bullet points
+3. For mathematical equations, ALWAYS use LaTeX notation:
+   - Inline math: $x = 5$
+   - Display math: $$E = mc^2$$
+   - Use \\times for multiplication (NOT * or x)
+   - Use \\frac{a}{b} for fractions
+   - Use \\sqrt{x} for square roots
+   - Example: "For $459.326$ in expanded form: $4 \\times 100 + 5 \\times 10 + 9 \\times 1 + 3 \\times \\frac{1}{10} + 2 \\times \\frac{1}{100} + 6 \\times \\frac{1}{1000}$"
+4. Remove ALL unnecessary punctuation like **, *, bullet points, arrows
 5. Make content clear, educational, and academically appropriate
 
 Return format:

@@ -94,10 +94,16 @@ CRITICAL REQUIREMENTS:
 3. Distribute ${totalMarks} marks appropriately across ${numQuestions} questions
 4. Include varied difficulty levels (30% easy, 50% medium, 20% challenging)
 5. Mix question types: multiple choice, short answer, problem-solving, essay
-6. For mathematical content: Use LaTeX notation wrapped in $ symbols (inline: $x^2$, display: $$x^2$$)
-7. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
-8. Each question must have clear mark allocation
-9. Include detailed marking rubric/answer key at the end
+6. For mathematical content: Use LaTeX notation
+   - Inline math: $x = 5$
+   - Display math: $$E = mc^2$$
+   - Use \\times for multiplication (NOT * or x)
+   - Use \\frac{a}{b} for fractions
+   - Use \\sqrt{x} for square roots
+7. For underlined text, use <u>text</u> HTML tags
+8. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
+9. Each question must have clear mark allocation
+10. Include detailed marking rubric/answer key at the end
 
 FORMAT:
 Assessment Title: [Clear, specific title]

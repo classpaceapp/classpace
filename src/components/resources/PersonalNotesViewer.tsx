@@ -152,9 +152,24 @@ export const PersonalNotesViewer = ({ noteId, onClose }: PersonalNotesViewerProp
           continue;
         }
 
-        // Handle regular paragraphs - note: math formulas will show as LaTeX notation
+        // Handle regular paragraphs - convert LaTeX to readable format
         checkPageBreak(10);
-        const wrappedText = pdf.splitTextToSize(trimmedLine, maxWidth);
+        // Convert LaTeX to more readable format for PDF
+        const readableText = trimmedLine
+          .replace(/\$\$(.+?)\$\$/g, '[$1]')  // Display math becomes [equation]
+          .replace(/\$(.+?)\$/g, '$1')         // Inline math removes $ delimiters
+          .replace(/\\times/g, '×')
+          .replace(/\\frac\{(.+?)\}\{(.+?)\}/g, '($1/$2)')
+          .replace(/\\sqrt\{(.+?)\}/g, '√($1)')
+          .replace(/\\pm/g, '±')
+          .replace(/\\leq/g, '≤')
+          .replace(/\\geq/g, '≥')
+          .replace(/\\neq/g, '≠')
+          .replace(/\\approx/g, '≈')
+          .replace(/\\_/g, '_')
+          .replace(/\\(.)/g, '$1');  // Remove remaining backslashes
+        
+        const wrappedText = pdf.splitTextToSize(readableText, maxWidth);
         pdf.text(wrappedText, margin, yPosition);
         yPosition += wrappedText.length * 6 + 3;
       }
