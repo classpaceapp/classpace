@@ -800,31 +800,49 @@ export type Database = {
       }
       pod_notes: {
         Row: {
-          color: string
+          additional_details: string | null
+          archived: boolean | null
+          color: string | null
           content: string
           created_at: string
-          created_by: string
+          curriculum: string
           id: string
           pod_id: string
+          subtopic: string | null
           title: string
+          topic: string
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          color?: string
+          additional_details?: string | null
+          archived?: boolean | null
+          color?: string | null
           content: string
           created_at?: string
-          created_by: string
+          curriculum: string
           id?: string
           pod_id: string
+          subtopic?: string | null
           title: string
+          topic: string
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          color?: string
+          additional_details?: string | null
+          archived?: boolean | null
+          color?: string | null
           content?: string
           created_at?: string
-          created_by?: string
+          curriculum?: string
           id?: string
           pod_id?: string
+          subtopic?: string | null
           title?: string
+          topic?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {

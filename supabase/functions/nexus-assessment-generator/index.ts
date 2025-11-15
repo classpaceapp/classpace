@@ -94,13 +94,13 @@ CRITICAL REQUIREMENTS:
 3. Distribute ${totalMarks} marks appropriately across ${numQuestions} questions
 4. Include varied difficulty levels (30% easy, 50% medium, 20% challenging)
 5. Mix question types: multiple choice, short answer, problem-solving, essay
-6. For mathematical content: Use LaTeX notation
+6. For mathematical content: Use LaTeX notation ONLY
    - Inline math: $x = 5$
    - Display math: $$E = mc^2$$
-   - Use \\times for multiplication (NOT * or x)
-   - Use \\frac{a}{b} for fractions
-   - Use \\sqrt{x} for square roots
-7. For underlined text, use <u>text</u> HTML tags
+   - Use $\\times$ for multiplication (NOT * or x)
+   - Use $\\frac{a}{b}$ for fractions
+   - Use $\\sqrt{x}$ for square roots
+7. NO HTML tags, NO underline tags, NO bold, NO italics - PLAIN TEXT ONLY except for LaTeX math
 8. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
 9. Each question must have clear mark allocation
 10. Include detailed marking rubric/answer key at the end
@@ -162,18 +162,26 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
 
     // Aggressive cleaning - remove ALL markdown and unnecessary formatting characters
     assessment = assessment
-      .replace(/\*\*\*/g, '') // Remove triple asterisks
-      .replace(/\*\*/g, '')   // Remove bold markers
-      .replace(/\*/g, '')     // Remove all remaining asterisks
-      .replace(/#{1,6}\s/g, '') // Remove markdown headers
-      .replace(/`{3}[\s\S]*?`{3}/g, '') // Remove code blocks
-      .replace(/`{1,2}/g, '') // Remove inline code markers
-      .replace(/_{2,}/g, '')  // Remove underline markers
-      .replace(/_([^_\s])_/g, '$1') // Remove emphasis underscores
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove markdown links
-      .replace(/^\s*[-*+]\s/gm, '') // Remove list markers
-      .replace(/^\s*\d+\.\s/gm, (match) => match.replace(/\s+$/, ' ')) // Clean numbered lists
-      .replace(/\n{3,}/g, '\n\n') // Normalize whitespace
+    // Aggressive cleaning of the response - remove ALL formatting except LaTeX math
+    let cleanedAssessment = assessmentContent
+      .replace(/```json\s*/g, '')
+      .replace(/```\s*/g, '')
+      .replace(/\*\*\*/g, '')
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/_{2,}/g, '')
+      .replace(/_([^_\s])_/g, '$1')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^\s*[-*+]\s+/gm, '')
+      .replace(/^\s*\d+\.\s+/gm, '')
+      .replace(/^\s*>\s+/gm, '')
+      // Remove ALL HTML-like tags except preserve content
+      .replace(/<\/?[^>]+(>|$)/g, '')
+      // Clean up whitespace
+      .replace(/\r\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
 
     // CRITICAL: Strip the answer key section to prevent answer leak in public assessments

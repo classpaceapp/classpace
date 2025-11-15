@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { CheckCircle2, FileText } from 'lucide-react';
 import 'katex/dist/katex.min.css';
-import { InlineMath, BlockMath } from 'react-katex';
+import { MathRenderer } from '@/components/quiz/MathRenderer';
 
 const PublicAssessment: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -122,18 +122,7 @@ const PublicAssessment: React.FC = () => {
   };
 
   const renderMathContent = (text: string) => {
-    const parts = text.split(/(\$\$[\s\S]+?\$\$|\$[^\$]+?\$)/g);
-    
-    return parts.map((part, index) => {
-      if (part.startsWith('$$') && part.endsWith('$$')) {
-        const math = part.slice(2, -2);
-        return <BlockMath key={index} math={math} />;
-      } else if (part.startsWith('$') && part.endsWith('$')) {
-        const math = part.slice(1, -1);
-        return <InlineMath key={index} math={math} />;
-      }
-      return <span key={index}>{part}</span>;
-    });
+    return <MathRenderer text={text} />;
   };
 
   if (loading) {
