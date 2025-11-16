@@ -160,10 +160,8 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
 
     console.log('Assessment generated, cleaning response...');
 
-    // Aggressive cleaning - remove ALL markdown and unnecessary formatting characters
-    assessment = assessment
     // Aggressive cleaning of the response - remove ALL formatting except LaTeX math
-    let cleanedAssessment = assessmentContent
+    assessment = assessment
       .replace(/```json\s*/g, '')
       .replace(/```\s*/g, '')
       .replace(/\*\*\*/g, '')
