@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { PodChat } from '@/components/pods/PodChat';
-import { PodNotes } from '@/components/pods/PodNotes';
+import { PodStickyNotes } from '@/components/pods/PodStickyNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
 import PodMeetings from '@/components/pods/PodMeetings';
 import PodQuizzesWithArchive from '@/components/pods/PodQuizzesWithArchive';
@@ -356,7 +356,7 @@ const PodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="notes" className="mt-6">
-            <PodNotes podId={id!} isTeacher={true} />
+            <PodStickyNotes podId={id!} isTeacher={true} />
           </TabsContent>
 
           <TabsContent value="meetings" className="mt-6">
