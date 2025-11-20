@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { PodChat } from '@/components/pods/PodChat';
-import { PodNotes } from '@/components/pods/PodNotes';
+import { PodStickyNotes } from '@/components/pods/PodStickyNotes';
 import { PodMaterials } from '@/components/pods/PodMaterials';
 import PodMeetings from '@/components/pods/PodMeetings';
 import PodQuizzesWithArchive from '@/components/pods/PodQuizzesWithArchive';
@@ -326,7 +326,7 @@ const StudentPodView: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="notes" className="mt-6">
-            <PodNotes podId={id!} isTeacher={false} />
+            <PodStickyNotes podId={id!} isTeacher={false} />
           </TabsContent>
 
           <TabsContent value="meetings" className="mt-6">
