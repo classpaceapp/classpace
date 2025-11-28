@@ -145,7 +145,7 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. Use ONLY plain text and LaTeX - absolutely NO markdown symbols (*, **, #, _, `, etc.), NO tables (\\begin{tabular}, etc.), NO excessive backslashes. All emphasis should be through proper capitalization and punctuation only. For matching questions, use simple numbered lists, NOT tables.' 
+            content: 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. CRITICAL RULES: Use ONLY plain text and LaTeX math (wrapped in $ or $$) - absolutely NO markdown symbols (*, **, #, _, `, etc.), NO tables of any kind (\\begin{tabular}, etc.), NO backslashes anywhere except inside LaTeX math delimiters ($ or $$). For blanks in fill-in-the-blank questions, use underscores like _____ or write "(blank)" - NEVER use backslashes. All emphasis should be through proper capitalization and punctuation only. For matching questions, use simple numbered lists, NOT tables.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -163,8 +163,29 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
 
     console.log('Assessment generated, cleaning response...');
 
-    // ULTRA-AGGRESSIVE cleaning of the response - remove ALL formatting except LaTeX math
-    assessment = assessment
+    // ULTRA-AGGRESSIVE cleaning - preserve LaTeX math, remove everything else
+    console.log('Starting aggressive cleaning...');
+    
+    // Step 1: Extract and protect LaTeX math expressions
+    const mathExpressions: string[] = [];
+    let tempAssessment = assessment;
+    
+    // Protect display math ($$...$$)
+    tempAssessment = tempAssessment.replace(/\$\$([^\$]+)\$\$/g, (match, content) => {
+      mathExpressions.push(match);
+      return `__MATH_${mathExpressions.length - 1}__`;
+    });
+    
+    // Protect inline math ($...$)
+    tempAssessment = tempAssessment.replace(/\$([^\$]+)\$/g, (match, content) => {
+      mathExpressions.push(match);
+      return `__MATH_${mathExpressions.length - 1}__`;
+    });
+    
+    console.log(`Protected ${mathExpressions.length} math expressions`);
+    
+    // Step 2: Aggressive cleaning on non-math content
+    tempAssessment = tempAssessment
       // Remove code blocks
       .replace(/```json\s*/g, '')
       .replace(/```\s*/g, '')
@@ -172,17 +193,12 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
       .replace(/\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g, '')
       .replace(/\\begin\{table\}[\s\S]*?\\end\{table\}/g, '')
       .replace(/\\begin\{array\}[\s\S]*?\\end\{array\}/g, '')
-      // Remove excessive backslashes (but preserve single backslashes in LaTeX)
-      .replace(/\\{9,}/g, '')
-      .replace(/\\{5,8}/g, '\\')
-      .replace(/\\{3,4}/g, '\\')
-      .replace(/\\{2}/g, '\\')
+      // Remove ALL backslashes now (math is protected)
+      .replace(/\\/g, '')
       // Remove markdown formatting
       .replace(/\*\*\*/g, '')
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
-      .replace(/_{2,}/g, '')
-      .replace(/_([^_\s])_/g, '$1')
       .replace(/#{1,6}\s/g, '')
       .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
       .replace(/`([^`]+)`/g, '$1')
@@ -193,16 +209,19 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
       .replace(/<\/?[^>]+(>|$)/g, '')
       // Remove table-related syntax
       .replace(/\|/g, '')
-      .replace(/\\hline/g, '')
-      .replace(/\\multicolumn\{[^}]*\}\{[^}]*\}\{[^}]*\}/g, '')
-      // Clean up line breaks and whitespace that appear after backslash removal
-      .replace(/\\\s*\n/g, '\n')
-      .replace(/\\\s+/g, ' ')
       // Final whitespace cleanup
       .replace(/\r\n/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
       .replace(/\s{3,}/g, ' ')
       .trim();
+    
+    // Step 3: Restore protected math expressions
+    mathExpressions.forEach((expr, index) => {
+      tempAssessment = tempAssessment.replace(`__MATH_${index}__`, expr);
+    });
+    
+    assessment = tempAssessment;
+    console.log('Cleaning completed');
 
     // CRITICAL: Strip the answer key section to prevent answer leak in public assessments
     // Find and remove everything after "MARKING RUBRIC", "ANSWER KEY", or similar headers
