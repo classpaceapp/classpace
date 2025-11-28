@@ -14,6 +14,7 @@ serve(async (req) => {
     const { 
       assessmentType, 
       subject, 
+      title,
       gradeLevel, 
       topic, 
       numQuestions,
@@ -21,7 +22,7 @@ serve(async (req) => {
       curriculum 
     } = await req.json();
     
-    if (!assessmentType || !subject || !gradeLevel || !topic || !numQuestions || !totalMarks || !curriculum) {
+    if (!assessmentType || !subject || !title || !gradeLevel || !topic || !numQuestions || !totalMarks || !curriculum) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -81,6 +82,7 @@ ${researchContext}
 Create a comprehensive, academically rigorous ${assessmentType} for ${curriculum} curriculum:
 
 ASSESSMENT DETAILS:
+- Title: ${title}
 - Subject: ${subject}
 - Topic: ${topic}
 - Grade Level: ${gradeLevel}
@@ -98,15 +100,17 @@ CRITICAL REQUIREMENTS:
    - Inline math: $x = 5$
    - Display math: $$E = mc^2$$
    - Use $\\times$ for multiplication (NOT * or x)
-   - Use $\\frac{a}{b}$ for fractions
+   - Use $\\frac{a}{b}$ for fractions (NOT 1/2)
    - Use $\\sqrt{x}$ for square roots
-7. NO HTML tags, NO underline tags, NO bold, NO italics - PLAIN TEXT ONLY except for LaTeX math
-8. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
-9. Each question must have clear mark allocation
-10. Include detailed marking rubric/answer key at the end
+7. ABSOLUTELY NO tables - use simple numbered lists instead
+8. NO HTML tags, NO underline tags, NO bold, NO italics - PLAIN TEXT ONLY except for LaTeX math
+9. NO backslashes except in LaTeX math expressions
+10. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
+11. Each question must have clear mark allocation
+12. Include detailed marking rubric/answer key at the end
 
 FORMAT:
-Assessment Title: [Clear, specific title]
+${title}
 
 Instructions for Students:
 - Time allocation
@@ -114,7 +118,6 @@ Instructions for Students:
 - Exam rules
 
 QUESTIONS:
-[Number each question clearly with mark allocation]
 
 Question 1 (X marks):
 [Question text with proper mathematical formatting using LaTeX where needed]
@@ -127,7 +130,7 @@ Question 2 (X marks):
 MARKING RUBRIC & ANSWER KEY:
 [Detailed answers and marking criteria for each question]
 
-IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #, etc.). Use proper capitalization and punctuation for emphasis.`;
+CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO excessive backslashes. Use proper capitalization and punctuation for emphasis.`;
 
     console.log('Sending to AI for generation...');
 
@@ -142,7 +145,7 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. Use ONLY plain text and LaTeX - absolutely NO markdown symbols (*, **, #, _, `, etc.). All emphasis should be through proper capitalization and punctuation only.' 
+            content: 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. Use ONLY plain text and LaTeX - absolutely NO markdown symbols (*, **, #, _, `, etc.), NO tables (\\begin{tabular}, etc.), NO excessive backslashes. All emphasis should be through proper capitalization and punctuation only. For matching questions, use simple numbered lists, NOT tables.' 
           },
           { role: 'user', content: prompt }
         ],
@@ -160,10 +163,21 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
 
     console.log('Assessment generated, cleaning response...');
 
-    // Aggressive cleaning of the response - remove ALL formatting except LaTeX math
+    // ULTRA-AGGRESSIVE cleaning of the response - remove ALL formatting except LaTeX math
     assessment = assessment
+      // Remove code blocks
       .replace(/```json\s*/g, '')
       .replace(/```\s*/g, '')
+      // Remove ALL LaTeX table environments
+      .replace(/\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g, '')
+      .replace(/\\begin\{table\}[\s\S]*?\\end\{table\}/g, '')
+      .replace(/\\begin\{array\}[\s\S]*?\\end\{array\}/g, '')
+      // Remove excessive backslashes (but preserve single backslashes in LaTeX)
+      .replace(/\\{9,}/g, '')
+      .replace(/\\{5,8}/g, '\\')
+      .replace(/\\{3,4}/g, '\\')
+      .replace(/\\{2}/g, '\\')
+      // Remove markdown formatting
       .replace(/\*\*\*/g, '')
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
@@ -175,11 +189,19 @@ IMPORTANT: Use ONLY plain text and LaTeX for math. NO markdown symbols (*, **, #
       .replace(/^\s*[-*+]\s+/gm, '')
       .replace(/^\s*\d+\.\s+/gm, '')
       .replace(/^\s*>\s+/gm, '')
-      // Remove ALL HTML-like tags except preserve content
+      // Remove ALL HTML-like tags
       .replace(/<\/?[^>]+(>|$)/g, '')
-      // Clean up whitespace
+      // Remove table-related syntax
+      .replace(/\|/g, '')
+      .replace(/\\hline/g, '')
+      .replace(/\\multicolumn\{[^}]*\}\{[^}]*\}\{[^}]*\}/g, '')
+      // Clean up line breaks and whitespace that appear after backslash removal
+      .replace(/\\\s*\n/g, '\n')
+      .replace(/\\\s+/g, ' ')
+      // Final whitespace cleanup
       .replace(/\r\n/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
+      .replace(/\s{3,}/g, ' ')
       .trim();
 
     // CRITICAL: Strip the answer key section to prevent answer leak in public assessments
