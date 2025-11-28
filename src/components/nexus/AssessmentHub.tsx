@@ -22,6 +22,7 @@ const AssessmentHub: React.FC = () => {
   // Form state
   const [assessmentType, setAssessmentType] = useState('');
   const [subject, setSubject] = useState('');
+  const [title, setTitle] = useState('');
   const [topic, setTopic] = useState('');
   const [numQuestions, setNumQuestions] = useState(10);
   const [totalMarks, setTotalMarks] = useState(100);
@@ -58,10 +59,10 @@ const AssessmentHub: React.FC = () => {
   };
 
   const handleGenerate = async () => {
-    if (!assessmentType || !subject || !topic || !curriculum || !yearLevel) {
+    if (!assessmentType || !subject || !title || !topic || !curriculum || !yearLevel) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including title",
         variant: "destructive"
       });
       return;
@@ -92,6 +93,7 @@ const AssessmentHub: React.FC = () => {
         body: {
           assessmentType,
           subject,
+          title,
           gradeLevel: yearLevel,
           topic,
           numQuestions,
@@ -107,7 +109,7 @@ const AssessmentHub: React.FC = () => {
         .from('nexus_assessments')
         .insert({
           teacher_id: user?.id,
-          title: `${subject} - ${topic}`,
+          title: title,
           assessment_type: assessmentType,
           subject,
           num_questions: numQuestions,
@@ -131,6 +133,7 @@ const AssessmentHub: React.FC = () => {
       // Reset form
       setAssessmentType('');
       setSubject('');
+      setTitle('');
       setTopic('');
       setNumQuestions(10);
       setTotalMarks(100);
@@ -339,6 +342,15 @@ const AssessmentHub: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Title *</Label>
+            <Input
+              placeholder="e.g., EVS Grade 4 Mid-Term Assessment"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
           </div>
 
           <div className="space-y-2">
