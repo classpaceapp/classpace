@@ -141,7 +141,7 @@ const MarketingDashboard = () => {
       return;
     }
 
-    if (!selectedList && selectedUsers.length === 0) {
+    if ((selectedList === 'selected-users' || !selectedList) && selectedUsers.length === 0) {
       toast.error('Please select recipients');
       return;
     }
@@ -154,7 +154,7 @@ const MarketingDashboard = () => {
         htmlContent: emailContent,
       };
 
-      if (selectedList) {
+      if (selectedList && selectedList !== 'selected-users') {
         payload.listId = parseInt(selectedList);
       } else {
         const selectedEmails = users
@@ -505,7 +505,7 @@ const MarketingDashboard = () => {
                       <SelectValue placeholder="Select a list or use selected users" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Selected Users ({selectedUsers.length})</SelectItem>
+                      <SelectItem value="selected-users">Selected Users ({selectedUsers.length})</SelectItem>
                       <Separator className="my-2" />
                       {lists.map(list => (
                         <SelectItem key={list.id} value={list.id.toString()}>
@@ -514,7 +514,7 @@ const MarketingDashboard = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  {!selectedList && selectedUsers.length === 0 && (
+                  {(selectedList === 'selected-users' || !selectedList) && selectedUsers.length === 0 && (
                     <p className="text-xs text-amber-400">Select users from the User Directory tab or choose a list</p>
                   )}
                 </div>
@@ -545,7 +545,7 @@ const MarketingDashboard = () => {
                 {/* Send button */}
                 <Button
                   onClick={sendEmail}
-                  disabled={isSending || (!selectedList && selectedUsers.length === 0) || !emailSubject || !emailContent}
+                  disabled={isSending || ((selectedList === 'selected-users' || !selectedList) && selectedUsers.length === 0) || !emailSubject || !emailContent}
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-6 text-lg"
                 >
                   {isSending ? (
