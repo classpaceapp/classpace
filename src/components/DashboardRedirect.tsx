@@ -62,8 +62,8 @@ const DashboardRedirect = () => {
             />
           </div>
 
-          {/* Rotating highlight ring */}
-          <div className="absolute -inset-4 rounded-[2rem] border-2 border-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 opacity-50 animate-[spin_3s_linear_infinite]" 
+          {/* Rotating highlight ring - circular */}
+          <div className="absolute -inset-4 rounded-full border-2 border-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 opacity-50 animate-[spin_3s_linear_infinite]" 
                style={{ 
                  mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                  maskComposite: 'xor',
