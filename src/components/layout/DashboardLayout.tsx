@@ -52,7 +52,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
     { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },
     { name: 'FAQs', href: '/faqs', icon: HelpCircle, color: 'text-orange-500' },
-    { name: 'AI Chat', href: '/ai-chat', icon: MessageSquare, color: 'text-cyan-500' },
+    { name: 'Assistant', href: '/ai-chat', icon: MessageSquare, color: 'text-cyan-500' },
     { name: 'Support', href: '/support-tab', icon: LifeBuoy, color: 'text-red-500' }
   ];
 
@@ -69,6 +69,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
     { name: 'Documentation', href: '/documentation', icon: FileText, color: 'text-green-500' },
     { name: 'FAQs', href: '/faqs', icon: HelpCircle, color: 'text-orange-500' },
+    { name: 'Assistant', href: '/ai-chat', icon: MessageSquare, color: 'text-cyan-500' },
     { name: 'Support', href: '/support-tab', icon: LifeBuoy, color: 'text-red-500' }
   ];
 
