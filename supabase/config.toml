@@ -74,3 +74,6 @@ verify_jwt = true
 
 [functions.grade-assessment]
 verify_jwt = false
+
+[functions.marketing-admin]
+verify_jwt = true
