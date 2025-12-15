@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import LoadingAnimation from '@/components/LoadingAnimation';
 
-// Email template definitions
+// Email template definitions - All with light backgrounds for visibility
 const EMAIL_TEMPLATES = [
   {
     id: 'welcome',
@@ -35,26 +35,26 @@ const EMAIL_TEMPLATES = [
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 40px;">
       <img src="https://classpace.co/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" alt="Classpace" style="width: 60px; height: 60px; margin-bottom: 16px;">
-      <h1 style="margin: 0; font-size: 32px; background: linear-gradient(135deg, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Welcome to Classpace!</h1>
+      <h1 style="margin: 0; font-size: 32px; color: #7c3aed;">Welcome to Classpace!</h1>
     </div>
     
     <!-- Main Content -->
-    <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-radius: 24px; padding: 40px; border: 1px solid rgba(139, 92, 246, 0.3);">
-      <p style="color: #e2e8f0; font-size: 18px; line-height: 1.7; margin: 0 0 24px 0;">
+    <div style="background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%); border-radius: 24px; padding: 40px; border: 2px solid #e9d5ff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.1);">
+      <p style="color: #1e293b; font-size: 18px; line-height: 1.7; margin: 0 0 24px 0;">
         Hi there! 👋
       </p>
-      <p style="color: #cbd5e1; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
+      <p style="color: #475569; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
         We're thrilled to have you join the Classpace community. Whether you're a teacher looking to revolutionize your classroom or a learner ready to explore new horizons, you're in the right place.
       </p>
-      <p style="color: #cbd5e1; font-size: 16px; line-height: 1.7; margin: 0 0 32px 0;">
+      <p style="color: #475569; font-size: 16px; line-height: 1.7; margin: 0 0 32px 0;">
         Here's what you can do next:
       </p>
-      <ul style="color: #cbd5e1; font-size: 16px; line-height: 2; margin: 0 0 32px 0; padding-left: 24px;">
+      <ul style="color: #334155; font-size: 16px; line-height: 2; margin: 0 0 32px 0; padding-left: 24px;">
         <li>✨ Explore AI-powered learning tools</li>
         <li>📚 Create or join study pods</li>
         <li>🎯 Generate quizzes and flashcards instantly</li>
@@ -66,9 +66,9 @@ const EMAIL_TEMPLATES = [
     </div>
     
     <!-- Footer -->
-    <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(139, 92, 246, 0.2);">
+    <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 2px solid #e9d5ff;">
       <p style="color: #64748b; font-size: 14px; margin: 0;">Made with 💜 by the Classpace Team</p>
-      <p style="color: #475569; font-size: 12px; margin: 8px 0 0 0;">© 2024 Classpace. All rights reserved.</p>
+      <p style="color: #94a3b8; font-size: 12px; margin: 8px 0 0 0;">© 2024 Classpace. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -86,20 +86,20 @@ const EMAIL_TEMPLATES = [
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f9ff;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 40px;">
       <img src="https://classpace.co/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" alt="Classpace" style="width: 60px; height: 60px; margin-bottom: 16px;">
-      <h1 style="margin: 0; font-size: 28px; color: #f1f5f9;">📢 Announcement</h1>
+      <h1 style="margin: 0; font-size: 28px; color: #0369a1;">📢 Announcement</h1>
     </div>
     
     <!-- Main Content -->
-    <div style="background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%); border-radius: 24px; padding: 40px; border: 1px solid rgba(56, 189, 248, 0.3);">
-      <h2 style="color: #f0f9ff; font-size: 24px; margin: 0 0 24px 0; font-weight: 700;">
+    <div style="background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%); border-radius: 24px; padding: 40px; border: 2px solid #7dd3fc; box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);">
+      <h2 style="color: #0c4a6e; font-size: 24px; margin: 0 0 24px 0; font-weight: 700;">
         [Your Announcement Title Here]
       </h2>
-      <p style="color: #e0f2fe; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
+      <p style="color: #334155; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
         [Your announcement content goes here. Share exciting news, updates, or important information with your community.]
       </p>
       <div style="text-align: center; margin-top: 32px;">
@@ -108,9 +108,9 @@ const EMAIL_TEMPLATES = [
     </div>
     
     <!-- Footer -->
-    <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(56, 189, 248, 0.2);">
+    <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 2px solid #bae6fd;">
       <p style="color: #64748b; font-size: 14px; margin: 0;">Made with 💜 by the Classpace Team</p>
-      <p style="color: #475569; font-size: 12px; margin: 8px 0 0 0;">© 2024 Classpace. All rights reserved.</p>
+      <p style="color: #94a3b8; font-size: 12px; margin: 8px 0 0 0;">© 2024 Classpace. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -128,7 +128,7 @@ const EMAIL_TEMPLATES = [
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #faf5ff;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <!-- Header with gradient background -->
     <div style="background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%); border-radius: 24px 24px 0 0; padding: 48px 32px; text-align: center;">
@@ -137,17 +137,17 @@ const EMAIL_TEMPLATES = [
     </div>
     
     <!-- Main Content -->
-    <div style="background: #1e1b4b; border-radius: 0 0 24px 24px; padding: 40px 32px; border: 1px solid rgba(139, 92, 246, 0.3); border-top: none;">
-      <h2 style="color: #f5f3ff; font-size: 22px; margin: 0 0 16px 0; font-weight: 600;">
+    <div style="background: #ffffff; border-radius: 0 0 24px 24px; padding: 40px 32px; border: 2px solid #e9d5ff; border-top: none;">
+      <h2 style="color: #581c87; font-size: 22px; margin: 0 0 16px 0; font-weight: 600;">
         Introducing: [Feature Name]
       </h2>
-      <p style="color: #c4b5fd; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
+      <p style="color: #475569; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
         [Describe your new feature here. What does it do? How will it help users?]
       </p>
       
-      <div style="background: rgba(139, 92, 246, 0.1); border-radius: 16px; padding: 24px; margin: 24px 0;">
-        <h3 style="color: #e9d5ff; font-size: 16px; margin: 0 0 12px 0; font-weight: 600;">Key Benefits:</h3>
-        <ul style="color: #d8b4fe; font-size: 15px; line-height: 2; margin: 0; padding-left: 20px;">
+      <div style="background: #faf5ff; border-radius: 16px; padding: 24px; margin: 24px 0; border: 1px solid #e9d5ff;">
+        <h3 style="color: #7c3aed; font-size: 16px; margin: 0 0 12px 0; font-weight: 600;">Key Benefits:</h3>
+        <ul style="color: #475569; font-size: 15px; line-height: 2; margin: 0; padding-left: 20px;">
           <li>Benefit 1</li>
           <li>Benefit 2</li>
           <li>Benefit 3</li>
@@ -179,7 +179,7 @@ const EMAIL_TEMPLATES = [
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fffbeb;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 24px;">
@@ -194,24 +194,24 @@ const EMAIL_TEMPLATES = [
     </div>
     
     <!-- Main Content -->
-    <div style="background: #1c1917; border-radius: 24px; padding: 40px 32px; border: 1px solid rgba(245, 158, 11, 0.3);">
-      <h2 style="color: #fef3c7; font-size: 24px; margin: 0 0 16px 0; text-align: center;">
+    <div style="background: #ffffff; border-radius: 24px; padding: 40px 32px; border: 2px solid #fed7aa; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.1);">
+      <h2 style="color: #92400e; font-size: 24px; margin: 0 0 16px 0; text-align: center;">
         [Your Offer Details]
       </h2>
-      <p style="color: #fcd34d; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0; text-align: center;">
+      <p style="color: #78350f; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0; text-align: center;">
         [Describe your promotion. What are users getting? What's the discount?]
       </p>
       
-      <div style="background: rgba(245, 158, 11, 0.1); border-radius: 16px; padding: 20px; margin: 24px 0; text-align: center;">
-        <p style="color: #fbbf24; font-size: 14px; margin: 0 0 8px 0;">Use code:</p>
-        <p style="color: #fef08a; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: 4px;">CLASSPACE20</p>
+      <div style="background: #fef3c7; border-radius: 16px; padding: 20px; margin: 24px 0; text-align: center; border: 1px solid #fcd34d;">
+        <p style="color: #92400e; font-size: 14px; margin: 0 0 8px 0;">Use code:</p>
+        <p style="color: #b45309; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: 4px;">CLASSPACE20</p>
       </div>
       
       <div style="text-align: center; margin-top: 32px;">
         <a href="https://classpace.co/pricing" style="display: inline-block; padding: 18px 48px; background: linear-gradient(135deg, #f59e0b, #ea580c); color: white; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 18px;">Claim Your Offer →</a>
       </div>
       
-      <p style="color: #78716c; font-size: 13px; text-align: center; margin: 24px 0 0 0;">
+      <p style="color: #9ca3af; font-size: 13px; text-align: center; margin: 24px 0 0 0;">
         *Offer expires [Date]. Terms and conditions apply.
       </p>
     </div>
@@ -236,43 +236,43 @@ const EMAIL_TEMPLATES = [
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ecfdf5;">
   <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 32px;">
       <img src="https://classpace.co/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" alt="Classpace" style="width: 50px; height: 50px; margin-bottom: 12px;">
-      <h1 style="margin: 0; font-size: 24px; color: #f1f5f9;">📬 Weekly Digest</h1>
+      <h1 style="margin: 0; font-size: 24px; color: #065f46;">📬 Weekly Digest</h1>
       <p style="color: #64748b; font-size: 14px; margin: 8px 0 0 0;">[Date]</p>
     </div>
     
     <!-- Main Content -->
-    <div style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); border-radius: 24px; padding: 32px; border: 1px solid rgba(52, 211, 153, 0.3); margin-bottom: 24px;">
-      <h2 style="color: #d1fae5; font-size: 20px; margin: 0 0 16px 0;">👋 Hello!</h2>
-      <p style="color: #a7f3d0; font-size: 15px; line-height: 1.7; margin: 0;">
+    <div style="background: linear-gradient(135deg, #ffffff 0%, #d1fae5 100%); border-radius: 24px; padding: 32px; border: 2px solid #6ee7b7; margin-bottom: 24px;">
+      <h2 style="color: #047857; font-size: 20px; margin: 0 0 16px 0;">👋 Hello!</h2>
+      <p style="color: #374151; font-size: 15px; line-height: 1.7; margin: 0;">
         Here's what's been happening at Classpace this week...
       </p>
     </div>
     
     <!-- Section 1 -->
-    <div style="background: #1e293b; border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid #334155;">
-      <h3 style="color: #f1f5f9; font-size: 18px; margin: 0 0 12px 0;">🚀 What's New</h3>
-      <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
+    <div style="background: #ffffff; border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid #a7f3d0;">
+      <h3 style="color: #065f46; font-size: 18px; margin: 0 0 12px 0;">🚀 What's New</h3>
+      <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
         [Share product updates, new features, or improvements]
       </p>
     </div>
     
     <!-- Section 2 -->
-    <div style="background: #1e293b; border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid #334155;">
-      <h3 style="color: #f1f5f9; font-size: 18px; margin: 0 0 12px 0;">📚 Tips & Tricks</h3>
-      <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
+    <div style="background: #ffffff; border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid #a7f3d0;">
+      <h3 style="color: #065f46; font-size: 18px; margin: 0 0 12px 0;">📚 Tips & Tricks</h3>
+      <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
         [Share helpful tips for using Classpace effectively]
       </p>
     </div>
     
     <!-- Section 3 -->
-    <div style="background: #1e293b; border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid #334155;">
-      <h3 style="color: #f1f5f9; font-size: 18px; margin: 0 0 12px 0;">🌟 Community Spotlight</h3>
-      <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
+    <div style="background: #ffffff; border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid #a7f3d0;">
+      <h3 style="color: #065f46; font-size: 18px; margin: 0 0 12px 0;">🌟 Community Spotlight</h3>
+      <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0;">
         [Highlight community achievements or user stories]
       </p>
     </div>
@@ -282,9 +282,9 @@ const EMAIL_TEMPLATES = [
     </div>
     
     <!-- Footer -->
-    <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #334155;">
+    <div style="text-align: center; margin-top: 40px; padding-top: 24px; border-top: 2px solid #a7f3d0;">
       <p style="color: #64748b; font-size: 14px; margin: 0;">Made with 💜 by the Classpace Team</p>
-      <p style="color: #475569; font-size: 12px; margin: 8px 0 0 0;">You're receiving this because you're part of the Classpace community.</p>
+      <p style="color: #94a3b8; font-size: 12px; margin: 8px 0 0 0;">You're receiving this because you're part of the Classpace community.</p>
     </div>
   </div>
 </body>
@@ -908,14 +908,25 @@ const MarketingDashboard = () => {
                     </CardTitle>
                     <CardDescription>Manage your Brevo contact lists</CardDescription>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={fetchData}
-                    className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Refresh
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={setupAndSyncLists}
+                      disabled={isSyncing}
+                      className="border-green-500/50 text-green-300 hover:bg-green-500/20"
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                      {isSyncing ? 'Syncing...' : 'Sync Users'}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={fetchData}
+                      className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

@@ -48,19 +48,17 @@ const DashboardRedirect = () => {
 
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center">
-        {/* Logo with glow and scale animation */}
+        {/* Logo with glow and rotating circle */}
         <div className="relative mb-8 animate-[scale-in_0.5s_ease-out]">
-          {/* Glow effect */}
-          <div className="absolute inset-0 w-32 h-32 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-60 animate-pulse" />
+          {/* Glow effect behind logo */}
+          <div className="absolute inset-0 w-32 h-32 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 animate-pulse" />
           
-          {/* Logo container with breathing animation */}
-          <div className="relative w-32 h-32 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl flex items-center justify-center animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]">
-            <img 
-              src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-              alt="Classpace" 
-              className="w-20 h-20 drop-shadow-2xl"
-            />
-          </div>
+          {/* Logo - just the image, no container */}
+          <img 
+            src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
+            alt="Classpace" 
+            className="relative w-32 h-32 drop-shadow-2xl"
+          />
 
           {/* Rotating highlight ring - circular */}
           <div className="absolute -inset-4 rounded-full border-2 border-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 opacity-50 animate-[spin_3s_linear_infinite]" 
