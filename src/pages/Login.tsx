@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BookOpen, Users, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,6 +23,10 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"teacher" | "learner">("teacher");
+  
+  // Google OAuth name fields
+  const [googleFirstName, setGoogleFirstName] = useState("");
+  const [googleLastName, setGoogleLastName] = useState("");
 
   // Handle authentication state and role selection for Google OAuth
   useEffect(() => {
@@ -32,6 +37,15 @@ const Login = () => {
         navigate(dashboardPath);
       } else {
         // User authenticated but no profile (new Google user), show role selection
+        // Pre-fill names from Google metadata if available
+        const gFirstName = user.user_metadata?.given_name || 
+                          user.user_metadata?.full_name?.split(' ')[0] || 
+                          user.user_metadata?.name?.split(' ')[0] || '';
+        const gLastName = user.user_metadata?.family_name || 
+                         user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || 
+                         user.user_metadata?.name?.split(' ').slice(1).join(' ') || '';
+        setGoogleFirstName(gFirstName);
+        setGoogleLastName(gLastName);
         setShowRoleDialog(true);
       }
     }
@@ -39,13 +53,25 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate names for signup
+    if (isSignUp) {
+      if (!firstName.trim()) {
+        toast.error("First name is required");
+        return;
+      }
+      if (!lastName.trim()) {
+        toast.error("Last name is required");
+        return;
+      }
+    }
+    
     setIsSubmitting(true);
     
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, role, firstName, lastName);
+        const { error } = await signUp(email, password, role, firstName.trim(), lastName.trim());
         if (!error) {
-          // Don't navigate immediately for sign up - let them check email if needed
           setEmail("");
           setPassword("");
           setFirstName("");
@@ -72,9 +98,19 @@ const Login = () => {
   };
 
   const handleRoleSelection = async () => {
+    // Validate names
+    if (!googleFirstName.trim()) {
+      toast.error("First name is required");
+      return;
+    }
+    if (!googleLastName.trim()) {
+      toast.error("Last name is required");
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
-      const { error } = await completeGoogleSignUp(selectedRole);
+      const { error } = await completeGoogleSignUp(selectedRole, googleFirstName.trim(), googleLastName.trim());
       if (!error) {
         setShowRoleDialog(false);
         // Navigation will be handled by useEffect when profile loads
@@ -198,7 +234,7 @@ const Login = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-gray-200">
-                    First Name {isSignUp && <span className="text-red-400">*</span>}
+                    First Name <span className="text-red-400">*</span>
                   </Label>
                   <Input
                     id="firstName"
@@ -206,13 +242,13 @@ const Login = () => {
                     placeholder="John"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    required={isSignUp}
+                    required
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName" className="text-gray-200">
-                    Last Name {isSignUp && <span className="text-red-400">*</span>}
+                    Last Name <span className="text-red-400">*</span>
                   </Label>
                   <Input
                     id="lastName"
@@ -220,7 +256,7 @@ const Login = () => {
                     placeholder="Doe"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    required={isSignUp}
+                    required
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
                   />
                 </div>
@@ -286,48 +322,85 @@ const Login = () => {
         </CardContent>
       </Card>
 
-      {/* Role Selection Dialog for Google OAuth */}
+      {/* Role Selection Dialog for Google OAuth - Now with mandatory name fields */}
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
-        <DialogContent className="bg-gray-800 border-gray-700">
+        <DialogContent className="bg-gray-800 border-gray-700 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white text-2xl">Welcome to Classpace!</DialogTitle>
             <DialogDescription className="text-gray-300">
-              Please select your role to complete your registration
+              Complete your profile to get started
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant={selectedRole === "teacher" ? "default" : "outline"}
-                onClick={() => setSelectedRole("teacher")}
-                className={`flex items-center space-x-2 h-16 transition-all ${
-                  selectedRole === "teacher" 
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
-                    : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
-                }`}
-              >
-                <BookOpen className="w-5 h-5" />
-                <span>Teacher</span>
-              </Button>
-              <Button
-                type="button"
-                variant={selectedRole === "learner" ? "default" : "outline"}
-                onClick={() => setSelectedRole("learner")}
-                className={`flex items-center space-x-2 h-16 transition-all ${
-                  selectedRole === "learner" 
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
-                    : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
-                }`}
-              >
-                <Users className="w-5 h-5" />
-                <span>Learner</span>
-              </Button>
+          <div className="space-y-5 py-4">
+            {/* Name fields - mandatory */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="googleFirstName" className="text-gray-200">
+                  First Name <span className="text-red-400">*</span>
+                </Label>
+                <Input
+                  id="googleFirstName"
+                  type="text"
+                  placeholder="John"
+                  value={googleFirstName}
+                  onChange={(e) => setGoogleFirstName(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="googleLastName" className="text-gray-200">
+                  Last Name <span className="text-red-400">*</span>
+                </Label>
+                <Input
+                  id="googleLastName"
+                  type="text"
+                  placeholder="Doe"
+                  value={googleLastName}
+                  onChange={(e) => setGoogleLastName(e.target.value)}
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
             </div>
+
+            <Separator className="bg-gray-600" />
+
+            {/* Role selection */}
+            <div className="space-y-2">
+              <Label className="text-gray-200">I am a:</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  type="button"
+                  variant={selectedRole === "teacher" ? "default" : "outline"}
+                  onClick={() => setSelectedRole("teacher")}
+                  className={`flex items-center space-x-2 h-14 transition-all ${
+                    selectedRole === "teacher" 
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
+                      : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
+                  }`}
+                >
+                  <BookOpen className="w-5 h-5" />
+                  <span>Teacher</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={selectedRole === "learner" ? "default" : "outline"}
+                  onClick={() => setSelectedRole("learner")}
+                  className={`flex items-center space-x-2 h-14 transition-all ${
+                    selectedRole === "learner" 
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 border-transparent" 
+                      : "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
+                  }`}
+                >
+                  <Users className="w-5 h-5" />
+                  <span>Learner</span>
+                </Button>
+              </div>
+            </div>
+
             <Button 
               onClick={handleRoleSelection}
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              disabled={isSubmitting || !googleFirstName.trim() || !googleLastName.trim()}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white disabled:opacity-50"
             >
               {isSubmitting ? "Setting up..." : "Continue"}
             </Button>

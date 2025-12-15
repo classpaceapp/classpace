@@ -35,7 +35,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, role: 'teacher' | 'learner', firstName?: string, lastName?: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
-  completeGoogleSignUp: (role: 'teacher' | 'learner') => Promise<{ error: any }>;
+  completeGoogleSignUp: (role: 'teacher' | 'learner', firstName: string, lastName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshSubscription: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -355,21 +355,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const completeGoogleSignUp = async (role: 'teacher' | 'learner') => {
+  const completeGoogleSignUp = async (role: 'teacher' | 'learner', firstName: string, lastName: string) => {
     if (!user?.id) {
       return { error: new Error('No user found') };
     }
 
     try {
-      // Extract names from Google user metadata
-      const firstName = user.user_metadata?.full_name?.split(' ')[0] || 
-                       user.user_metadata?.given_name || 
-                       user.user_metadata?.name?.split(' ')[0] || '';
-      const lastName = user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || 
-                      user.user_metadata?.family_name || 
-                      user.user_metadata?.name?.split(' ').slice(1).join(' ') || '';
-
-      // Update the profile with the selected role and names from Google
+      // Update the profile with the selected role and provided names
       const { error } = await supabase
         .from('profiles')
         .update({ 
