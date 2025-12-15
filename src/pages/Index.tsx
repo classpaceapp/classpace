@@ -428,9 +428,14 @@ const Index = () => {
           {/* Bottom Section */}
           <div className="border-t border-gray-700 mt-8 md:mt-12 pt-6 md:pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-0">
-              <p className="text-gray-400 text-xs md:text-base text-center md:text-left">
-                © 2025 Classpace. All rights reserved.
-              </p>
+              <div className="text-center md:text-left">
+                <p className="text-gray-400 text-xs md:text-base">
+                  © 2025 Classpace. All rights reserved.
+                </p>
+                <p className="text-gray-500 text-[10px] md:text-xs mt-1">
+                  Classpace Inc, 600 N Broad St, Ste 5 #445, Middletown, Delaware 19709
+                </p>
+              </div>
               <p className="text-gray-400 text-xs md:text-sm text-center md:text-right">
                 Built for educators and learners everywhere.
               </p>

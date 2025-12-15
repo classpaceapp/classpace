@@ -402,9 +402,14 @@ const Careers = () => {
 
           <div className="border-t border-gray-700 mt-12 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-gray-400 mb-4 md:mb-0">
-                © 2025 Classpace. All rights reserved.
-              </p>
+              <div className="mb-4 md:mb-0">
+                <p className="text-gray-400">
+                  © 2025 Classpace. All rights reserved.
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  Classpace Inc, 600 N Broad St, Ste 5 #445, Middletown, Delaware 19709
+                </p>
+              </div>
               <p className="text-gray-400 text-sm">
                 Built for educators and learners everywhere.
               </p>
