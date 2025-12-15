@@ -48,6 +48,7 @@ import More from "./pages/More";
 import TeacherNexus from "./pages/TeacherNexus";
 import PublicAssessment from "./pages/PublicAssessment";
 import AllResources from "./pages/AllResources";
+import MarketingDashboard from "./pages/MarketingDashboard";
 
 const queryClient = new QueryClient();
 
@@ -249,6 +250,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route path="/marketingdashboard" element={<MarketingDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
