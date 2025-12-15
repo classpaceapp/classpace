@@ -77,3 +77,6 @@ verify_jwt = false
 
 [functions.marketing-admin]
 verify_jwt = true
+
+[functions.smart-assistant]
+verify_jwt = true
