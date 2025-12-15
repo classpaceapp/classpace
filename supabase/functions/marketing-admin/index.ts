@@ -209,8 +209,13 @@ async function sendEmail(to: string[], subject: string, htmlContent: string, lis
 }
 
 async function getBrevoLists() {
-  const lists = await brevoRequest("/contacts/lists?limit=50");
-  return lists.lists || [];
+  // Fetch lists with statistics to get subscriber counts
+  const lists = await brevoRequest("/contacts/lists?limit=50&sort=desc");
+  return (lists.lists || []).map((list: any) => ({
+    id: list.id,
+    name: list.name,
+    totalSubscribers: list.uniqueSubscribers || list.totalSubscribers || 0,
+  }));
 }
 
 async function createCustomList(name: string, userEmails: string[]) {
@@ -220,11 +225,18 @@ async function createCustomList(name: string, userEmails: string[]) {
     folderId: 1,
   });
   
-  // Add contacts to list
-  if (userEmails.length > 0) {
-    await brevoRequest(`/contacts/lists/${newList.id}/contacts/add`, "POST", {
-      emails: userEmails,
-    });
+  // First, ensure contacts exist in Brevo (create or update them)
+  for (const email of userEmails) {
+    try {
+      await brevoRequest("/contacts", "POST", {
+        email,
+        listIds: [newList.id],
+        updateEnabled: true, // Update if exists, create if not
+      });
+      log(`Added/updated contact for list: ${email}`);
+    } catch (error: any) {
+      log(`Failed to add contact ${email} to list`, { error: error.message });
+    }
   }
   
   log("Created custom list", { name, id: newList.id, contacts: userEmails.length });
