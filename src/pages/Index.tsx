@@ -6,11 +6,12 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 import MobileCardReveal from "@/components/MobileCardReveal";
 import { useLoadingAnimation } from "@/hooks/useLoadingAnimation";
 import { useAuth } from "@/contexts/AuthContext";
+import DashboardRedirect from "@/components/DashboardRedirect";
 
 const Index = () => {
   const navigate = useNavigate();
   const isLoading = useLoadingAnimation();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, loading } = useAuth();
 
   const domains = [
     {
@@ -80,6 +81,11 @@ const Index = () => {
 
   if (isLoading) {
     return <LoadingAnimation />;
+  }
+
+  // Show redirect animation for logged-in users
+  if (!loading && user && profile) {
+    return <DashboardRedirect />;
   }
 
   return (
