@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
 import { StudentSubscriptionCard } from '@/components/subscription/StudentSubscriptionCard';
+import SmartAssistant from '@/components/assistant/SmartAssistant';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -299,6 +300,17 @@ const StudentDashboard: React.FC = () => {
             <div>
               <StudentSubscriptionCard />
             </div>
+          </div>
+
+          {/* AI Learning Assistant */}
+          <div className="mb-6 md:mb-12">
+            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+              <Sparkles className="h-5 w-5 md:h-7 md:w-7 text-purple-600" />
+              <h2 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                AI Learning Assistant
+              </h2>
+            </div>
+            <SmartAssistant userRole="learner" />
           </div>
 
           {/* Classes Section */}
