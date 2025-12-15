@@ -31,12 +31,16 @@ const Login = () => {
   // Handle authentication state and role selection for Google OAuth
   useEffect(() => {
     if (user && !loading) {
-      if (profile) {
-        // User has a profile, redirect to dashboard
+      // Check if profile exists AND is complete (has first_name set)
+      // The database trigger creates profiles immediately with empty names for Google OAuth users
+      const isProfileComplete = profile && profile.first_name && profile.first_name.trim() !== '';
+      
+      if (isProfileComplete) {
+        // Profile is complete, redirect to appropriate dashboard
         const dashboardPath = profile.role === 'learner' ? '/student-dashboard' : '/dashboard';
         navigate(dashboardPath);
       } else {
-        // User authenticated but no profile (new Google user), show role selection
+        // Either no profile yet, or profile exists but is incomplete (Google OAuth user)
         // Pre-fill names from Google metadata if available
         const gFirstName = user.user_metadata?.given_name || 
                           user.user_metadata?.full_name?.split(' ')[0] || 
