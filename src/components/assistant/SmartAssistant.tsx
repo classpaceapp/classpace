@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,8 +7,51 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Sparkles, User, Loader2, X, Maximize2, Minimize2 } from 'lucide-react';
+import { Send, Sparkles, User, Loader2, X, Maximize2, Minimize2, Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Speech Recognition types
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: Event) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
 
 interface Message {
   id: string;
@@ -47,8 +90,10 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const suggestions = userRole === 'teacher' ? TEACHER_SUGGESTIONS : STUDENT_SUGGESTIONS;
   const assistantName = userRole === 'teacher' ? 'Teaching Assistant' : 'Learning Assistant';
@@ -61,6 +106,91 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Voice recognition setup
+  const startListening = useCallback(() => {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognitionAPI) {
+      toast({
+        title: "Not supported",
+        description: "Voice input is not supported in your browser. Try Chrome or Edge.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setInputMessage(prev => prev + finalTranscript);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event);
+      setIsListening(false);
+      toast({
+        title: "Voice error",
+        description: "Could not recognize speech. Please try again.",
+        variant: "destructive",
+      });
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+    
+    toast({
+      title: "Listening...",
+      description: "Speak now. Click the mic button again to stop.",
+    });
+  }, [toast]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }, []);
+
+  const toggleVoiceInput = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
 
   const handleSendMessage = async (messageText?: string) => {
     const text = messageText || inputMessage.trim();
@@ -385,17 +515,37 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
 
       {/* Input Area */}
       <div className="px-4 md:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-gray-100">
-        <div className="flex gap-3 items-end">
+        <div className="flex gap-2 items-end">
           <Textarea
             ref={textareaRef}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyPress}
-            placeholder={`Ask me anything about your ${userRole === 'teacher' ? 'teaching' : 'learning'}...`}
-            className="flex-1 min-h-[44px] max-h-32 resize-none rounded-xl border-gray-200 bg-gray-50/50 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-400"
+            placeholder={isListening ? "Listening... speak now" : `Ask me anything about your ${userRole === 'teacher' ? 'teaching' : 'learning'}...`}
+            className={cn(
+              "flex-1 min-h-[44px] max-h-32 resize-none rounded-xl border-gray-200 bg-gray-50/50 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-400",
+              isListening && "border-red-300 bg-red-50/50 placeholder:text-red-400"
+            )}
             disabled={isLoading}
             rows={1}
           />
+          <Button
+            onClick={toggleVoiceInput}
+            disabled={isLoading}
+            variant="outline"
+            className={cn(
+              "h-11 w-11 rounded-xl transition-all",
+              isListening 
+                ? "bg-red-500 hover:bg-red-600 border-red-500 text-white animate-pulse" 
+                : "border-gray-200 hover:border-purple-400 hover:bg-purple-50"
+            )}
+          >
+            {isListening ? (
+              <MicOff className="w-5 h-5" />
+            ) : (
+              <Mic className="w-5 h-5 text-gray-600" />
+            )}
+          </Button>
           <Button
             onClick={() => handleSendMessage()}
             disabled={!inputMessage.trim() || isLoading}
@@ -409,7 +559,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
           </Button>
         </div>
         <p className="text-[10px] text-gray-400 mt-2 text-center">
-          Press Enter to send • Shift+Enter for new line
+          Press Enter to send • Shift+Enter for new line • Click mic for voice input
         </p>
       </div>
     </Card>
