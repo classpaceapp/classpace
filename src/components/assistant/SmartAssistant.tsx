@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Sparkles, User, Loader2, X, Maximize2, Minimize2, Mic, MicOff } from 'lucide-react';
+import { Send, Sparkles, User, Loader2, X, Maximize2, Minimize2, Mic, MicOff, Save, Download, History, Trash2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 // Speech Recognition types
 interface SpeechRecognitionEvent extends Event {
@@ -60,6 +61,15 @@ interface Message {
   timestamp: Date;
 }
 
+interface SavedConversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  user_role: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface SmartAssistantProps {
   userRole: 'teacher' | 'learner';
 }
@@ -83,7 +93,7 @@ const STUDENT_SUGGESTIONS = [
 ];
 
 const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -91,6 +101,10 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
   const [streamingContent, setStreamingContent] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [savedConversations, setSavedConversations] = useState<SavedConversation[]>([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -106,6 +120,184 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Fetch saved conversations
+  const fetchSavedConversations = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadingConversations(true);
+    try {
+      const { data, error } = await supabase
+        .from('assistant_conversations')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('user_role', userRole)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Parse messages from JSON
+      const conversations = (data || []).map(conv => ({
+        ...conv,
+        messages: (conv.messages as unknown as Message[]) || []
+      }));
+      setSavedConversations(conversations);
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    } finally {
+      setLoadingConversations(false);
+    }
+  }, [user?.id, userRole]);
+
+  useEffect(() => {
+    if (showHistory) {
+      fetchSavedConversations();
+    }
+  }, [showHistory, fetchSavedConversations]);
+
+  // Save current conversation
+  const saveConversation = useCallback(async () => {
+    if (!user?.id || messages.length === 0) {
+      toast({
+        title: "Nothing to save",
+        description: "Start a conversation first before saving.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const title = messages[0]?.content.slice(0, 50) + (messages[0]?.content.length > 50 ? '...' : '');
+      
+      if (currentConversationId) {
+        // Update existing conversation
+        const { error } = await supabase
+          .from('assistant_conversations')
+          .update({
+            messages: messages.map(m => ({ id: m.id, role: m.role, content: m.content, timestamp: m.timestamp.toISOString() })),
+            title,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', currentConversationId);
+        
+        if (error) throw error;
+        toast({
+          title: "Conversation updated",
+          description: "Your conversation has been saved.",
+        });
+      } else {
+        // Create new conversation
+        const { data, error } = await supabase
+          .from('assistant_conversations')
+          .insert([{
+            user_id: user.id,
+            title,
+            messages: messages.map(m => ({ id: m.id, role: m.role, content: m.content, timestamp: m.timestamp.toISOString() })),
+            user_role: userRole,
+          }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        setCurrentConversationId(data.id);
+        toast({
+          title: "Conversation saved",
+          description: "Your conversation has been saved to history.",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving conversation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save conversation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [user?.id, messages, currentConversationId, userRole, toast]);
+
+  // Load a saved conversation
+  const loadConversation = useCallback((conversation: SavedConversation) => {
+    setMessages(conversation.messages.map(m => ({
+      ...m,
+      timestamp: new Date(m.timestamp)
+    })));
+    setCurrentConversationId(conversation.id);
+    setShowHistory(false);
+    toast({
+      title: "Conversation loaded",
+      description: `Loaded: ${conversation.title}`,
+    });
+  }, [toast]);
+
+  // Delete a saved conversation
+  const deleteConversation = useCallback(async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('assistant_conversations')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      setSavedConversations(prev => prev.filter(c => c.id !== id));
+      if (currentConversationId === id) {
+        setCurrentConversationId(null);
+      }
+      toast({
+        title: "Deleted",
+        description: "Conversation has been deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete conversation.",
+        variant: "destructive",
+      });
+    }
+  }, [currentConversationId, toast]);
+
+  // Export conversation as text
+  const exportConversation = useCallback(() => {
+    if (messages.length === 0) {
+      toast({
+        title: "Nothing to export",
+        description: "Start a conversation first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const content = messages.map(m => {
+      const role = m.role === 'user' ? 'You' : 'Assistant';
+      const time = format(new Date(m.timestamp), 'PPp');
+      return `[${time}] ${role}:\n${m.content}\n`;
+    }).join('\n---\n\n');
+
+    const header = `Classpace ${assistantName} Conversation\nExported: ${format(new Date(), 'PPpp')}\n\n${'='.repeat(50)}\n\n`;
+    const fullContent = header + content;
+
+    const blob = new Blob([fullContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assistant-conversation-${format(new Date(), 'yyyy-MM-dd-HHmm')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exported",
+      description: "Conversation has been downloaded as a text file.",
+    });
+  }, [messages, assistantName, toast]);
+
+  // Start new conversation
+  const startNewConversation = useCallback(() => {
+    setMessages([]);
+    setCurrentConversationId(null);
+    setShowHistory(false);
+  }, []);
 
   // Voice recognition setup
   const startListening = useCallback(() => {
@@ -325,40 +517,136 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
       {/* Header */}
       <div className="flex items-center justify-between px-4 md:px-6 py-4 bg-white/80 backdrop-blur-xl border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5 shadow-lg">
-              <div className="w-full h-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
-                <img 
-                  src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                  alt="Classpace" 
-                  className="w-8 h-8 object-contain"
-                />
+          {showHistory ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowHistory(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          ) : (
+            <div className="relative">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5 shadow-lg">
+                <div className="w-full h-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
+                    alt="Classpace" 
+                    className="w-8 h-8 object-contain"
+                  />
+                </div>
               </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
-          </div>
+          )}
           <div>
             <h2 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {assistantName}
+              {showHistory ? 'Saved Conversations' : assistantName}
             </h2>
             <p className="text-xs text-gray-500">
-              Powered by AI • Full context access
+              {showHistory ? `${savedConversations.length} conversation(s)` : 'Powered by AI • Full context access'}
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-gray-400 hover:text-gray-600"
-        >
-          {isExpanded ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-1">
+          {!showHistory && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={saveConversation}
+                disabled={messages.length === 0}
+                className="text-gray-400 hover:text-purple-600"
+                title="Save conversation"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={exportConversation}
+                disabled={messages.length === 0}
+                className="text-gray-400 hover:text-purple-600"
+                title="Export conversation"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowHistory(true)}
+                className="text-gray-400 hover:text-purple-600"
+                title="View saved conversations"
+              >
+                <History className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            {isExpanded ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
 
-      {/* Messages Area */}
+      {/* Messages Area or History */}
       <ScrollArea className="flex-1 px-4 md:px-6 py-4">
-        {messages.length === 0 && !streamingContent ? (
+        {showHistory ? (
+          // Saved Conversations List
+          <div className="space-y-3">
+            <Button
+              onClick={startNewConversation}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl py-3 mb-4"
+            >
+              + New Conversation
+            </Button>
+            
+            {loadingConversations ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+              </div>
+            ) : savedConversations.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <History className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p className="font-medium">No saved conversations yet</p>
+                <p className="text-sm">Start a conversation and save it to see it here</p>
+              </div>
+            ) : (
+              savedConversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  className="bg-white/80 rounded-xl p-4 border border-gray-100 hover:border-purple-200 transition-all cursor-pointer group"
+                  onClick={() => loadConversation(conv)}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 truncate">{conv.title}</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {format(new Date(conv.updated_at), 'PPp')} • {conv.messages.length} messages
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteConversation(conv.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : messages.length === 0 && !streamingContent ? (
           <div className="h-full flex flex-col items-center justify-center text-center px-4 py-8">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5 shadow-2xl mb-6">
               <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center">
@@ -497,7 +785,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
       </ScrollArea>
 
       {/* More suggestions (after conversation started) */}
-      {messages.length > 0 && !isLoading && (
+      {!showHistory && messages.length > 0 && !isLoading && (
         <div className="px-4 md:px-6 py-2 border-t border-gray-100 bg-white/50">
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {suggestions.slice(0, 3).map((suggestion, index) => (
@@ -514,6 +802,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
       )}
 
       {/* Input Area */}
+      {!showHistory && (
       <div className="px-4 md:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-gray-100">
         <div className="flex gap-2 items-end">
           <Textarea
@@ -562,6 +851,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
           Press Enter to send • Shift+Enter for new line • Click mic for voice input
         </p>
       </div>
+      )}
     </Card>
   );
 };
