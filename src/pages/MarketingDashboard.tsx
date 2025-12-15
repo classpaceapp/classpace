@@ -51,6 +51,7 @@ const MarketingDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   
   // Email composer state
   const [emailSubject, setEmailSubject] = useState('');
@@ -61,11 +62,21 @@ const MarketingDashboard = () => {
   const [showCreateList, setShowCreateList] = useState(false);
   const [newListName, setNewListName] = useState('');
 
+  // Wait for auth to fully load before checking authorization
   useEffect(() => {
-    if (user?.email === AUTHORIZED_EMAIL) {
+    if (!loading) {
+      setAuthChecked(true);
+    }
+  }, [loading]);
+
+  // Check if user email matches (case-insensitive)
+  const isAuthorized = user?.email?.toLowerCase() === AUTHORIZED_EMAIL.toLowerCase();
+
+  useEffect(() => {
+    if (authChecked && isAuthorized) {
       fetchData();
     }
-  }, [user]);
+  }, [authChecked, isAuthorized]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -85,6 +96,7 @@ const MarketingDashboard = () => {
       setUsers(usersRes.data || []);
       setLists(listsRes.data || []);
     } catch (error: any) {
+      console.error('Marketing dashboard error:', error);
       toast.error('Failed to fetch data: ' + error.message);
     } finally {
       setIsLoading(false);
@@ -107,6 +119,21 @@ const MarketingDashboard = () => {
       setIsSyncing(false);
     }
   };
+
+  // Show loading while auth is being checked
+  if (loading || !authChecked) {
+    return <LoadingAnimation />;
+  }
+
+  // Redirect if not authorized (after auth is fully loaded)
+  if (!isAuthorized) {
+    console.log('Marketing dashboard access denied:', { 
+      userEmail: user?.email, 
+      expected: AUTHORIZED_EMAIL,
+      isLoggedIn: !!user 
+    });
+    return <Navigate to="/" replace />;
+  }
 
   const sendEmail = async () => {
     if (!emailSubject || !emailContent) {
@@ -215,12 +242,6 @@ const MarketingDashboard = () => {
   const clearSelection = () => {
     setSelectedUsers([]);
   };
-
-  if (loading) return <LoadingAnimation />;
-  
-  if (!user || user.email !== AUTHORIZED_EMAIL) {
-    return <Navigate to="/" replace />;
-  }
 
   const filteredUsers = users.filter(u => {
     const matchesSearch = 

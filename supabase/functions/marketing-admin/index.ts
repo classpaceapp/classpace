@@ -33,9 +33,12 @@ async function verifyAuthorizedUser(authHeader: string): Promise<{ authorized: b
     return { authorized: false };
   }
   
-  log("User verified", { email: user.email });
+  // Case-insensitive email comparison
+  const isAuthorized = user.email?.toLowerCase() === AUTHORIZED_EMAIL.toLowerCase();
+  log("User verified", { email: user.email, isAuthorized });
+  
   return { 
-    authorized: user.email === AUTHORIZED_EMAIL, 
+    authorized: isAuthorized, 
     userId: user.id,
     email: user.email 
   };
