@@ -136,8 +136,13 @@ const MarketingDashboard = () => {
   }
 
   const sendEmail = async () => {
-    if (!emailSubject || !emailContent) {
-      toast.error('Please fill in subject and content');
+    if (!emailSubject || emailSubject.trim().length < 3) {
+      toast.error('Subject must be at least 3 characters');
+      return;
+    }
+
+    if (!emailContent || emailContent.trim().length < 11) {
+      toast.error('Email content must be at least 11 characters (Brevo requirement)');
       return;
     }
 
