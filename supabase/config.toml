@@ -33,13 +33,7 @@ verify_jwt = true
 [functions.learnspace-chat]
 verify_jwt = true
 
-[functions.phoenix-ai-tutor]
-verify_jwt = true
-
-[functions.phoenix-voice-stt]
-verify_jwt = true
-
-[functions.phoenix-voice-tts]
+[functions.phoenix-realtime-token]
 verify_jwt = true
 
 [functions.resume-subscription]
