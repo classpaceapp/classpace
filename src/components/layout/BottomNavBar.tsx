@@ -13,7 +13,7 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ userRole }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const PHOENIX_COMING_SOON = true;
+  const PHOENIX_COMING_SOON = false;
 
   const teacherTabs = [
     { name: 'Home', href: '/dashboard', icon: Home },

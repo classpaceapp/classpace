@@ -43,7 +43,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const PHOENIX_COMING_SOON = true;
+  const PHOENIX_COMING_SOON = false;
 
   // Fetch unread message count for teachers
   useEffect(() => {
