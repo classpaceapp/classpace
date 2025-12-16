@@ -26,18 +26,16 @@ export const ContactBadge: React.FC<ContactBadgeProps> = ({
 
   const checkTeachPlusStatus = async () => {
     try {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('tier, status')
-        .eq('user_id', educatorId)
-        .eq('status', 'active')
-        .maybeSingle();
+      // Use RPC function that has SECURITY DEFINER to bypass RLS
+      const { data, error } = await supabase.rpc('is_teach_plus_educator', {
+        _user_id: educatorId
+      });
 
       if (error) {
         console.error('Error checking subscription:', error);
         setIsTeachPlus(false);
       } else {
-        setIsTeachPlus(data?.tier === 'teacher_premium');
+        setIsTeachPlus(data === true);
       }
     } catch (err) {
       console.error('Error:', err);

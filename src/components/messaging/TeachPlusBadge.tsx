@@ -18,14 +18,12 @@ export const TeachPlusBadge: React.FC<TeachPlusBadgeProps> = ({ userId, size = '
 
   const checkStatus = async () => {
     try {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('tier, status')
-        .eq('user_id', userId)
-        .eq('status', 'active')
-        .maybeSingle();
+      // Use RPC function that has SECURITY DEFINER to bypass RLS
+      const { data, error } = await supabase.rpc('is_teach_plus_educator', {
+        _user_id: userId
+      });
 
-      if (!error && data?.tier === 'teacher_premium') {
+      if (!error && data === true) {
         setIsTeachPlus(true);
       }
     } catch (err) {
