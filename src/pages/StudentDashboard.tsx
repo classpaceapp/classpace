@@ -6,11 +6,12 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import PodCard from '@/components/pods/PodCard';
 import { StudentSubscriptionCard } from '@/components/subscription/StudentSubscriptionCard';
 import SmartAssistant from '@/components/assistant/SmartAssistant';
+import { LearnerSentMessages } from '@/components/messaging/LearnerSentMessages';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Users, BookOpen, Calendar, Sparkles, Search, KeyRound, Boxes } from 'lucide-react';
+import { Users, BookOpen, Calendar, Sparkles, Search, KeyRound, Boxes, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
@@ -313,6 +314,17 @@ const StudentDashboard: React.FC = () => {
               </h2>
             </div>
             <SmartAssistant userRole="learner" />
+          </div>
+
+          {/* Educator Messages */}
+          <div className="mb-6 md:mb-12">
+            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
+              <MessageSquare className="h-5 w-5 md:h-7 md:w-7 text-purple-600" />
+              <h2 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Messages to Educators
+              </h2>
+            </div>
+            <LearnerSentMessages />
           </div>
 
           {/* Classes Section */}
