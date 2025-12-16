@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, GraduationCap, Award, Sparkles, ExternalLink } from 'lucide-react';
+import { ContactBadge } from '@/components/messaging/ContactBadge';
+import { ContactEducatorModal } from '@/components/messaging/ContactEducatorModal';
 
 interface EducatorData {
   id: string;
@@ -42,6 +44,7 @@ const EducatorProfile: React.FC = () => {
   const [publicPods, setPublicPods] = useState<PublicPod[]>([]);
   const [loading, setLoading] = useState(true);
   const [joiningPod, setJoiningPod] = useState<string | null>(null);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   useEffect(() => {
     fetchEducator();
@@ -204,6 +207,15 @@ const EducatorProfile: React.FC = () => {
                       {educator.years_experience} {educator.years_experience === 1 ? 'year' : 'years'} of experience
                     </span>
                   </div>
+                  {/* Teach+ Badge and Contact Button */}
+                  <div className="mt-4">
+                    <ContactBadge
+                      educatorId={educator.user_id}
+                      educatorName={`${educator.profiles.first_name} ${educator.profiles.last_name}`}
+                      onContactClick={() => setShowContactModal(true)}
+                      viewerRole={profile?.role}
+                    />
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -335,6 +347,14 @@ const EducatorProfile: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactEducatorModal
+        isOpen={showContactModal}
+        onClose={() => setShowContactModal(false)}
+        educatorId={educator.user_id}
+        educatorName={`${educator.profiles.first_name} ${educator.profiles.last_name}`}
+      />
     </DashboardLayout>
   );
 };
