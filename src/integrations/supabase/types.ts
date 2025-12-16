@@ -114,6 +114,45 @@ export type Database = {
         }
         Relationships: []
       }
+      educator_messages: {
+        Row: {
+          created_at: string | null
+          educator_id: string
+          id: string
+          is_read: boolean | null
+          learner_id: string
+          message: string
+          replied_at: string | null
+          reply: string | null
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          educator_id: string
+          id?: string
+          is_read?: boolean | null
+          learner_id: string
+          message: string
+          replied_at?: string | null
+          reply?: string | null
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          educator_id?: string
+          id?: string
+          is_read?: boolean | null
+          learner_id?: string
+          message?: string
+          replied_at?: string | null
+          reply?: string | null
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       flashcard_cards: {
         Row: {
           card_order: number
@@ -1540,6 +1579,7 @@ export type Database = {
         Args: { _pod_id: string; _user_id: string }
         Returns: boolean
       }
+      is_teach_plus_educator: { Args: { _user_id: string }; Returns: boolean }
       join_pod_with_code: { Args: { code: string }; Returns: string }
     }
     Enums: {

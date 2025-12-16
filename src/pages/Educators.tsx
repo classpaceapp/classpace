@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Search, GraduationCap, Sparkles, Award } from 'lucide-react';
+import { Search, GraduationCap, Sparkles, Award, MessageSquare } from 'lucide-react';
+import { TeachPlusBadge } from '@/components/messaging/TeachPlusBadge';
 
 interface TeacherProfile {
   id: string;
@@ -175,9 +176,12 @@ const Educators: React.FC = () => {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <CardTitle className="text-xl bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
-                              {educator.profiles.first_name} {educator.profiles.last_name}
-                            </CardTitle>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <CardTitle className="text-xl bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
+                                {educator.profiles.first_name} {educator.profiles.last_name}
+                              </CardTitle>
+                              <TeachPlusBadge userId={educator.user_id} size="sm" />
+                            </div>
                             <div className="flex items-center gap-2 mt-1">
                               <Award className="h-4 w-4 text-teal-600" />
                               <span className="text-sm text-muted-foreground">

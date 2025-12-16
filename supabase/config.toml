@@ -80,3 +80,6 @@ verify_jwt = true
 
 [functions.smart-assistant]
 verify_jwt = true
+
+[functions.notify-educator-message]
+verify_jwt = true
