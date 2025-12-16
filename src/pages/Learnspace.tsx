@@ -326,9 +326,7 @@ const Learnspace: React.FC = () => {
         <div className="hidden md:flex w-72 bg-white/60 backdrop-blur-xl border-r border-gray-200 flex-col">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
-                <img src={learnspaceLogo} alt="Classpace Learnspace icon" className="h-6 w-6" />
-              </div>
+              <img src={learnspaceLogo} alt="Classpace Learnspace icon" className="h-12 w-12" />
               <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Learnspace
               </h1>
@@ -400,9 +398,7 @@ const Learnspace: React.FC = () => {
           <ScrollArea className="flex-1 p-6">
             {!currentChatId ? (
               <div className="h-full flex flex-col items-center justify-center text-center px-8">
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center mb-8 shadow-2xl">
-                  <img src={learnspaceLogo} alt="Classpace Learnspace icon" className="h-12 w-12" />
-                </div>
+                <img src={learnspaceLogo} alt="Classpace Learnspace icon" className="h-24 w-24 mb-8" />
                 <h2 className="text-3xl font-bold text-gray-900 mb-4">
                   Welcome to Learnspace
                 </h2>
