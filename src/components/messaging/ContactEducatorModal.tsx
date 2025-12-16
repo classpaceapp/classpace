@@ -80,10 +80,11 @@ export const ContactEducatorModal: React.FC<ContactEducatorModalProps> = ({
 
       if (insertError) throw insertError;
 
-      // Trigger email notification
+      // Trigger email notification to educator
       try {
         await supabase.functions.invoke('notify-educator-message', {
           body: {
+            type: 'new_message',
             educatorId,
             learnerId: user.id,
             subject: subject.trim(),
