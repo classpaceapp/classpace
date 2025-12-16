@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Menu, 
   X, 
@@ -37,11 +38,54 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const PHOENIX_COMING_SOON = true;
+
+  // Fetch unread message count for teachers
+  useEffect(() => {
+    if (userRole === 'teacher' && user?.id) {
+      fetchUnreadCount();
+      
+      // Set up realtime subscription for new messages
+      const channel = supabase
+        .channel('educator-messages-count')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'educator_messages',
+            filter: `educator_id=eq.${user.id}`
+          },
+          () => {
+            fetchUnreadCount();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [userRole, user?.id]);
+
+  const fetchUnreadCount = async () => {
+    if (!user?.id) return;
+    
+    const { count, error } = await supabase
+      .from('educator_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('educator_id', user.id)
+      .eq('is_read', false);
+
+    if (!error && count !== null) {
+      setUnreadMessageCount(count);
+    }
+  };
 
   const teacherNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: Home, color: 'text-blue-500' },
@@ -170,6 +214,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
                 <span className="font-medium truncate">{item.name}</span>
                 {userRole === 'learner' && item.icon === 'phoenix' && PHOENIX_COMING_SOON && (
                   <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0 flex-shrink-0">Soon</Badge>
+                )}
+                {userRole === 'teacher' && item.name === 'Messages' && unreadMessageCount > 0 && (
+                  <Badge className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0 flex-shrink-0 min-w-[18px] h-[18px] flex items-center justify-center">
+                    {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                  </Badge>
                 )}
               </button>
             );
