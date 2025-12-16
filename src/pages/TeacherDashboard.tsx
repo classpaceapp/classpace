@@ -7,13 +7,12 @@ import PodCard from '@/components/pods/PodCard';
 import CreatePodFlow from '@/components/pods/CreatePodFlow';
 import SubscriptionCard from '@/components/subscription/SubscriptionCard';
 import SmartAssistant from '@/components/assistant/SmartAssistant';
-import { TeacherInbox } from '@/components/messaging/TeacherInbox';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, BookOpen, Activity, Sparkles, Boxes, Inbox } from 'lucide-react';
+import { Plus, Users, BookOpen, Activity, Sparkles, Boxes } from 'lucide-react';
 
 interface Pod {
   id: string;
@@ -250,17 +249,6 @@ const TeacherDashboard: React.FC = () => {
             </div>
           </div>
 
-
-          {/* Student Messages Inbox */}
-          <div className="mb-6 md:mb-12">
-            <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-6">
-              <Inbox className="h-5 w-5 md:h-7 md:w-7 text-teal-600" />
-              <h2 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                Student Messages
-              </h2>
-            </div>
-            <TeacherInbox />
-          </div>
 
           {/* AI Teaching Assistant */}
           <div className="mb-6 md:mb-12">

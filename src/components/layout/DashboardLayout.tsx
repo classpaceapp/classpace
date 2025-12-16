@@ -18,7 +18,8 @@ import {
   Library,
   Rocket,
   Compass,
-  FolderOpen
+  FolderOpen,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -47,6 +48,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'Pods', href: '/teacher-pods', icon: Boxes, color: 'text-indigo-500' },
     { name: 'Nexus', href: '/teacher-nexus', icon: Compass, color: 'text-violet-500' },
     { name: 'Educators', href: '/educators', icon: GraduationCap, color: 'text-teal-500' },
+    { name: 'Messages', href: '/messages', icon: Mail, color: 'text-cyan-500' },
     { name: 'Careers', href: '/student-careers', icon: Rocket, color: 'text-emerald-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },
@@ -64,6 +66,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
     { name: 'My Resources', href: '/my-resources', icon: Library, color: 'text-amber-500' },
     { name: 'All Resources', href: '/all-resources', icon: FolderOpen, color: 'text-orange-500' },
     { name: 'Educators', href: '/educators', icon: GraduationCap, color: 'text-teal-500' },
+    { name: 'Messages', href: '/messages', icon: Mail, color: 'text-cyan-500' },
     { name: 'Careers', href: '/student-careers', icon: Rocket, color: 'text-emerald-500' },
     { name: 'Profile', href: '/profile', icon: User, color: 'text-purple-500' },
     { name: 'My Plan', href: '/my-plan', icon: Sparkles, color: 'text-pink-500' },

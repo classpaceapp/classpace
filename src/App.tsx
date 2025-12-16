@@ -49,6 +49,7 @@ import TeacherNexus from "./pages/TeacherNexus";
 import PublicAssessment from "./pages/PublicAssessment";
 import AllResources from "./pages/AllResources";
 import MarketingDashboard from "./pages/MarketingDashboard";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -239,6 +240,11 @@ const App = () => (
             <Route path="/more" element={
               <ProtectedRoute>
                 <More />
+              </ProtectedRoute>
+            } />
+            <Route path="/messages" element={
+              <ProtectedRoute>
+                <Messages />
               </ProtectedRoute>
             } />
             <Route path="/assessment/:code" element={<PublicAssessment />} />
