@@ -284,36 +284,61 @@ export const TeacherInbox: React.FC = () => {
               </div>
             </div>
 
-            {/* Original Message */}
-            <div className="space-y-2">
-              <h4 className="font-semibold text-teal-900 dark:text-teal-100">
+            {/* Conversation Thread */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-teal-900 dark:text-teal-100 text-lg">
                 {selectedMessage.subject}
               </h4>
-              <div className="p-4 bg-white dark:bg-gray-900 rounded-lg border border-teal-200 dark:border-teal-800">
-                <p className="whitespace-pre-wrap text-sm">{selectedMessage.message}</p>
+              
+              {/* Student's Message */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  <span>Student's message</span>
+                  <span>•</span>
+                  <Clock className="h-3 w-3" />
+                  <span>{format(new Date(selectedMessage.created_at), 'PPp')}</span>
+                </div>
+                <div className="p-4 bg-teal-50 dark:bg-teal-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                  <p className="whitespace-pre-wrap text-sm">{selectedMessage.message}</p>
+                </div>
               </div>
+
+              {/* Your Reply (if already sent) */}
+              {selectedMessage.reply && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MessageSquare className="h-4 w-4 text-green-600" />
+                    <span className="text-green-600 font-medium">Your reply</span>
+                    <span>•</span>
+                    <Clock className="h-3 w-3" />
+                    <span>
+                      {selectedMessage.replied_at
+                        ? format(new Date(selectedMessage.replied_at), 'PPp')
+                        : 'Unknown'}
+                    </span>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <p className="whitespace-pre-wrap text-sm">{selectedMessage.reply}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Reply Section */}
-            <div className="space-y-3">
+            {/* Reply Input Section */}
+            <div className="space-y-3 pt-4 border-t border-teal-200/50 dark:border-teal-800/50">
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-teal-600" />
+                <Send className="h-4 w-4 text-teal-600" />
                 <h4 className="font-semibold text-teal-900 dark:text-teal-100">
-                  {selectedMessage.reply ? 'Your Reply' : 'Send a Reply'}
+                  {selectedMessage.reply ? 'Edit Your Reply' : 'Send a Reply'}
                 </h4>
-                {selectedMessage.replied_at && (
-                  <Badge variant="secondary" className="text-xs">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Sent {formatDistanceToNow(new Date(selectedMessage.replied_at))} ago
-                  </Badge>
-                )}
               </div>
 
               <Textarea
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Write your reply to the student..."
-                rows={5}
+                rows={4}
                 maxLength={2000}
                 className={`border-teal-200 focus:border-teal-500 focus:ring-teal-500 resize-none ${
                   replyError ? 'border-red-500' : ''
