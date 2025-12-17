@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Users, Brain, MessageSquare, Music, Palette, Calculator, Globe, Video, Clock, ArrowRight, CheckCircle, Instagram, Linkedin, LogOut } from "lucide-react";
@@ -7,6 +7,8 @@ import MobileCardReveal from "@/components/MobileCardReveal";
 import { useLoadingAnimation } from "@/hooks/useLoadingAnimation";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardRedirect from "@/components/DashboardRedirect";
+import SEO from "@/components/SEO";
+import { OrganizationSchema, WebsiteSchema, SoftwareApplicationSchema } from "@/components/StructuredData";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -90,7 +92,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-x-hidden">
-      {/* Header */}
+      <SEO 
+        title="Learn and Teach Anything. Together."
+        description="AI-powered shared workspaces for teachers and learners. Create interactive courses, collaborate in real-time with Pods, and transform education with Phoenix AI tutor."
+        canonical="/"
+      />
+      <OrganizationSchema />
+      <WebsiteSchema />
+      <SoftwareApplicationSchema />
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
@@ -328,36 +337,36 @@ const Index = () => {
               <h3 className="text-base md:text-xl font-bold mb-3 md:mb-6 text-purple-300">Product</h3>
               <ul className="space-y-2 md:space-y-4">
                 <li>
-                  <button 
-                    onClick={() => navigate("/pricing")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/pricing"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Pricing
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => navigate("/our-journey")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/our-journey"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Our Journey
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => navigate("/careers")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/careers"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Careers
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => navigate("/login")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/login"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Sign In
-                  </button>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -367,25 +376,25 @@ const Index = () => {
               <h3 className="text-base md:text-xl font-bold mb-3 md:mb-6 text-purple-300">Support</h3>
               <ul className="space-y-2 md:space-y-4">
                 <li>
-                  <button 
-                    onClick={() => navigate("/support")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/support"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Help Center
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => navigate("/refunds")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/refunds"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Refunds
-                  </button>
+                  </Link>
                 </li>
                 <li>
                   <a 
                     href="mailto:social@classpace.co"
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Contact Us
                   </a>
@@ -398,28 +407,28 @@ const Index = () => {
               <h3 className="text-base md:text-xl font-bold mb-3 md:mb-6 text-purple-300">Legal</h3>
               <ul className="space-y-2 md:space-y-4">
                 <li>
-                  <button 
-                    onClick={() => navigate("/terms")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/terms"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Terms & Conditions
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => navigate("/privacy")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/privacy"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Privacy Policy
-                  </button>
+                  </Link>
                 </li>
                 <li>
-                  <button 
-                    onClick={() => navigate("/investors")}
-                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
+                  <Link 
+                    to="/investors"
+                    className="text-sm md:text-lg font-bold text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200 block"
                   >
                     Investors
-                  </button>
+                  </Link>
                 </li>
               </ul>
             </div>

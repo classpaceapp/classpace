@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Briefcase, Instagram, Linkedin, Upload, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
+import { BreadcrumbSchema } from "@/components/StructuredData";
 
 const Careers = () => {
   const navigate = useNavigate();
@@ -123,6 +125,12 @@ const Careers = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="Careers - Join Our Team"
+        description="Join Classpace and help revolutionize education. Explore career opportunities in engineering, design, marketing, and operations. Be part of the AI education revolution."
+        canonical="/careers"
+      />
+      <BreadcrumbSchema items={[{ name: 'Home', url: '/' }, { name: 'Careers', url: '/careers' }]} />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">

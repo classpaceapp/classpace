@@ -1,13 +1,20 @@
-
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Mail, Instagram, Linkedin } from "lucide-react";
+import SEO from "@/components/SEO";
+import { BreadcrumbSchema } from "@/components/StructuredData";
 
 const OurJourney = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="Our Journey - Revolutionizing Education"
+        description="Learn about Classpace's mission to revolutionize education for the AI era. Building the future of teaching and learning through intelligent, collaborative spaces."
+        canonical="/our-journey"
+      />
+      <BreadcrumbSchema items={[{ name: 'Home', url: '/' }, { name: 'Our Journey', url: '/our-journey' }]} />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">

@@ -1,10 +1,11 @@
-
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ArrowLeft, Check, Star, Zap, ChevronDown, Instagram, Linkedin } from "lucide-react";
 import { useState } from "react";
+import SEO from "@/components/SEO";
+import { FAQSchema, BreadcrumbSchema } from "@/components/StructuredData";
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -123,6 +124,13 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="Pricing - Plans for Teachers & Students"
+        description="Simple, transparent pricing for Classpace. Free plans available for teachers and students. Learn+ and Teach+ plans at $7/month for unlimited AI-powered learning."
+        canonical="/pricing"
+      />
+      <FAQSchema faqs={faqs} />
+      <BreadcrumbSchema items={[{ name: 'Home', url: '/' }, { name: 'Pricing', url: '/pricing' }]} />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
