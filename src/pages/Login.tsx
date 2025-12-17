@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { BookOpen, Users, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import SEO from "@/components/SEO";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -132,6 +132,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-3 md:p-4">
+      <SEO 
+        title="Sign In or Create Account"
+        description="Sign in to Classpace or create a new account. Access AI-powered learning tools for teachers and students. Join the future of education."
+        canonical="/login"
+      />
       {/* Back Button */}
       <Button 
         onClick={() => navigate("/")}

@@ -1,8 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageSquare, Mail, ArrowLeft, Instagram, Linkedin } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import SEO from "@/components/SEO";
+import { BreadcrumbSchema } from "@/components/StructuredData";
 
 const Support = () => {
   const navigate = useNavigate();
@@ -11,6 +13,12 @@ const Support = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="Help Center & Support"
+        description="Get support for Classpace. Access live chat, email support, and help resources. We're here to support you every step of your Classpace journey."
+        canonical="/support"
+      />
+      <BreadcrumbSchema items={[{ name: 'Home', url: '/' }, { name: 'Help Center', url: '/support' }]} />
       {/* Header */}
       <header className="bg-black/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">

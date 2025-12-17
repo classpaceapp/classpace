@@ -1,12 +1,18 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, TrendingUp, Rocket, Users, Target, Instagram, Linkedin } from "lucide-react";
+import SEO from "@/components/SEO";
 
 const Investors = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <SEO 
+        title="Investors - Partner with Classpace"
+        description="Invest in the future of education. Classpace is revolutionizing how teachers and learners collaborate with AI-powered tools."
+        canonical="/investors"
+      />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
