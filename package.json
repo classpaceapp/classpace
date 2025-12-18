@@ -70,7 +70,6 @@
     "tailwindcss-animate": "^1.0.7",
     "tldraw": "^4.1.2",
     "vaul": "^0.9.3",
-    "vite-plugin-prerender": "^1.0.8",
     "y-webrtc": "^10.3.0",
     "y-websocket": "^3.0.0",
     "yjs": "^13.6.27",
