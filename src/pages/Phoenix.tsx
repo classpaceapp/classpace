@@ -38,6 +38,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { normalizeMathDelimiters } from '@/utils/phoenixMathUtils';
 
 interface TranscriptMessage {
   id: string;
@@ -282,9 +283,9 @@ const Phoenix: React.FC = () => {
     
     const whiteboardState = getCurrentWhiteboardState(whiteboardRef);
     
-    // Use the latest transcript from state
     const updateData: any = {
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      session_transcript: transcript as any
     };
     
     // Always save whiteboard state
@@ -292,13 +293,15 @@ const Phoenix: React.FC = () => {
       updateData.whiteboard_state = whiteboardState;
     }
     
-    console.log('[PHOENIX] Flushing session:', currentSessionId, 'whiteboard objects:', whiteboardState?.objects?.length || 0);
+    console.log('[PHOENIX] Flushing session:', currentSessionId, 
+      'whiteboard objects:', whiteboardState?.objects?.length || 0,
+      'transcript messages:', transcript.length);
     
     await supabase
       .from('phoenix_sessions')
       .update(updateData)
       .eq('id', currentSessionId);
-  }, [currentSessionId]);
+  }, [currentSessionId, transcript]);
 
   const createNewSession = async () => {
     if (!user?.id) return;
@@ -408,12 +411,13 @@ const Phoenix: React.FC = () => {
     }
     await connect();
     
-    // After connection, send session context to voice mode
-    // Small delay to ensure data channel is ready
+    // After connection, inject session context to voice mode WITHOUT triggering a response
+    // This primes the model with conversation history so it doesn't ask "what problem..."
     setTimeout(() => {
       if (transcript.length > 0 || whiteboardRef.current) {
         // Build context summary for voice mode
-        let contextSummary = '[Session context - continuing from previous conversation]\n';
+        let contextSummary = '[CONTEXT INJECTION - DO NOT RESPOND TO THIS, just absorb the context]\n';
+        contextSummary += 'You are continuing an existing session. The student has already started working with you.\n';
         
         // Add transcript summary (last few messages)
         if (transcript.length > 0) {
@@ -421,7 +425,7 @@ const Phoenix: React.FC = () => {
           contextSummary += 'Recent conversation:\n';
           recentMessages.forEach(msg => {
             const role = msg.role === 'user' ? 'Student' : 'Phoenix';
-            const preview = msg.content.substring(0, 100) + (msg.content.length > 100 ? '...' : '');
+            const preview = msg.content.substring(0, 150) + (msg.content.length > 150 ? '...' : '');
             contextSummary += `  ${role}: ${preview}\n`;
           });
         }
@@ -437,7 +441,8 @@ const Phoenix: React.FC = () => {
         }
         
         if (transcript.length > 0 || (layout && layout.items.length > 0)) {
-          sendWhiteboardContext(contextSummary);
+          // Pass false to NOT trigger a response - just inject context silently
+          sendWhiteboardContext(contextSummary, false);
         }
       }
     }, 1500);
@@ -925,7 +930,7 @@ const Phoenix: React.FC = () => {
                           remarkPlugins={[remarkMath]}
                           rehypePlugins={[rehypeKatex]}
                         >
-                          {msg.content}
+                          {normalizeMathDelimiters(msg.content)}
                         </ReactMarkdown>
                       </div>
                     </div>
