@@ -10,17 +10,63 @@ interface WhiteboardAction {
   params: Record<string, any>;
 }
 
+interface WhiteboardLayoutItem {
+  type: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  text?: string;
+}
+
+interface WhiteboardContext {
+  items: WhiteboardLayoutItem[];
+  canvasWidth: number;
+  canvasHeight: number;
+  nextY: number;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, includeWhiteboardActions, transcriptContext, whiteboardContext } = await req.json();
+    const { messages, includeWhiteboardActions, whiteboardContext, fullTranscript } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
+    }
+
+    // Build whiteboard context string for the AI
+    let whiteboardContextStr = '';
+    if (whiteboardContext) {
+      const ctx = whiteboardContext as WhiteboardContext;
+      whiteboardContextStr = `
+CURRENT WHITEBOARD STATE:
+- Canvas size: ${ctx.canvasWidth}x${ctx.canvasHeight} pixels
+- Number of objects: ${ctx.items.length}
+- Next safe Y position to write: ${ctx.nextY}
+`;
+      if (ctx.items.length > 0) {
+        whiteboardContextStr += '- Existing objects:\n';
+        ctx.items.forEach((item, i) => {
+          const textPreview = item.text ? ` "${item.text}"` : '';
+          whiteboardContextStr += `  ${i + 1}. ${item.type} at (${item.left}, ${item.top}), size ${item.width}x${item.height}${textPreview}\n`;
+        });
+      } else {
+        whiteboardContextStr += '- Whiteboard is EMPTY - feel free to start at y=50\n';
+      }
+    }
+
+    // Build full transcript context
+    let transcriptContextStr = '';
+    if (fullTranscript && fullTranscript.length > 0) {
+      transcriptContextStr = `
+CONVERSATION HISTORY (for context - you can reference what was discussed before):
+${fullTranscript.map((m: any) => `${m.role === 'user' ? 'Student' : 'Phoenix'}: ${m.content.substring(0, 200)}${m.content.length > 200 ? '...' : ''}`).join('\n')}
+`;
     }
 
     const systemPrompt = `You are Phoenix, an exceptional AI teaching assistant with access to a shared whiteboard. You communicate via text with students and help them learn.
@@ -30,6 +76,9 @@ CORE IDENTITY:
 - You adapt your teaching style to the student's level
 - You celebrate small wins and progress
 - You never make students feel bad for not knowing something
+
+${whiteboardContextStr}
+${transcriptContextStr}
 
 FORMATTING GUIDELINES FOR TEXT RESPONSES:
 - Use Markdown for formatting (headers, bold, lists, etc.)
@@ -51,39 +100,39 @@ Include a JSON block at the END of your response for whiteboard actions:
 \`\`\`whiteboard
 [
   {"type": "draw_text", "params": {"text": "x² + y² = z²", "x": 100, "y": 50, "fontSize": 28}},
-  {"type": "draw_text", "params": {"text": "−35x = 2", "x": 100, "y": 100, "fontSize": 28}},
-  {"type": "draw_shape", "params": {"shape": "arrow", "x": 80, "y": 130, "width": 0, "height": 40}}
+  {"type": "draw_text", "params": {"text": "Step 2: Solve", "x": 100, "y": 100, "fontSize": 24}}
 ]
 \`\`\`
 
-CRITICAL WHITEBOARD RULES:
-1. For equations on whiteboard, use draw_text with VISUAL Unicode characters, NOT LaTeX syntax:
+CRITICAL WHITEBOARD RULES - FOLLOW THESE EXACTLY:
+1. ALWAYS check the "Next safe Y position" from the whiteboard context above
+2. NEVER place content at y positions where existing objects already exist
+3. If the whiteboard has existing objects, start your NEW content at the "Next safe Y position" or below
+4. If whiteboard is getting full (nextY > 500), ASK to clear it first before drawing more
+5. For equations on whiteboard, use draw_text with VISUAL Unicode characters, NOT LaTeX syntax:
    - Powers: x² y³ (not x^2)
-   - Fractions: ½ ⅓ ¼ ⅔ ¾ or write as "2/35"
+   - Fractions: ½ ⅓ ¼ ⅔ ¾ or write as "a/b"
    - Roots: √x ∛x
    - Greek: π θ α β γ δ ε φ ω Δ Σ
    - Operators: × ÷ ± ∓ · ∙ = ≠ ≈ < > ≤ ≥ → ← ↔
    - Other: ∞ ∂ ∇ ∫ ∑ ∏
-2. Start at y=50, increment by 50 for each new line
-3. Don't overlap existing content
-4. Ask to clear whiteboard if it gets full
-5. Use fontSize 24-32 for readability
+6. Increment y by 50 for each new line of content
+7. Use fontSize 24-32 for readability
+8. x position should usually be 50-100 for left-aligned content
 
 Available actions:
 - draw_text: {"type": "draw_text", "params": {"text": string, "x": number, "y": number, "fontSize?": number, "color?": string}}
 - draw_shape: {"type": "draw_shape", "params": {"shape": "rectangle"|"circle"|"line"|"arrow", "x": number, "y": number, "width": number, "height": number, "color?": string}}
 - draw_freehand: {"type": "draw_freehand", "params": {"points": [{x, y}...], "color?": string}}
 - highlight_area: {"type": "highlight_area", "params": {"x": number, "y": number, "width": number, "height": number}}
-- clear_whiteboard: {"type": "clear_whiteboard", "params": {}}
+- clear_whiteboard: {"type": "clear_whiteboard", "params": {}} - USE ONLY WHEN ASKED OR WHEN BOARD IS FULL
 - move_cursor: {"type": "move_cursor", "params": {"x": number, "y": number}}
-
-Canvas coordinates: x: 0-1000, y: 0-600
 
 TEACHING APPROACH:
 1. Understand what the student wants to learn
 2. Break complex concepts into digestible steps
 3. Use equations and formulas when teaching math/science
-4. ALWAYS use the whiteboard to illustrate concepts
+4. ALWAYS use the whiteboard to illustrate concepts - students learn visually
 5. Check for understanding regularly`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -112,6 +161,13 @@ TEACHING APPROACH:
         });
       }
       
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Payment required. Please add credits to continue." }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
       throw new Error(`API error: ${response.status}`);
     }
 
@@ -135,6 +191,8 @@ TEACHING APPROACH:
         console.error('[PHOENIX-TEXT] Failed to parse whiteboard actions:', e);
       }
     }
+
+    console.log('[PHOENIX-TEXT] Response generated, whiteboard actions:', whiteboardActions.length);
 
     return new Response(JSON.stringify({ 
       content,

@@ -34,6 +34,9 @@ export const usePhoenixRealtime = ({
   
   // Track pending function calls for real-time whiteboard
   const pendingFunctionArgsRef = useRef<Map<string, string>>(new Map());
+  
+  // Track if we should ignore incoming events (after stop)
+  const ignoreEventsRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Create audio element for AI voice playback
@@ -51,6 +54,7 @@ export const usePhoenixRealtime = ({
     
     setIsConnecting(true);
     sessionReadyRef.current = false;
+    ignoreEventsRef.current = false;
     console.log('[PHOENIX-REALTIME] Starting connection...');
 
     try {
@@ -157,12 +161,20 @@ export const usePhoenixRealtime = ({
   }, [isConnected, isConnecting, onError, toast]);
 
   const handleRealtimeEvent = useCallback((event: any) => {
+    // If we're ignoring events (after stop), skip processing
+    if (ignoreEventsRef.current && 
+        !['session.created', 'session.updated', 'error'].includes(event.type)) {
+      console.log('[PHOENIX-REALTIME] Ignoring event (stopped):', event.type);
+      return;
+    }
+    
     console.log('[PHOENIX-REALTIME] Event:', event.type);
 
     switch (event.type) {
       case 'session.created':
         console.log('[PHOENIX-REALTIME] Session created!', event.session);
         sessionReadyRef.current = true;
+        ignoreEventsRef.current = false;
         setIsConnected(true);
         setIsConnecting(false);
         setIsListening(true);
@@ -387,6 +399,61 @@ export const usePhoenixRealtime = ({
     dcRef.current.send(JSON.stringify({ type: 'response.create' }));
   }, []);
 
+  // Stop Phoenix mid-response (cancel current response and mute audio)
+  const stop = useCallback(() => {
+    console.log('[PHOENIX-REALTIME] Stopping Phoenix...');
+    
+    // Set flag to ignore incoming events
+    ignoreEventsRef.current = true;
+    
+    // Mute audio immediately to stop playback
+    if (audioElRef.current) {
+      audioElRef.current.pause();
+      audioElRef.current.srcObject = null;
+      // Recreate audio element for next response
+      const newAudioEl = document.createElement('audio');
+      newAudioEl.autoplay = true;
+      audioElRef.current = newAudioEl;
+    }
+    
+    // Send cancel event to OpenAI
+    if (dcRef.current?.readyState === 'open') {
+      try {
+        dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
+        console.log('[PHOENIX-REALTIME] Sent response.cancel');
+      } catch (e) {
+        console.error('[PHOENIX-REALTIME] Failed to send cancel:', e);
+      }
+    }
+    
+    // Clear pending function calls
+    pendingFunctionArgsRef.current.clear();
+    
+    // Reset states
+    setIsSpeaking(false);
+    setIsListening(true);
+    onSpeakingChange?.(false);
+    
+    // Re-enable events after a short delay (for next response)
+    setTimeout(() => {
+      ignoreEventsRef.current = false;
+      // Reconnect audio if still connected
+      if (pcRef.current && audioElRef.current) {
+        const receivers = pcRef.current.getReceivers();
+        const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
+        if (audioReceiver?.track) {
+          const stream = new MediaStream([audioReceiver.track]);
+          audioElRef.current.srcObject = stream;
+        }
+      }
+    }, 500);
+    
+    toast({
+      title: "Phoenix stopped",
+      description: "Ready for your next question",
+    });
+  }, [onSpeakingChange, toast]);
+
   const disconnect = useCallback(() => {
     console.log('[PHOENIX-REALTIME] Disconnecting...');
     
@@ -406,6 +473,7 @@ export const usePhoenixRealtime = ({
     }
     
     sessionReadyRef.current = false;
+    ignoreEventsRef.current = false;
     pendingFunctionArgsRef.current.clear();
     setIsConnected(false);
     setIsConnecting(false);
@@ -420,6 +488,7 @@ export const usePhoenixRealtime = ({
     isListening,
     connect,
     disconnect,
+    stop,
     sendTextMessage,
     sendScreenshot
   };

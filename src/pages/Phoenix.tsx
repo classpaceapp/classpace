@@ -30,7 +30,8 @@ import {
   Keyboard,
   Edit2,
   Check,
-  X
+  X,
+  StopCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -50,6 +51,7 @@ interface PhoenixSession {
   title: string;
   created_at: string;
   updated_at: string;
+  whiteboard_state?: any;
 }
 
 const Phoenix: React.FC = () => {
@@ -64,17 +66,19 @@ const Phoenix: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   
   // Mode states
-  // isTextMode: controls whether Phoenix RESPONDS with text (vs voice)
-  // User can ALWAYS type regardless of this setting
   const [isTextMode, setIsTextMode] = useState(false);
   const [isTextLoading, setIsTextLoading] = useState(false);
   
-  // Track if Phoenix has active whiteboard session (true when connected OR when text mode with session)
+  // Track if Phoenix has active whiteboard session
   const [isPhoenixActive, setIsPhoenixActive] = useState(false);
   
   // Session rename state
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  
+  // Abort controller for text mode cancellation
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const whiteboardActionTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
   
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +93,7 @@ const Phoenix: React.FC = () => {
     isListening,
     connect,
     disconnect,
+    stop: stopVoice,
     sendTextMessage: sendVoiceTextMessage,
     sendScreenshot
   } = usePhoenixRealtime({
@@ -125,6 +130,10 @@ const Phoenix: React.FC = () => {
     // Load session data when session changes
     if (currentSessionId) {
       loadSessionData(currentSessionId);
+    } else {
+      // Clear whiteboard when no session
+      whiteboardRef.current?.clear();
+      setTranscript([]);
     }
   }, [currentSessionId]);
 
@@ -136,7 +145,6 @@ const Phoenix: React.FC = () => {
     console.log('[PHOENIX] Whiteboard action:', action);
     
     if (action.type === 'capture_screenshot') {
-      // Capture and send screenshot to AI
       captureAndSendScreenshot(action.params.reason || 'Student requested analysis');
     } else {
       whiteboardRef.current?.executeAction(action);
@@ -199,11 +207,23 @@ const Phoenix: React.FC = () => {
 
       if (error) throw error;
       
+      // Load transcript
       if (data.session_transcript && Array.isArray(data.session_transcript)) {
         setTranscript(data.session_transcript as any as TranscriptMessage[]);
       } else {
         setTranscript([]);
       }
+      
+      // Clear then load whiteboard state
+      whiteboardRef.current?.clear();
+      if (data.whiteboard_state && Object.keys(data.whiteboard_state).length > 0) {
+        // Small delay to ensure clear completes
+        setTimeout(() => {
+          whiteboardRef.current?.loadState(data.whiteboard_state);
+        }, 100);
+      }
+      
+      console.log('[PHOENIX] Session loaded:', sessionId);
     } catch (error: any) {
       console.error('[PHOENIX] Error loading session:', error);
     }
@@ -220,6 +240,18 @@ const Phoenix: React.FC = () => {
       })
       .eq('id', currentSessionId);
   };
+
+  const saveWhiteboardState = useCallback(async (state: any) => {
+    if (!currentSessionId) return;
+    
+    await supabase
+      .from('phoenix_sessions')
+      .update({
+        whiteboard_state: state as any,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', currentSessionId);
+  }, [currentSessionId]);
 
   const createNewSession = async () => {
     if (!user?.id) return;
@@ -241,6 +273,7 @@ const Phoenix: React.FC = () => {
       setSessions([data as PhoenixSession, ...sessions]);
       setCurrentSessionId(data.id);
       setTranscript([]);
+      whiteboardRef.current?.clear();
       
       toast({
         title: "New session created",
@@ -305,6 +338,7 @@ const Phoenix: React.FC = () => {
       if (currentSessionId === sessionId) {
         setCurrentSessionId(null);
         setTranscript([]);
+        whiteboardRef.current?.clear();
         if (isConnected) disconnect();
       }
       
@@ -325,17 +359,44 @@ const Phoenix: React.FC = () => {
     await connect();
   };
 
+  // Stop Phoenix (voice or text mode)
+  const handleStop = useCallback(() => {
+    if (isTextMode) {
+      // Cancel text mode request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      // Cancel any pending whiteboard action timeouts
+      whiteboardActionTimeoutsRef.current.forEach(t => clearTimeout(t));
+      whiteboardActionTimeoutsRef.current = [];
+      setIsTextLoading(false);
+      toast({
+        title: "Phoenix stopped",
+        description: "Ready for your next question",
+      });
+    } else if (isConnected) {
+      // Stop voice mode
+      stopVoice();
+    }
+  }, [isTextMode, isConnected, stopVoice, toast]);
+
   // Execute whiteboard actions from text mode response
   const executeWhiteboardActions = useCallback((actions: WhiteboardAction[]) => {
     if (!whiteboardRef.current || !actions || actions.length === 0) return;
     
     console.log('[PHOENIX] Executing text-mode whiteboard actions:', actions);
     
+    // Clear previous timeouts
+    whiteboardActionTimeoutsRef.current.forEach(t => clearTimeout(t));
+    whiteboardActionTimeoutsRef.current = [];
+    
     // Execute actions with small delays for visual effect
     actions.forEach((action, index) => {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         handleWhiteboardAction(action);
       }, index * 300);
+      whiteboardActionTimeoutsRef.current.push(timeout);
     });
   }, []);
 
@@ -351,21 +412,37 @@ const Phoenix: React.FC = () => {
       timestamp: new Date()
     };
     
-    setTranscript(prev => [...prev, userMessage]);
+    const updatedTranscript = [...transcript, userMessage];
+    setTranscript(updatedTranscript);
     setIsTextLoading(true);
     
+    // Create abort controller for this request
+    abortControllerRef.current = new AbortController();
+    
     try {
+      // Get whiteboard layout for context
+      const whiteboardContext = whiteboardRef.current?.getWhiteboardLayout() || null;
+      
       // Build message history for context
-      const messageHistory = transcript.slice(-10).map(m => ({
+      const messageHistory = updatedTranscript.slice(-10).map(m => ({
         role: m.role,
         content: m.content
       }));
       
-      messageHistory.push({ role: 'user', content: text });
-      
       const response = await supabase.functions.invoke('phoenix-text-chat', {
-        body: { messages: messageHistory, includeWhiteboardActions: true }
+        body: { 
+          messages: messageHistory, 
+          includeWhiteboardActions: true,
+          whiteboardContext,
+          fullTranscript: updatedTranscript.map(m => ({ role: m.role, content: m.content }))
+        }
       });
+      
+      // Check if aborted
+      if (abortControllerRef.current?.signal.aborted) {
+        console.log('[PHOENIX] Request was aborted');
+        return;
+      }
       
       if (response.error) throw response.error;
       
@@ -376,7 +453,8 @@ const Phoenix: React.FC = () => {
         timestamp: new Date()
       };
       
-      setTranscript(prev => [...prev, assistantMessage]);
+      const finalTranscript = [...updatedTranscript, assistantMessage];
+      setTranscript(finalTranscript);
       
       // Execute any whiteboard actions from the response
       if (response.data.whiteboardActions && response.data.whiteboardActions.length > 0) {
@@ -385,9 +463,13 @@ const Phoenix: React.FC = () => {
       
       // Save to database
       if (currentSessionId) {
-        saveTranscript([...transcript, userMessage, assistantMessage]);
+        saveTranscript(finalTranscript);
       }
     } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('[PHOENIX] Request aborted');
+        return;
+      }
       console.error('[PHOENIX] Text mode error:', error);
       toast({
         title: 'Error',
@@ -396,6 +478,7 @@ const Phoenix: React.FC = () => {
       });
     } finally {
       setIsTextLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -421,7 +504,7 @@ const Phoenix: React.FC = () => {
   const handleModeToggle = (checked: boolean) => {
     setIsTextMode(checked);
     
-    // Disconnect voice if switching to text mode (but Phoenix stays active on whiteboard)
+    // Disconnect voice if switching to text mode
     if (checked && isConnected) {
       disconnect();
     }
@@ -433,6 +516,30 @@ const Phoenix: React.FC = () => {
         : 'Connect to speak with Phoenix in real-time',
     });
   };
+
+  // Handle session switch
+  const handleSessionSwitch = (sessionId: string) => {
+    if (editingSessionId === sessionId) return;
+    
+    // Disconnect voice if connected
+    if (isConnected) {
+      disconnect();
+    }
+    
+    // Cancel any pending text requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    whiteboardActionTimeoutsRef.current.forEach(t => clearTimeout(t));
+    whiteboardActionTimeoutsRef.current = [];
+    setIsTextLoading(false);
+    
+    setCurrentSessionId(sessionId);
+  };
+
+  // Check if stop button should be shown
+  const showStopButton = (isConnected && isSpeaking) || isTextLoading;
 
   // Render upgrade prompt for non-subscribers
   if (!hasLearnPlus) {
@@ -495,7 +602,7 @@ const Phoenix: React.FC = () => {
               </div>
             </div>
 
-            {/* Mode Toggle - Controls how Phoenix RESPONDS */}
+            {/* Mode Toggle */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-3">
               <div className="flex items-center gap-2">
                 {isTextMode ? (
@@ -542,14 +649,16 @@ const Phoenix: React.FC = () => {
                     )}
                   </Button>
                 ) : (
-                  <Button
-                    onClick={disconnect}
-                    variant="destructive"
-                    className="w-full"
-                  >
-                    <PhoneOff className="h-4 w-4 mr-2" />
-                    End Session
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={disconnect}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      <PhoneOff className="h-4 w-4 mr-2" />
+                      End Session
+                    </Button>
+                  </div>
                 )
               ) : (
                 // Text mode - show active state
@@ -559,6 +668,18 @@ const Phoenix: React.FC = () => {
                     <span className="text-sm font-medium text-blue-800">Phoenix ready (Text Mode)</span>
                   </div>
                 </div>
+              )}
+
+              {/* Stop Button - shows when Phoenix is speaking or loading */}
+              {showStopButton && (
+                <Button
+                  onClick={handleStop}
+                  variant="outline"
+                  className="w-full border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  <StopCircle className="h-4 w-4 mr-2" />
+                  Stop Phoenix
+                </Button>
               )}
 
               <Button
@@ -608,12 +729,7 @@ const Phoenix: React.FC = () => {
                           ? "bg-gradient-to-r from-orange-100 to-red-100 border-2 border-orange-300"
                           : "hover:bg-gray-100/50 border border-transparent"
                       )}
-                      onClick={() => {
-                        if (editingSessionId !== session.id) {
-                          setCurrentSessionId(session.id);
-                          if (isConnected) disconnect();
-                        }
-                      }}
+                      onClick={() => handleSessionSwitch(session.id)}
                     >
                       <div className="flex-1 min-w-0">
                         {editingSessionId === session.id ? (
@@ -748,13 +864,8 @@ const Phoenix: React.FC = () => {
                 ref={whiteboardRef}
                 isConnected={isPhoenixActive}
                 onStateChange={(state) => {
-                  // Save whiteboard state
-                  if (currentSessionId) {
-                    supabase
-                      .from('phoenix_sessions')
-                      .update({ whiteboard_state: state as any })
-                      .eq('id', currentSessionId);
-                  }
+                  // Save whiteboard state to current session
+                  saveWhiteboardState(state);
                 }}
               />
             ) : (
@@ -781,7 +892,7 @@ const Phoenix: React.FC = () => {
             )}
           </div>
 
-          {/* Text Input - Always show when there's a session (for both modes) */}
+          {/* Text Input - Always show when there's a session */}
           {currentSessionId && (isConnected || isTextMode) && (
             <div className="p-4 border-t border-gray-200 bg-white/50 backdrop-blur-sm">
               <div className="flex gap-2 max-w-3xl mx-auto">
