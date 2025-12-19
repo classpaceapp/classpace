@@ -369,13 +369,14 @@ export const usePhoenixRealtime = ({
     onTranscript?.(text, 'user');
   }, [onTranscript]);
 
-  const sendScreenshot = useCallback((imageBase64: string, context: string) => {
+  // Send whiteboard context as text (since realtime model doesn't support images)
+  const sendWhiteboardContext = useCallback((context: string) => {
     if (!dcRef.current || dcRef.current.readyState !== 'open') {
       console.error('[PHOENIX-REALTIME] Data channel not ready');
       return;
     }
 
-    console.log('[PHOENIX-REALTIME] Sending screenshot to AI');
+    console.log('[PHOENIX-REALTIME] Sending whiteboard context as text');
 
     const event = {
       type: 'conversation.item.create',
@@ -385,11 +386,7 @@ export const usePhoenixRealtime = ({
         content: [
           {
             type: 'input_text',
-            text: `[Whiteboard screenshot captured: ${context}]`
-          },
-          {
-            type: 'input_image',
-            image_url: `data:image/png;base64,${imageBase64}`
+            text: context
           }
         ]
       }
@@ -398,6 +395,15 @@ export const usePhoenixRealtime = ({
     dcRef.current.send(JSON.stringify(event));
     dcRef.current.send(JSON.stringify({ type: 'response.create' }));
   }, []);
+
+  // NOTE: The gpt-4o-realtime-preview model does NOT support image inputs.
+  // Instead of sending screenshots, we send a text description of the whiteboard.
+  const sendScreenshot = useCallback((imageBase64: string, context: string) => {
+    console.warn('[PHOENIX-REALTIME] Image input not supported by realtime model. Sending text context instead.');
+    
+    // Instead of sending the image, send a text message explaining we captured the whiteboard
+    sendWhiteboardContext(`[I captured a screenshot of the whiteboard. Context: ${context}. Please describe what you'd like me to analyze or help with based on our conversation.]`);
+  }, [sendWhiteboardContext]);
 
   // Stop Phoenix mid-response (cancel current response and mute audio)
   const stop = useCallback(() => {
@@ -490,6 +496,7 @@ export const usePhoenixRealtime = ({
     disconnect,
     stop,
     sendTextMessage,
-    sendScreenshot
+    sendScreenshot,
+    sendWhiteboardContext
   };
 };
