@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Excalidraw, exportToBlob } from '@excalidraw/excalidraw';
+import { Excalidraw, exportToBlob, MainMenu, WelcomeScreen } from '@excalidraw/excalidraw';
 import { PhoenixCursor } from './PhoenixCursor';
 import type { WhiteboardAction } from '@/hooks/usePhoenixRealtime';
 
@@ -302,7 +302,7 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   }, [isConnected]);
 
   return (
-    <div ref={containerRef} className="relative h-full w-full rounded-2xl overflow-hidden border-2 border-gray-200 bg-white shadow-xl">
+    <div ref={containerRef} className="relative h-full w-full rounded-2xl overflow-hidden border-2 border-gray-200 bg-white shadow-xl phoenix-whiteboard">
       {/* Phoenix AI Cursor */}
       <PhoenixCursor
         x={cursorPosition.x}
@@ -311,7 +311,7 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
         isActive={isCursorActive}
       />
 
-      {/* Excalidraw Canvas */}
+      {/* Excalidraw Canvas - Clean UI */}
       <Excalidraw
         excalidrawAPI={(api) => setExcalidrawAPI(api)}
         onChange={handleChange}
@@ -320,25 +320,70 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
             viewBackgroundColor: '#ffffff',
             currentItemStrokeColor: '#000000',
             currentItemBackgroundColor: 'transparent',
+            gridSize: null,
           },
         }}
         UIOptions={{
           canvasActions: {
+            changeViewBackgroundColor: false,
             clearCanvas: true,
             export: false,
             loadScene: false,
             saveToActiveFile: false,
+            toggleTheme: false,
+          },
+          tools: {
+            image: false,
           },
         }}
-      />
+      >
+        {/* Hide the default menu */}
+        <MainMenu>
+          <MainMenu.DefaultItems.ClearCanvas />
+          <MainMenu.DefaultItems.ChangeCanvasBackground />
+        </MainMenu>
+        
+        {/* Remove the welcome screen */}
+        <WelcomeScreen>
+          <WelcomeScreen.Center>
+            <WelcomeScreen.Center.Heading>
+              Phoenix Whiteboard
+            </WelcomeScreen.Center.Heading>
+            <WelcomeScreen.Center.Menu>
+              <WelcomeScreen.Center.MenuItemHelp />
+            </WelcomeScreen.Center.Menu>
+          </WelcomeScreen.Center>
+        </WelcomeScreen>
+      </Excalidraw>
 
       {/* Connection indicator */}
       {isConnected && (
-        <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-green-100 border border-green-300 rounded-full">
+        <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-green-100 border border-green-300 rounded-full z-10">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           <span className="text-xs font-medium text-green-700">Phoenix Active</span>
         </div>
       )}
+
+      {/* Custom CSS to hide unwanted Excalidraw elements */}
+      <style>{`
+        .phoenix-whiteboard .layer-ui__wrapper__top-right {
+          display: none !important;
+        }
+        .phoenix-whiteboard .library-button {
+          display: none !important;
+        }
+        .phoenix-whiteboard [class*="library"] {
+          display: none !important;
+        }
+        .phoenix-whiteboard .App-menu_top__left {
+          display: none !important;
+        }
+        .phoenix-whiteboard .excalidraw .Island {
+          background: rgba(255, 255, 255, 0.95) !important;
+          border-radius: 12px !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        }
+      `}</style>
     </div>
   );
 });
