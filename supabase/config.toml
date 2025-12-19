@@ -36,6 +36,9 @@ verify_jwt = true
 [functions.phoenix-realtime-token]
 verify_jwt = true
 
+[functions.phoenix-text-chat]
+verify_jwt = true
+
 [functions.resume-subscription]
 verify_jwt = true
 

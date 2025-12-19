@@ -52,7 +52,17 @@ interface PhoenixSession {
   created_at: string;
   updated_at: string;
   whiteboard_state?: any;
+  session_transcript?: any;
 }
+
+// Helper to get current whiteboard state synchronously
+const getCurrentWhiteboardState = (ref: React.RefObject<PhoenixWhiteboardRef | null>): any => {
+  try {
+    return ref.current?.getState() || {};
+  } catch {
+    return {};
+  }
+};
 
 const Phoenix: React.FC = () => {
   const { user, subscription, refreshSubscription } = useAuth();
@@ -95,7 +105,8 @@ const Phoenix: React.FC = () => {
     disconnect,
     stop: stopVoice,
     sendTextMessage: sendVoiceTextMessage,
-    sendScreenshot
+    sendScreenshot,
+    sendWhiteboardContext
   } = usePhoenixRealtime({
     onWhiteboardAction: handleWhiteboardAction,
     onTranscript: handleTranscript,
@@ -171,14 +182,26 @@ const Phoenix: React.FC = () => {
     if (!whiteboardRef.current) return;
     
     try {
-      const screenshot = await whiteboardRef.current.captureScreenshot();
-      if (screenshot) {
-        sendScreenshot(screenshot, reason);
+      // Instead of sending screenshot (not supported), send whiteboard layout as text context
+      const layout = whiteboardRef.current.getWhiteboardLayout();
+      let contextText = `[Whiteboard analysis requested: ${reason}]\n`;
+      contextText += `Canvas: ${layout.canvasWidth}x${layout.canvasHeight}px, ${layout.items.length} objects.\n`;
+      
+      if (layout.items.length > 0) {
+        contextText += 'Objects on whiteboard:\n';
+        layout.items.slice(0, 10).forEach((item, i) => {
+          const textPreview = item.text ? ` "${item.text}"` : '';
+          contextText += `  ${i + 1}. ${item.type} at (${item.left}, ${item.top})${textPreview}\n`;
+        });
+      } else {
+        contextText += 'The whiteboard is currently empty.';
       }
+      
+      sendWhiteboardContext(contextText);
     } catch (error) {
-      console.error('[PHOENIX] Screenshot error:', error);
+      console.error('[PHOENIX] Whiteboard context error:', error);
     }
-  }, [sendScreenshot]);
+  }, [sendWhiteboardContext]);
 
   const fetchSessions = async () => {
     if (!user?.id) return;
@@ -253,10 +276,37 @@ const Phoenix: React.FC = () => {
       .eq('id', currentSessionId);
   }, [currentSessionId]);
 
+  // Flush current session state to DB (call before switching/creating sessions)
+  const flushCurrentSession = useCallback(async () => {
+    if (!currentSessionId) return;
+    
+    const whiteboardState = getCurrentWhiteboardState(whiteboardRef);
+    
+    // Use the latest transcript from state
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+    
+    // Always save whiteboard state
+    if (whiteboardState && Object.keys(whiteboardState).length > 0) {
+      updateData.whiteboard_state = whiteboardState;
+    }
+    
+    console.log('[PHOENIX] Flushing session:', currentSessionId, 'whiteboard objects:', whiteboardState?.objects?.length || 0);
+    
+    await supabase
+      .from('phoenix_sessions')
+      .update(updateData)
+      .eq('id', currentSessionId);
+  }, [currentSessionId]);
+
   const createNewSession = async () => {
     if (!user?.id) return;
     
     try {
+      // IMPORTANT: Save current session before creating new one
+      await flushCurrentSession();
+      
       const { data, error } = await supabase
         .from('phoenix_sessions')
         .insert([{
@@ -357,6 +407,40 @@ const Phoenix: React.FC = () => {
       await createNewSession();
     }
     await connect();
+    
+    // After connection, send session context to voice mode
+    // Small delay to ensure data channel is ready
+    setTimeout(() => {
+      if (transcript.length > 0 || whiteboardRef.current) {
+        // Build context summary for voice mode
+        let contextSummary = '[Session context - continuing from previous conversation]\n';
+        
+        // Add transcript summary (last few messages)
+        if (transcript.length > 0) {
+          const recentMessages = transcript.slice(-5);
+          contextSummary += 'Recent conversation:\n';
+          recentMessages.forEach(msg => {
+            const role = msg.role === 'user' ? 'Student' : 'Phoenix';
+            const preview = msg.content.substring(0, 100) + (msg.content.length > 100 ? '...' : '');
+            contextSummary += `  ${role}: ${preview}\n`;
+          });
+        }
+        
+        // Add whiteboard summary
+        const layout = whiteboardRef.current?.getWhiteboardLayout();
+        if (layout && layout.items.length > 0) {
+          contextSummary += `\nWhiteboard has ${layout.items.length} objects. `;
+          const textItems = layout.items.filter(i => i.text);
+          if (textItems.length > 0) {
+            contextSummary += 'Text on board: ' + textItems.map(i => `"${i.text}"`).slice(0, 3).join(', ');
+          }
+        }
+        
+        if (transcript.length > 0 || (layout && layout.items.length > 0)) {
+          sendWhiteboardContext(contextSummary);
+        }
+      }
+    }, 1500);
   };
 
   // Stop Phoenix (voice or text mode)
@@ -501,7 +585,10 @@ const Phoenix: React.FC = () => {
   };
 
   // Toggle text mode
-  const handleModeToggle = (checked: boolean) => {
+  const handleModeToggle = async (checked: boolean) => {
+    // Save session state before mode change
+    await flushCurrentSession();
+    
     setIsTextMode(checked);
     
     // Disconnect voice if switching to text mode
@@ -518,8 +605,12 @@ const Phoenix: React.FC = () => {
   };
 
   // Handle session switch
-  const handleSessionSwitch = (sessionId: string) => {
+  const handleSessionSwitch = async (sessionId: string) => {
     if (editingSessionId === sessionId) return;
+    if (sessionId === currentSessionId) return; // Already on this session
+    
+    // IMPORTANT: Save current session before switching
+    await flushCurrentSession();
     
     // Disconnect voice if connected
     if (isConnected) {
