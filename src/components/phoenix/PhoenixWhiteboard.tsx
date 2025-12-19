@@ -370,14 +370,12 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     }
   };
 
-  // Show cursor when connected
+  // Show cursor when Phoenix is active (voice connected OR text mode with session)
   useEffect(() => {
-    if (isConnected && !isCursorVisible) {
+    if (isConnected) {
       setIsCursorVisible(true);
     }
-    if (!isConnected) {
-      setIsCursorVisible(false);
-    }
+    // Don't hide cursor if disconnected - may still be in text mode
   }, [isConnected]);
 
   return (

@@ -7,6 +7,7 @@ import { usePhoenixRealtime, WhiteboardAction } from '@/hooks/usePhoenixRealtime
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -26,7 +27,10 @@ import {
   Zap,
   Lock,
   MessageSquare,
-  Keyboard
+  Keyboard,
+  Edit2,
+  Check,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -59,9 +63,18 @@ const Phoenix: React.FC = () => {
   const [textInput, setTextInput] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   
-  // Text mode state - when true, Phoenix responds with text instead of voice
+  // Mode states
+  // isTextMode: controls whether Phoenix RESPONDS with text (vs voice)
+  // User can ALWAYS type regardless of this setting
   const [isTextMode, setIsTextMode] = useState(false);
   const [isTextLoading, setIsTextLoading] = useState(false);
+  
+  // Track if Phoenix has active whiteboard session (true when connected OR when text mode with session)
+  const [isPhoenixActive, setIsPhoenixActive] = useState(false);
+  
+  // Session rename state
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
   
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +104,11 @@ const Phoenix: React.FC = () => {
       });
     }
   });
+
+  // Phoenix is "active" when either connected via voice OR in text mode with a session
+  useEffect(() => {
+    setIsPhoenixActive(isConnected || (isTextMode && currentSessionId !== null));
+  }, [isConnected, isTextMode, currentSessionId]);
 
   useEffect(() => {
     if (user?.id && hasLearnPlus) {
@@ -236,6 +254,43 @@ const Phoenix: React.FC = () => {
     }
   };
 
+  const renameSession = async (sessionId: string, newTitle: string) => {
+    if (!newTitle.trim()) return;
+    
+    try {
+      const { error } = await supabase
+        .from('phoenix_sessions')
+        .update({ title: newTitle.trim(), updated_at: new Date().toISOString() })
+        .eq('id', sessionId);
+
+      if (error) throw error;
+
+      setSessions(sessions.map(s => 
+        s.id === sessionId ? { ...s, title: newTitle.trim() } : s
+      ));
+      setEditingSessionId(null);
+      setEditingTitle('');
+      
+      toast({ title: 'Session renamed' });
+    } catch (error: any) {
+      toast({
+        title: 'Error renaming session',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const startEditingSession = (session: PhoenixSession) => {
+    setEditingSessionId(session.id);
+    setEditingTitle(session.title);
+  };
+
+  const cancelEditingSession = () => {
+    setEditingSessionId(null);
+    setEditingTitle('');
+  };
+
   const deleteSession = async (sessionId: string) => {
     try {
       const { error } = await supabase
@@ -269,6 +324,20 @@ const Phoenix: React.FC = () => {
     await connect();
   };
 
+  // Execute whiteboard actions from text mode response
+  const executeWhiteboardActions = useCallback((actions: WhiteboardAction[]) => {
+    if (!whiteboardRef.current || !actions || actions.length === 0) return;
+    
+    console.log('[PHOENIX] Executing text-mode whiteboard actions:', actions);
+    
+    // Execute actions with small delays for visual effect
+    actions.forEach((action, index) => {
+      setTimeout(() => {
+        handleWhiteboardAction(action);
+      }, index * 300);
+    });
+  }, []);
+
   // Send text message via Lovable AI (text mode)
   const sendTextModeMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -294,7 +363,7 @@ const Phoenix: React.FC = () => {
       messageHistory.push({ role: 'user', content: text });
       
       const response = await supabase.functions.invoke('phoenix-text-chat', {
-        body: { messages: messageHistory }
+        body: { messages: messageHistory, includeWhiteboardActions: true }
       });
       
       if (response.error) throw response.error;
@@ -307,6 +376,11 @@ const Phoenix: React.FC = () => {
       };
       
       setTranscript(prev => [...prev, assistantMessage]);
+      
+      // Execute any whiteboard actions from the response
+      if (response.data.whiteboardActions && response.data.whiteboardActions.length > 0) {
+        executeWhiteboardActions(response.data.whiteboardActions);
+      }
       
       // Save to database
       if (currentSessionId) {
@@ -346,7 +420,7 @@ const Phoenix: React.FC = () => {
   const handleModeToggle = (checked: boolean) => {
     setIsTextMode(checked);
     
-    // Disconnect voice if switching to text mode
+    // Disconnect voice if switching to text mode (but Phoenix stays active on whiteboard)
     if (checked && isConnected) {
       disconnect();
     }
@@ -354,7 +428,7 @@ const Phoenix: React.FC = () => {
     toast({
       title: checked ? 'Text Mode Enabled' : 'Voice Mode Enabled',
       description: checked 
-        ? 'Phoenix will respond with formatted text and equations' 
+        ? 'Phoenix will respond with formatted text and use the whiteboard' 
         : 'Connect to speak with Phoenix in real-time',
     });
   };
@@ -420,7 +494,7 @@ const Phoenix: React.FC = () => {
               </div>
             </div>
 
-            {/* Mode Toggle */}
+            {/* Mode Toggle - Controls how Phoenix RESPONDS */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-3">
               <div className="flex items-center gap-2">
                 {isTextMode ? (
@@ -429,7 +503,7 @@ const Phoenix: React.FC = () => {
                   <Mic className="h-4 w-4 text-orange-600" />
                 )}
                 <Label htmlFor="text-mode" className="text-sm font-medium">
-                  {isTextMode ? 'Text Mode' : 'Voice Mode'}
+                  {isTextMode ? 'Text Responses' : 'Voice Responses'}
                 </Label>
               </div>
               <Switch
@@ -438,6 +512,11 @@ const Phoenix: React.FC = () => {
                 onCheckedChange={handleModeToggle}
               />
             </div>
+            <p className="text-xs text-muted-foreground mb-3 px-1">
+              {isTextMode 
+                ? 'Phoenix responds with text & uses whiteboard autonomously'
+                : 'Phoenix speaks & uses whiteboard in real-time'}
+            </p>
 
             {/* Connection Controls */}
             <div className="space-y-2">
@@ -472,11 +551,11 @@ const Phoenix: React.FC = () => {
                   </Button>
                 )
               ) : (
-                // Text mode - just show "Ready" state
+                // Text mode - show active state
                 <div className="w-full p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
                   <div className="flex items-center justify-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">Text chat ready</span>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-medium text-blue-800">Phoenix ready (Text Mode)</span>
                   </div>
                 </div>
               )}
@@ -529,29 +608,82 @@ const Phoenix: React.FC = () => {
                           : "hover:bg-gray-100/50 border border-transparent"
                       )}
                       onClick={() => {
-                        setCurrentSessionId(session.id);
-                        if (isConnected) disconnect();
+                        if (editingSessionId !== session.id) {
+                          setCurrentSessionId(session.id);
+                          if (isConnected) disconnect();
+                        }
                       }}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 truncate">
-                          {session.title}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(session.updated_at).toLocaleDateString()}
-                        </p>
+                        {editingSessionId === session.id ? (
+                          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                            <Input
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              className="h-7 text-sm"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  renameSession(session.id, editingTitle);
+                                } else if (e.key === 'Escape') {
+                                  cancelEditingSession();
+                                }
+                              }}
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0"
+                              onClick={() => renameSession(session.id, editingTitle)}
+                            >
+                              <Check className="h-3 w-3 text-green-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0"
+                              onClick={cancelEditingSession}
+                            >
+                              <X className="h-3 w-3 text-red-600" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="font-medium text-sm text-gray-900 truncate">
+                              {session.title}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(session.updated_at).toLocaleDateString()}
+                            </p>
+                          </>
+                        )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteSession(session.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
+                      {editingSessionId !== session.id && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              startEditingSession(session);
+                            }}
+                          >
+                            <Edit2 className="h-3 w-3 text-gray-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteSession(session.id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3 text-red-600" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
@@ -613,7 +745,7 @@ const Phoenix: React.FC = () => {
             {currentSessionId ? (
               <PhoenixWhiteboard
                 ref={whiteboardRef}
-                isConnected={isConnected && !isTextMode}
+                isConnected={isPhoenixActive}
                 onStateChange={(state) => {
                   // Save whiteboard state
                   if (currentSessionId) {
@@ -656,7 +788,7 @@ const Phoenix: React.FC = () => {
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
                   placeholder={isTextMode 
-                    ? "Type your question... (Phoenix will respond with text)" 
+                    ? "Type your question... (Phoenix will respond with text and draw on whiteboard)" 
                     : "Type a message (or just speak!)..."
                   }
                   className="resize-none"
@@ -683,7 +815,7 @@ const Phoenix: React.FC = () => {
               </div>
               <p className="text-xs text-center text-muted-foreground mt-2">
                 {isTextMode 
-                  ? "Text mode: Phoenix will respond with formatted text and equations"
+                  ? "Text mode: Phoenix responds with formatted text and uses the whiteboard autonomously"
                   : "Phoenix is listening. Speak naturally or type your questions."
                 }
               </p>
