@@ -5,20 +5,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface WhiteboardAction {
+  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard';
+  params: Record<string, any>;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages } = await req.json();
+    const { messages, includeWhiteboardActions } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `You are Phoenix, an exceptional AI teaching assistant. You communicate via text with students and help them learn.
+    const systemPrompt = `You are Phoenix, an exceptional AI teaching assistant with access to a shared whiteboard. You communicate via text with students and help them learn.
 
 CORE IDENTITY:
 - You are warm, encouraging, and patient
@@ -34,12 +39,41 @@ FORMATTING GUIDELINES:
 - Use bullet points and numbered lists for clarity
 - Provide practice problems when appropriate
 
+WHITEBOARD CAPABILITIES:
+You can control a shared whiteboard to help teach visually. When it would help explain a concept, include a JSON block with whiteboard actions at the END of your response in this format:
+
+\`\`\`whiteboard
+[
+  {"type": "draw_text", "params": {"text": "Example", "x": 100, "y": 50, "fontSize": 24}},
+  {"type": "draw_equation", "params": {"latex": "E = mc^2", "x": 100, "y": 100}},
+  {"type": "draw_shape", "params": {"shape": "rectangle", "x": 80, "y": 40, "width": 200, "height": 80, "color": "#ff6600"}}
+]
+\`\`\`
+
+Available whiteboard actions:
+- move_cursor: {"type": "move_cursor", "params": {"x": number, "y": number}}
+- draw_text: {"type": "draw_text", "params": {"text": string, "x": number, "y": number, "fontSize?": number, "color?": string}}
+- draw_equation: {"type": "draw_equation", "params": {"latex": string, "x": number, "y": number, "fontSize?": number}}
+- draw_shape: {"type": "draw_shape", "params": {"shape": "rectangle"|"circle"|"line"|"arrow", "x": number, "y": number, "width": number, "height": number, "color?": string, "fill?": string}}
+- draw_freehand: {"type": "draw_freehand", "params": {"points": [{x, y}...], "color?": string, "strokeWidth?": number}}
+- highlight_area: {"type": "highlight_area", "params": {"x": number, "y": number, "width": number, "height": number, "color?": string}}
+- clear_whiteboard: {"type": "clear_whiteboard", "params": {}}
+
+USE THE WHITEBOARD when:
+- Explaining mathematical concepts (draw equations, graphs, diagrams)
+- Teaching visual topics (draw diagrams, shapes, arrows)
+- Highlighting important points
+- Working through problems step by step
+
+Canvas coordinates: x: 0-1000, y: 0-700
+
 TEACHING APPROACH:
 1. Start by understanding what the student wants to learn
 2. Break complex concepts into digestible steps
 3. Use equations and formulas when teaching math/science
-4. Check for understanding regularly
-5. Summarize key takeaways at the end`;
+4. Use the whiteboard to illustrate concepts visually
+5. Check for understanding regularly
+6. Summarize key takeaways at the end`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -71,9 +105,30 @@ TEACHING APPROACH:
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
+    let content = data.choices?.[0]?.message?.content || '';
+    
+    // Parse whiteboard actions from response
+    const whiteboardActions: WhiteboardAction[] = [];
+    const whiteboardMatch = content.match(/```whiteboard\n([\s\S]*?)\n```/);
+    
+    if (whiteboardMatch) {
+      try {
+        const actionsJson = whiteboardMatch[1];
+        const parsed = JSON.parse(actionsJson);
+        if (Array.isArray(parsed)) {
+          whiteboardActions.push(...parsed);
+        }
+        // Remove the whiteboard block from content shown to user
+        content = content.replace(/```whiteboard\n[\s\S]*?\n```/g, '').trim();
+      } catch (e) {
+        console.error('[PHOENIX-TEXT] Failed to parse whiteboard actions:', e);
+      }
+    }
 
-    return new Response(JSON.stringify({ content }), {
+    return new Response(JSON.stringify({ 
+      content,
+      whiteboardActions: whiteboardActions.length > 0 ? whiteboardActions : undefined
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
