@@ -5,6 +5,7 @@ import type { WhiteboardAction } from '@/hooks/usePhoenixRealtime';
 import { Button } from '@/components/ui/button';
 import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { latexToVisualUnicode, normalizeCoordinates } from '@/utils/phoenixMathUtils';
 
 interface PhoenixWhiteboardProps {
   onStateChange?: (state: any) => void;
@@ -276,16 +277,26 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const handleDrawText = useCallback((params: { text: string; x: number; y: number; fontSize?: number; color?: string }) => {
     if (!fabricCanvas) return;
 
+    // Get actual canvas dimensions for coordinate normalization
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
     setIsCursorVisible(true);
     setIsCursorActive(true);
-    setCursorPosition({ x: params.x, y: params.y });
+    
+    // Normalize coordinates from 1000x700 space to actual canvas
+    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    setCursorPosition(pos);
 
-    const text = new IText(params.text, {
-      left: params.x,
-      top: params.y,
+    // Apply LaTeX to Unicode conversion for any math in the text
+    const displayText = latexToVisualUnicode(params.text);
+
+    const text = new IText(displayText, {
+      left: pos.x,
+      top: pos.y,
       fill: params.color || '#000000',
       fontSize: params.fontSize || 20,
-      fontFamily: 'Arial',
+      fontFamily: 'Arial, "Segoe UI Symbol", "Apple Symbols", sans-serif',
     });
 
     fabricCanvas.add(text);
@@ -300,43 +311,95 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     y: number; 
     width: number; 
     height: number; 
+    // New: explicit endpoint support
+    x2?: number;
+    y2?: number;
     color?: string; 
     fill?: string 
   }) => {
     if (!fabricCanvas) return;
 
+    // Get actual canvas dimensions for coordinate normalization
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
     setIsCursorVisible(true);
     setIsCursorActive(true);
-    setCursorPosition({ x: params.x, y: params.y });
+    
+    // Normalize starting coordinates from 1000x700 space to actual canvas
+    const start = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    setCursorPosition(start);
 
     let shape: FabricObject | null = null;
 
     if (params.shape === 'rectangle') {
+      const normalizedWidth = (params.width / 1000) * canvasWidth;
+      const normalizedHeight = (params.height / 700) * canvasHeight;
+      
       shape = new Rect({
-        left: params.x,
-        top: params.y,
-        width: params.width,
-        height: params.height,
+        left: start.x,
+        top: start.y,
+        width: normalizedWidth,
+        height: normalizedHeight,
         fill: params.fill || 'transparent',
         stroke: params.color || '#000000',
         strokeWidth: 2,
       });
     } else if (params.shape === 'circle' || params.shape === 'ellipse') {
+      const normalizedWidth = (params.width / 1000) * canvasWidth;
+      const normalizedHeight = (params.height / 700) * canvasHeight;
+      
       shape = new Circle({
-        left: params.x,
-        top: params.y,
-        radius: Math.min(params.width, params.height) / 2,
+        left: start.x,
+        top: start.y,
+        radius: Math.min(normalizedWidth, normalizedHeight) / 2,
         fill: params.fill || 'transparent',
         stroke: params.color || '#000000',
         strokeWidth: 2,
       });
     } else if (params.shape === 'arrow' || params.shape === 'line') {
-      const pathStr = `M ${params.x} ${params.y} L ${params.x + params.width} ${params.y + params.height}`;
+      // Support explicit x2,y2 endpoints OR width/height as delta
+      let endX: number, endY: number;
+      
+      if (params.x2 !== undefined && params.y2 !== undefined) {
+        // Use explicit endpoints
+        const end = normalizeCoordinates(params.x2, params.y2, canvasWidth, canvasHeight);
+        endX = end.x;
+        endY = end.y;
+      } else {
+        // Treat width/height as endpoint coordinates relative to canvas size
+        // If the model provides "width: 500, height: 300", interpret as target point
+        const end = normalizeCoordinates(params.x + params.width, params.y + params.height, canvasWidth, canvasHeight);
+        endX = end.x;
+        endY = end.y;
+      }
+      
+      const pathStr = `M ${start.x} ${start.y} L ${endX} ${endY}`;
       shape = new Path(pathStr, {
         stroke: params.color || '#000000',
         strokeWidth: 2,
         fill: '',
       });
+      
+      // Add arrowhead for arrows
+      if (params.shape === 'arrow') {
+        const angle = Math.atan2(endY - start.y, endX - start.x);
+        const arrowLength = 15;
+        const arrowAngle = Math.PI / 6;
+        
+        const arrow1X = endX - arrowLength * Math.cos(angle - arrowAngle);
+        const arrow1Y = endY - arrowLength * Math.sin(angle - arrowAngle);
+        const arrow2X = endX - arrowLength * Math.cos(angle + arrowAngle);
+        const arrow2Y = endY - arrowLength * Math.sin(angle + arrowAngle);
+        
+        const arrowHeadPath = `M ${endX} ${endY} L ${arrow1X} ${arrow1Y} M ${endX} ${endY} L ${arrow2X} ${arrow2Y}`;
+        const arrowHead = new Path(arrowHeadPath, {
+          stroke: params.color || '#000000',
+          strokeWidth: 2,
+          fill: '',
+        });
+        fabricCanvas.add(arrowHead);
+      }
     }
 
     if (shape) {
@@ -350,54 +413,26 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const handleDrawEquation = useCallback((params: { latex: string; x: number; y: number; fontSize?: number }) => {
     if (!fabricCanvas) return;
 
+    // Get actual canvas dimensions for coordinate normalization
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
     setIsCursorVisible(true);
     setIsCursorActive(true);
-    setCursorPosition({ x: params.x, y: params.y });
+    
+    // Normalize coordinates
+    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    setCursorPosition(pos);
 
-    // Convert LaTeX-style syntax to visual Unicode characters
-    let visualText = params.latex
-      // Powers
-      .replace(/\^2/g, '²').replace(/\^3/g, '³').replace(/\^4/g, '⁴')
-      .replace(/\^0/g, '⁰').replace(/\^1/g, '¹').replace(/\^5/g, '⁵')
-      .replace(/\^6/g, '⁶').replace(/\^7/g, '⁷').replace(/\^8/g, '⁸').replace(/\^9/g, '⁹')
-      .replace(/\^n/g, 'ⁿ').replace(/\^i/g, 'ⁱ')
-      .replace(/\^{(\d+)}/g, (_, p) => p.split('').map((d: string) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[parseInt(d)] || d).join(''))
-      // Subscripts
-      .replace(/_0/g, '₀').replace(/_1/g, '₁').replace(/_2/g, '₂').replace(/_3/g, '₃')
-      .replace(/_4/g, '₄').replace(/_5/g, '₅').replace(/_6/g, '₆').replace(/_7/g, '₇')
-      .replace(/_8/g, '₈').replace(/_9/g, '₉').replace(/_n/g, 'ₙ').replace(/_i/g, 'ᵢ')
-      .replace(/_{(\d+)}/g, (_, p) => p.split('').map((d: string) => '₀₁₂₃₄₅₆₇₈₉'[parseInt(d)] || d).join(''))
-      // Fractions
-      .replace(/\\frac\{1\}\{2\}/g, '½').replace(/\\frac\{1\}\{3\}/g, '⅓')
-      .replace(/\\frac\{1\}\{4\}/g, '¼').replace(/\\frac\{2\}\{3\}/g, '⅔')
-      .replace(/\\frac\{3\}\{4\}/g, '¾').replace(/\\frac\{1\}\{5\}/g, '⅕')
-      .replace(/\\frac\{(.+?)\}\{(.+?)\}/g, '$1/$2')
-      // Greek letters
-      .replace(/\\alpha/g, 'α').replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
-      .replace(/\\delta/g, 'δ').replace(/\\epsilon/g, 'ε').replace(/\\theta/g, 'θ')
-      .replace(/\\lambda/g, 'λ').replace(/\\mu/g, 'μ').replace(/\\pi/g, 'π')
-      .replace(/\\sigma/g, 'σ').replace(/\\phi/g, 'φ').replace(/\\omega/g, 'ω')
-      .replace(/\\Delta/g, 'Δ').replace(/\\Sigma/g, 'Σ').replace(/\\Pi/g, 'Π')
-      .replace(/\\Omega/g, 'Ω').replace(/\\Gamma/g, 'Γ')
-      // Math symbols
-      .replace(/\\sqrt\{(.+?)\}/g, '√($1)').replace(/\\sqrt/g, '√')
-      .replace(/\\infty/g, '∞').replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
-      .replace(/\\times/g, '×').replace(/\\div/g, '÷').replace(/\\cdot/g, '·')
-      .replace(/\\neq/g, '≠').replace(/\\leq/g, '≤').replace(/\\geq/g, '≥')
-      .replace(/\\approx/g, '≈').replace(/\\equiv/g, '≡')
-      .replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
-      .replace(/\\leftrightarrow/g, '↔').replace(/\\Rightarrow/g, '⇒')
-      .replace(/\\int/g, '∫').replace(/\\sum/g, '∑').replace(/\\prod/g, '∏')
-      .replace(/\\partial/g, '∂').replace(/\\nabla/g, '∇')
-      // Clean up any remaining LaTeX commands
-      .replace(/\\/g, '');
+    // Use the comprehensive LaTeX to Unicode converter
+    const visualText = latexToVisualUnicode(params.latex);
 
     const text = new IText(visualText, {
-      left: params.x,
-      top: params.y,
+      left: pos.x,
+      top: pos.y,
       fill: '#1e40af',
       fontSize: params.fontSize || 28,
-      fontFamily: 'Arial, "Segoe UI Symbol", sans-serif',
+      fontFamily: 'Arial, "Segoe UI Symbol", "Apple Symbols", sans-serif',
     });
 
     fabricCanvas.add(text);
@@ -409,15 +444,25 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const handleHighlightArea = useCallback((params: { x: number; y: number; width: number; height: number; color?: string }) => {
     if (!fabricCanvas) return;
 
+    // Get actual canvas dimensions for coordinate normalization
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
     setIsCursorVisible(true);
     setIsCursorActive(true);
-    setCursorPosition({ x: params.x, y: params.y });
+    
+    // Normalize coordinates and dimensions
+    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    setCursorPosition(pos);
+    
+    const normalizedWidth = (params.width / 1000) * canvasWidth;
+    const normalizedHeight = (params.height / 700) * canvasHeight;
 
     const highlight = new Rect({
-      left: params.x,
-      top: params.y,
-      width: params.width,
-      height: params.height,
+      left: pos.x,
+      top: pos.y,
+      width: normalizedWidth,
+      height: normalizedHeight,
       fill: params.color || 'rgba(255, 255, 0, 0.3)',
       stroke: '',
       strokeWidth: 0,

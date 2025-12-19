@@ -370,13 +370,14 @@ export const usePhoenixRealtime = ({
   }, [onTranscript]);
 
   // Send whiteboard context as text (since realtime model doesn't support images)
-  const sendWhiteboardContext = useCallback((context: string) => {
+  // triggerResponse: if false, injects context silently without prompting AI to respond
+  const sendWhiteboardContext = useCallback((context: string, triggerResponse: boolean = true) => {
     if (!dcRef.current || dcRef.current.readyState !== 'open') {
       console.error('[PHOENIX-REALTIME] Data channel not ready');
       return;
     }
 
-    console.log('[PHOENIX-REALTIME] Sending whiteboard context as text');
+    console.log('[PHOENIX-REALTIME] Sending whiteboard context as text, triggerResponse:', triggerResponse);
 
     const event = {
       type: 'conversation.item.create',
@@ -393,7 +394,12 @@ export const usePhoenixRealtime = ({
     };
 
     dcRef.current.send(JSON.stringify(event));
-    dcRef.current.send(JSON.stringify({ type: 'response.create' }));
+    
+    // Only trigger a response if explicitly requested
+    // For context injection during mode switches, we don't want to trigger a response
+    if (triggerResponse) {
+      dcRef.current.send(JSON.stringify({ type: 'response.create' }));
+    }
   }, []);
 
   // NOTE: The gpt-4o-realtime-preview model does NOT support image inputs.
@@ -402,7 +408,8 @@ export const usePhoenixRealtime = ({
     console.warn('[PHOENIX-REALTIME] Image input not supported by realtime model. Sending text context instead.');
     
     // Instead of sending the image, send a text message explaining we captured the whiteboard
-    sendWhiteboardContext(`[I captured a screenshot of the whiteboard. Context: ${context}. Please describe what you'd like me to analyze or help with based on our conversation.]`);
+    // This DOES trigger a response since the user explicitly asked for screenshot analysis
+    sendWhiteboardContext(`[I captured a screenshot of the whiteboard. Context: ${context}. Please describe what you'd like me to analyze or help with based on our conversation.]`, true);
   }, [sendWhiteboardContext]);
 
   // Stop Phoenix mid-response (cancel current response and mute audio)
