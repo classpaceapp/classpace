@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Mic, 
@@ -22,10 +24,15 @@ import {
   Phone,
   PhoneOff,
   Zap,
-  Lock
+  Lock,
+  MessageSquare,
+  Keyboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 interface TranscriptMessage {
   id: string;
@@ -52,6 +59,10 @@ const Phoenix: React.FC = () => {
   const [textInput, setTextInput] = useState('');
   const [isMuted, setIsMuted] = useState(false);
   
+  // Text mode state - when true, Phoenix responds with text instead of voice
+  const [isTextMode, setIsTextMode] = useState(false);
+  const [isTextLoading, setIsTextLoading] = useState(false);
+  
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
   // Check if user has Learn+ subscription
@@ -64,7 +75,7 @@ const Phoenix: React.FC = () => {
     isSpeaking,
     connect,
     disconnect,
-    sendTextMessage,
+    sendTextMessage: sendVoiceTextMessage,
     sendScreenshot
   } = usePhoenixRealtime({
     onWhiteboardAction: handleWhiteboardAction,
@@ -214,7 +225,7 @@ const Phoenix: React.FC = () => {
       
       toast({
         title: "New session created",
-        description: "Connect to Phoenix to start learning!",
+        description: isTextMode ? "Start typing to chat with Phoenix!" : "Connect to Phoenix to start learning!",
       });
     } catch (error: any) {
       toast({
@@ -258,12 +269,94 @@ const Phoenix: React.FC = () => {
     await connect();
   };
 
+  // Send text message via Lovable AI (text mode)
+  const sendTextModeMessage = async (text: string) => {
+    if (!text.trim()) return;
+    
+    // Add user message to transcript
+    const userMessage: TranscriptMessage = {
+      id: `msg-${Date.now()}-user`,
+      role: 'user',
+      content: text,
+      timestamp: new Date()
+    };
+    
+    setTranscript(prev => [...prev, userMessage]);
+    setIsTextLoading(true);
+    
+    try {
+      // Build message history for context
+      const messageHistory = transcript.slice(-10).map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+      
+      messageHistory.push({ role: 'user', content: text });
+      
+      const response = await supabase.functions.invoke('phoenix-text-chat', {
+        body: { messages: messageHistory }
+      });
+      
+      if (response.error) throw response.error;
+      
+      const assistantMessage: TranscriptMessage = {
+        id: `msg-${Date.now()}-assistant`,
+        role: 'assistant',
+        content: response.data.content || 'I apologize, I couldn\'t generate a response.',
+        timestamp: new Date()
+      };
+      
+      setTranscript(prev => [...prev, assistantMessage]);
+      
+      // Save to database
+      if (currentSessionId) {
+        saveTranscript([...transcript, userMessage, assistantMessage]);
+      }
+    } catch (error: any) {
+      console.error('[PHOENIX] Text mode error:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to get response from Phoenix',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsTextLoading(false);
+    }
+  };
+
   const handleTextSubmit = async () => {
-    if (!textInput.trim() || !isConnected) return;
+    if (!textInput.trim()) return;
     
     const text = textInput.trim();
     setTextInput('');
-    sendTextMessage(text);
+    
+    if (isTextMode) {
+      // Ensure we have a session
+      if (!currentSessionId) {
+        await createNewSession();
+      }
+      await sendTextModeMessage(text);
+    } else if (isConnected) {
+      // Voice mode - send via WebRTC
+      sendVoiceTextMessage(text);
+    }
+  };
+
+  // Toggle text mode
+  const handleModeToggle = (checked: boolean) => {
+    setIsTextMode(checked);
+    
+    // Disconnect voice if switching to text mode
+    if (checked && isConnected) {
+      disconnect();
+    }
+    
+    toast({
+      title: checked ? 'Text Mode Enabled' : 'Voice Mode Enabled',
+      description: checked 
+        ? 'Phoenix will respond with formatted text and equations' 
+        : 'Connect to speak with Phoenix in real-time',
+    });
   };
 
   // Render upgrade prompt for non-subscribers
@@ -327,35 +420,65 @@ const Phoenix: React.FC = () => {
               </div>
             </div>
 
+            {/* Mode Toggle */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl mb-3">
+              <div className="flex items-center gap-2">
+                {isTextMode ? (
+                  <Keyboard className="h-4 w-4 text-blue-600" />
+                ) : (
+                  <Mic className="h-4 w-4 text-orange-600" />
+                )}
+                <Label htmlFor="text-mode" className="text-sm font-medium">
+                  {isTextMode ? 'Text Mode' : 'Voice Mode'}
+                </Label>
+              </div>
+              <Switch
+                id="text-mode"
+                checked={isTextMode}
+                onCheckedChange={handleModeToggle}
+              />
+            </div>
+
             {/* Connection Controls */}
             <div className="space-y-2">
-              {!isConnected ? (
-                <Button
-                  onClick={handleConnect}
-                  disabled={isConnecting}
-                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                >
-                  {isConnecting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    <>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Connect to Phoenix
-                    </>
-                  )}
-                </Button>
+              {!isTextMode ? (
+                // Voice mode controls
+                !isConnected ? (
+                  <Button
+                    onClick={handleConnect}
+                    disabled={isConnecting}
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                  >
+                    {isConnecting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <Phone className="h-4 w-4 mr-2" />
+                        Connect to Phoenix
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={disconnect}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    <PhoneOff className="h-4 w-4 mr-2" />
+                    End Session
+                  </Button>
+                )
               ) : (
-                <Button
-                  onClick={disconnect}
-                  variant="destructive"
-                  className="w-full"
-                >
-                  <PhoneOff className="h-4 w-4 mr-2" />
-                  End Session
-                </Button>
+                // Text mode - just show "Ready" state
+                <div className="w-full p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-800">Text chat ready</span>
+                  </div>
+                </div>
               )}
 
               <Button
@@ -370,7 +493,7 @@ const Phoenix: React.FC = () => {
           </div>
 
           {/* Status Indicator */}
-          {isConnected && (
+          {isConnected && !isTextMode && (
             <div className="px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
               <div className="flex items-center gap-2">
                 <div className={cn(
@@ -458,10 +581,24 @@ const Phoenix: React.FC = () => {
                         {msg.role === 'assistant' ? 'Phoenix' : 'You'}
                       </p>
                       <div className="text-gray-800 prose prose-sm max-w-none">
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   ))}
+                  {isTextLoading && (
+                    <div className="p-3 rounded-lg bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200">
+                      <p className="font-medium text-xs mb-1">Phoenix</p>
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                        <span className="text-sm text-gray-600">Thinking...</span>
+                      </div>
+                    </div>
+                  )}
                   <div ref={transcriptEndRef} />
                 </div>
               </ScrollArea>
@@ -476,7 +613,7 @@ const Phoenix: React.FC = () => {
             {currentSessionId ? (
               <PhoenixWhiteboard
                 ref={whiteboardRef}
-                isConnected={isConnected}
+                isConnected={isConnected && !isTextMode}
                 onStateChange={(state) => {
                   // Save whiteboard state
                   if (currentSessionId) {
@@ -511,16 +648,20 @@ const Phoenix: React.FC = () => {
             )}
           </div>
 
-          {/* Text Input (fallback for when voice isn't working) */}
-          {currentSessionId && isConnected && (
+          {/* Text Input - Always show when there's a session (for both modes) */}
+          {currentSessionId && (isConnected || isTextMode) && (
             <div className="p-4 border-t border-gray-200 bg-white/50 backdrop-blur-sm">
               <div className="flex gap-2 max-w-3xl mx-auto">
                 <Textarea
                   value={textInput}
                   onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Type a message (or just speak!)..."
+                  placeholder={isTextMode 
+                    ? "Type your question... (Phoenix will respond with text)" 
+                    : "Type a message (or just speak!)..."
+                  }
                   className="resize-none"
                   rows={1}
+                  disabled={isTextLoading}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -530,14 +671,21 @@ const Phoenix: React.FC = () => {
                 />
                 <Button
                   onClick={handleTextSubmit}
-                  disabled={!textInput.trim()}
+                  disabled={!textInput.trim() || isTextLoading}
                   className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
                 >
-                  <Send className="h-4 w-4" />
+                  {isTextLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
               <p className="text-xs text-center text-muted-foreground mt-2">
-                Phoenix is listening. Speak naturally or type your questions.
+                {isTextMode 
+                  ? "Text mode: Phoenix will respond with formatted text and equations"
+                  : "Phoenix is listening. Speak naturally or type your questions."
+                }
               </p>
             </div>
           )}
