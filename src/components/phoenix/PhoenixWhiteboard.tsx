@@ -474,17 +474,21 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       </div>
 
       {/* Canvas Container */}
-      <div ref={containerRef} className="flex-1 relative">
-        {/* Phoenix AI Cursor */}
-        <PhoenixCursor
-          x={cursorPosition.x}
-          y={cursorPosition.y}
-          isVisible={isCursorVisible && isConnected}
-          isActive={isCursorActive}
-        />
+      <div ref={containerRef} className="flex-1 relative overflow-hidden">
+        {/* Phoenix AI Cursor - positioned outside canvas wrapper to avoid Fabric.js DOM conflicts */}
+        {isCursorVisible && isConnected && (
+          <PhoenixCursor
+            x={cursorPosition.x}
+            y={cursorPosition.y}
+            isVisible={true}
+            isActive={isCursorActive}
+          />
+        )}
 
-        {/* Fabric Canvas */}
-        <canvas ref={canvasRef} className="absolute inset-0" />
+        {/* Fabric Canvas - isolated in its own div to prevent React/Fabric.js DOM conflicts */}
+        <div className="absolute inset-0" style={{ pointerEvents: 'auto' }}>
+          <canvas ref={canvasRef} />
+        </div>
       </div>
     </div>
   );
