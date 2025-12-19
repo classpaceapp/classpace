@@ -11,10 +11,22 @@ interface PhoenixWhiteboardProps {
   isConnected?: boolean;
 }
 
+export interface WhiteboardLayoutItem {
+  type: string;
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  text?: string;
+}
+
 export interface PhoenixWhiteboardRef {
   executeAction: (action: WhiteboardAction) => void;
   captureScreenshot: () => Promise<string>;
   getState: () => any;
+  loadState: (state: any) => void;
+  clear: () => void;
+  getWhiteboardLayout: () => { items: WhiteboardLayoutItem[]; canvasWidth: number; canvasHeight: number; nextY: number };
 }
 
 type Tool = 'select' | 'draw' | 'rectangle' | 'circle' | 'text' | 'eraser';
@@ -102,6 +114,50 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     }
   }, [activeTool, activeColor, fabricCanvas]);
 
+  // Get whiteboard layout for Phoenix context
+  const getWhiteboardLayout = useCallback((): { items: WhiteboardLayoutItem[]; canvasWidth: number; canvasHeight: number; nextY: number } => {
+    if (!fabricCanvas) {
+      return { items: [], canvasWidth: 1000, canvasHeight: 600, nextY: 50 };
+    }
+    
+    const objects = fabricCanvas.getObjects();
+    const items: WhiteboardLayoutItem[] = [];
+    let maxBottom = 0;
+    
+    objects.forEach((obj: FabricObject) => {
+      const bounds = obj.getBoundingRect();
+      const item: WhiteboardLayoutItem = {
+        type: obj.type || 'unknown',
+        left: Math.round(bounds.left),
+        top: Math.round(bounds.top),
+        width: Math.round(bounds.width),
+        height: Math.round(bounds.height),
+      };
+      
+      // Extract text content if it's a text object
+      if (obj.type === 'i-text' || obj.type === 'text') {
+        item.text = (obj as IText).text?.substring(0, 50) || '';
+      }
+      
+      items.push(item);
+      
+      const bottom = bounds.top + bounds.height;
+      if (bottom > maxBottom) {
+        maxBottom = bottom;
+      }
+    });
+    
+    // Calculate next safe Y position (with padding)
+    const nextY = items.length === 0 ? 50 : Math.min(maxBottom + 50, 550);
+    
+    return {
+      items,
+      canvasWidth: fabricCanvas.width || 1000,
+      canvasHeight: fabricCanvas.height || 600,
+      nextY
+    };
+  }, [fabricCanvas]);
+
   // Expose methods to parent
   useImperativeHandle(ref, () => ({
     executeAction: (action: WhiteboardAction) => executeWhiteboardAction(action),
@@ -120,7 +176,28 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
         return '';
       }
     },
-    getState: () => fabricCanvas?.toJSON() || {}
+    getState: () => fabricCanvas?.toJSON() || {},
+    loadState: (state: any) => {
+      if (!fabricCanvas || !state) return;
+      console.log('[WHITEBOARD] Loading state...');
+      try {
+        fabricCanvas.loadFromJSON(state, () => {
+          fabricCanvas.renderAll();
+          console.log('[WHITEBOARD] State loaded successfully');
+        });
+      } catch (error) {
+        console.error('[WHITEBOARD] Failed to load state:', error);
+      }
+    },
+    clear: () => {
+      if (!fabricCanvas) return;
+      console.log('[WHITEBOARD] Clearing canvas');
+      fabricCanvas.clear();
+      fabricCanvas.backgroundColor = '#ffffff';
+      fabricCanvas.renderAll();
+      setIsCursorVisible(false);
+    },
+    getWhiteboardLayout
   }));
 
   const executeWhiteboardAction = useCallback((action: WhiteboardAction) => {
