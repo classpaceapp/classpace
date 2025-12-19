@@ -24,11 +24,16 @@ export const usePhoenixRealtime = ({
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const sessionReadyRef = useRef<boolean>(false);
+  
+  // Track pending function calls for real-time whiteboard
+  const pendingFunctionArgsRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     // Create audio element for AI voice playback
@@ -45,6 +50,7 @@ export const usePhoenixRealtime = ({
     if (isConnected || isConnecting) return;
     
     setIsConnecting(true);
+    sessionReadyRef.current = false;
     console.log('[PHOENIX-REALTIME] Starting connection...');
 
     try {
@@ -79,7 +85,7 @@ export const usePhoenixRealtime = ({
 
       // Set up remote audio
       pc.ontrack = (e) => {
-        console.log('[PHOENIX-REALTIME] Received remote track');
+        console.log('[PHOENIX-REALTIME] Received remote track:', e.track.kind);
         if (audioElRef.current) {
           audioElRef.current.srcObject = e.streams[0];
         }
@@ -87,6 +93,7 @@ export const usePhoenixRealtime = ({
 
       // Add local audio track
       stream.getTracks().forEach(track => {
+        console.log('[PHOENIX-REALTIME] Adding local track:', track.kind);
         pc.addTrack(track, stream);
       });
 
@@ -95,11 +102,15 @@ export const usePhoenixRealtime = ({
       dcRef.current = dc;
 
       dc.addEventListener('open', () => {
-        console.log('[PHOENIX-REALTIME] Data channel opened');
+        console.log('[PHOENIX-REALTIME] Data channel opened - waiting for session.created');
       });
 
       dc.addEventListener('message', (e) => {
         handleRealtimeEvent(JSON.parse(e.data));
+      });
+
+      dc.addEventListener('error', (e) => {
+        console.error('[PHOENIX-REALTIME] Data channel error:', e);
       });
 
       // Create and set local description
@@ -120,6 +131,8 @@ export const usePhoenixRealtime = ({
       });
 
       if (!sdpResponse.ok) {
+        const errorText = await sdpResponse.text();
+        console.error('[PHOENIX-REALTIME] SDP error:', errorText);
         throw new Error(`WebRTC connection failed: ${sdpResponse.status}`);
       }
 
@@ -129,15 +142,7 @@ export const usePhoenixRealtime = ({
       };
       
       await pc.setRemoteDescription(answer);
-      console.log('[PHOENIX-REALTIME] WebRTC connection established');
-
-      setIsConnected(true);
-      setIsConnecting(false);
-
-      toast({
-        title: "Phoenix Connected",
-        description: "Voice connection established. Start speaking!",
-      });
+      console.log('[PHOENIX-REALTIME] WebRTC connection established, waiting for session...');
 
     } catch (error: any) {
       console.error('[PHOENIX-REALTIME] Connection error:', error);
@@ -152,26 +157,73 @@ export const usePhoenixRealtime = ({
   }, [isConnected, isConnecting, onError, toast]);
 
   const handleRealtimeEvent = useCallback((event: any) => {
-    console.log('[PHOENIX-REALTIME] Event:', event.type, event);
+    console.log('[PHOENIX-REALTIME] Event:', event.type);
 
     switch (event.type) {
+      case 'session.created':
+        console.log('[PHOENIX-REALTIME] Session created!', event.session);
+        sessionReadyRef.current = true;
+        setIsConnected(true);
+        setIsConnecting(false);
+        setIsListening(true);
+        
+        toast({
+          title: "Phoenix Connected",
+          description: "Start speaking - Phoenix is listening!",
+        });
+        break;
+
+      case 'session.updated':
+        console.log('[PHOENIX-REALTIME] Session updated:', event.session);
+        break;
+
+      case 'input_audio_buffer.speech_started':
+        console.log('[PHOENIX-REALTIME] Speech detected - user is talking');
+        setIsListening(false);
+        break;
+
+      case 'input_audio_buffer.speech_stopped':
+        console.log('[PHOENIX-REALTIME] Speech stopped - processing...');
+        break;
+
+      case 'input_audio_buffer.committed':
+        console.log('[PHOENIX-REALTIME] Audio buffer committed');
+        break;
+
+      case 'conversation.item.created':
+        console.log('[PHOENIX-REALTIME] Conversation item created:', event.item?.type);
+        break;
+
+      case 'response.created':
+        console.log('[PHOENIX-REALTIME] Response started');
+        break;
+
+      case 'response.output_item.added':
+        console.log('[PHOENIX-REALTIME] Output item added:', event.item?.type);
+        break;
+
       case 'response.audio.delta':
         // AI is speaking
         if (!isSpeaking) {
           setIsSpeaking(true);
+          setIsListening(false);
           onSpeakingChange?.(true);
         }
         break;
 
       case 'response.audio.done':
-        // AI finished speaking
-        setIsSpeaking(false);
-        onSpeakingChange?.(false);
+        // AI finished this audio chunk
+        console.log('[PHOENIX-REALTIME] Audio chunk done');
+        break;
+
+      case 'response.audio_transcript.delta':
+        // Incremental transcript - could be used for real-time display
         break;
 
       case 'response.audio_transcript.done':
         // AI transcript complete
         if (event.transcript) {
+          console.log('[PHOENIX-REALTIME] AI said:', event.transcript.substring(0, 100) + '...');
           onTranscript?.(event.transcript, 'assistant');
         }
         break;
@@ -179,7 +231,17 @@ export const usePhoenixRealtime = ({
       case 'conversation.item.input_audio_transcription.completed':
         // User transcript
         if (event.transcript) {
+          console.log('[PHOENIX-REALTIME] User said:', event.transcript);
           onTranscript?.(event.transcript, 'user');
+        }
+        break;
+
+      case 'response.function_call_arguments.delta':
+        // Incremental function call arguments - for real-time whiteboard
+        const { call_id, delta } = event;
+        if (call_id && delta) {
+          const existing = pendingFunctionArgsRef.current.get(call_id) || '';
+          pendingFunctionArgsRef.current.set(call_id, existing + delta);
         }
         break;
 
@@ -188,12 +250,31 @@ export const usePhoenixRealtime = ({
         handleFunctionCall(event);
         break;
 
+      case 'response.done':
+        // Full response complete
+        console.log('[PHOENIX-REALTIME] Response complete');
+        setIsSpeaking(false);
+        setIsListening(true);
+        onSpeakingChange?.(false);
+        break;
+
       case 'error':
         console.error('[PHOENIX-REALTIME] API Error:', event.error);
         onError?.(event.error?.message || 'Unknown error');
+        toast({
+          title: 'Phoenix Error',
+          description: event.error?.message || 'Something went wrong',
+          variant: 'destructive',
+        });
         break;
+
+      default:
+        // Log other events for debugging
+        if (event.type && !event.type.startsWith('rate_limits')) {
+          console.log('[PHOENIX-REALTIME] Unhandled event:', event.type);
+        }
     }
-  }, [isSpeaking, onSpeakingChange, onTranscript, onError]);
+  }, [isSpeaking, onSpeakingChange, onTranscript, onError, toast]);
 
   const handleFunctionCall = useCallback((event: any) => {
     const { name, call_id } = event;
@@ -214,6 +295,11 @@ export const usePhoenixRealtime = ({
     };
     
     onWhiteboardAction?.(action);
+
+    // Clear pending args
+    if (call_id) {
+      pendingFunctionArgsRef.current.delete(call_id);
+    }
 
     // Send function result back to AI
     if (dcRef.current?.readyState === 'open') {
@@ -243,6 +329,13 @@ export const usePhoenixRealtime = ({
       console.error('[PHOENIX-REALTIME] Data channel not ready');
       return;
     }
+
+    if (!sessionReadyRef.current) {
+      console.error('[PHOENIX-REALTIME] Session not ready yet');
+      return;
+    }
+
+    console.log('[PHOENIX-REALTIME] Sending text message:', text);
 
     const event = {
       type: 'conversation.item.create',
@@ -283,10 +376,8 @@ export const usePhoenixRealtime = ({
             text: `[Whiteboard screenshot captured: ${context}]`
           },
           {
-            type: 'image_url',
-            image_url: {
-              url: `data:image/png;base64,${imageBase64}`
-            }
+            type: 'input_image',
+            image_url: `data:image/png;base64,${imageBase64}`
           }
         ]
       }
@@ -314,14 +405,19 @@ export const usePhoenixRealtime = ({
       pcRef.current = null;
     }
     
+    sessionReadyRef.current = false;
+    pendingFunctionArgsRef.current.clear();
     setIsConnected(false);
+    setIsConnecting(false);
     setIsSpeaking(false);
+    setIsListening(false);
   }, []);
 
   return {
     isConnected,
     isConnecting,
     isSpeaking,
+    isListening,
     connect,
     disconnect,
     sendTextMessage,

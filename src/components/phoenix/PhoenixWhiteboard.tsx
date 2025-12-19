@@ -277,13 +277,50 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     setIsCursorActive(true);
     setCursorPosition({ x: params.x, y: params.y });
 
-    // Render LaTeX as styled text (monospace, blue)
-    const text = new IText(params.latex, {
+    // Convert LaTeX-style syntax to visual Unicode characters
+    let visualText = params.latex
+      // Powers
+      .replace(/\^2/g, '²').replace(/\^3/g, '³').replace(/\^4/g, '⁴')
+      .replace(/\^0/g, '⁰').replace(/\^1/g, '¹').replace(/\^5/g, '⁵')
+      .replace(/\^6/g, '⁶').replace(/\^7/g, '⁷').replace(/\^8/g, '⁸').replace(/\^9/g, '⁹')
+      .replace(/\^n/g, 'ⁿ').replace(/\^i/g, 'ⁱ')
+      .replace(/\^{(\d+)}/g, (_, p) => p.split('').map((d: string) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[parseInt(d)] || d).join(''))
+      // Subscripts
+      .replace(/_0/g, '₀').replace(/_1/g, '₁').replace(/_2/g, '₂').replace(/_3/g, '₃')
+      .replace(/_4/g, '₄').replace(/_5/g, '₅').replace(/_6/g, '₆').replace(/_7/g, '₇')
+      .replace(/_8/g, '₈').replace(/_9/g, '₉').replace(/_n/g, 'ₙ').replace(/_i/g, 'ᵢ')
+      .replace(/_{(\d+)}/g, (_, p) => p.split('').map((d: string) => '₀₁₂₃₄₅₆₇₈₉'[parseInt(d)] || d).join(''))
+      // Fractions
+      .replace(/\\frac\{1\}\{2\}/g, '½').replace(/\\frac\{1\}\{3\}/g, '⅓')
+      .replace(/\\frac\{1\}\{4\}/g, '¼').replace(/\\frac\{2\}\{3\}/g, '⅔')
+      .replace(/\\frac\{3\}\{4\}/g, '¾').replace(/\\frac\{1\}\{5\}/g, '⅕')
+      .replace(/\\frac\{(.+?)\}\{(.+?)\}/g, '$1/$2')
+      // Greek letters
+      .replace(/\\alpha/g, 'α').replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+      .replace(/\\delta/g, 'δ').replace(/\\epsilon/g, 'ε').replace(/\\theta/g, 'θ')
+      .replace(/\\lambda/g, 'λ').replace(/\\mu/g, 'μ').replace(/\\pi/g, 'π')
+      .replace(/\\sigma/g, 'σ').replace(/\\phi/g, 'φ').replace(/\\omega/g, 'ω')
+      .replace(/\\Delta/g, 'Δ').replace(/\\Sigma/g, 'Σ').replace(/\\Pi/g, 'Π')
+      .replace(/\\Omega/g, 'Ω').replace(/\\Gamma/g, 'Γ')
+      // Math symbols
+      .replace(/\\sqrt\{(.+?)\}/g, '√($1)').replace(/\\sqrt/g, '√')
+      .replace(/\\infty/g, '∞').replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+      .replace(/\\times/g, '×').replace(/\\div/g, '÷').replace(/\\cdot/g, '·')
+      .replace(/\\neq/g, '≠').replace(/\\leq/g, '≤').replace(/\\geq/g, '≥')
+      .replace(/\\approx/g, '≈').replace(/\\equiv/g, '≡')
+      .replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+      .replace(/\\leftrightarrow/g, '↔').replace(/\\Rightarrow/g, '⇒')
+      .replace(/\\int/g, '∫').replace(/\\sum/g, '∑').replace(/\\prod/g, '∏')
+      .replace(/\\partial/g, '∂').replace(/\\nabla/g, '∇')
+      // Clean up any remaining LaTeX commands
+      .replace(/\\/g, '');
+
+    const text = new IText(visualText, {
       left: params.x,
       top: params.y,
       fill: '#1e40af',
-      fontSize: params.fontSize || 24,
-      fontFamily: 'monospace',
+      fontSize: params.fontSize || 28,
+      fontFamily: 'Arial, "Segoe UI Symbol", sans-serif',
     });
 
     fabricCanvas.add(text);

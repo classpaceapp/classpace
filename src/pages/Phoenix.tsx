@@ -86,6 +86,7 @@ const Phoenix: React.FC = () => {
     isConnected,
     isConnecting,
     isSpeaking,
+    isListening,
     connect,
     disconnect,
     sendTextMessage: sendVoiceTextMessage,
@@ -577,10 +578,10 @@ const Phoenix: React.FC = () => {
               <div className="flex items-center gap-2">
                 <div className={cn(
                   "w-3 h-3 rounded-full",
-                  isSpeaking ? "bg-orange-500 animate-pulse" : "bg-green-500"
+                  isSpeaking ? "bg-orange-500 animate-pulse" : isListening ? "bg-green-500 animate-pulse" : "bg-yellow-500"
                 )} />
                 <span className="text-sm font-medium text-green-800">
-                  {isSpeaking ? "Phoenix is speaking..." : "Phoenix is listening..."}
+                  {isSpeaking ? "Phoenix is speaking..." : isListening ? "Phoenix is listening... (speak now!)" : "Processing..."}
                 </span>
               </div>
             </div>
