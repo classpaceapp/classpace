@@ -988,8 +988,19 @@ const Phoenix: React.FC = () => {
           {/* Transcript */}
           {currentSessionId && (
             <div className="flex-1 border-t border-gray-200 flex flex-col max-h-[40%]">
-              <div className="px-4 py-2 border-b border-gray-200">
+              <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-gray-700">Transcript</h3>
+                {transcript.length > 0 && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs gap-1"
+                    onClick={exportTranscriptPDF}
+                  >
+                    <Download className="h-3 w-3" />
+                    Export PDF
+                  </Button>
+                )}
               </div>
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-3">
