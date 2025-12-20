@@ -681,7 +681,11 @@ const Phoenix: React.FC = () => {
       // Role header
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(msg.role === 'assistant' ? 234, 88, 12 : 59, 130, 246);
+      if (msg.role === 'assistant') {
+        pdf.setTextColor(234, 88, 12);
+      } else {
+        pdf.setTextColor(59, 130, 246);
+      }
       pdf.text(msg.role === 'assistant' ? 'Phoenix' : 'You', margin, yPos);
       yPos += 6;
       
