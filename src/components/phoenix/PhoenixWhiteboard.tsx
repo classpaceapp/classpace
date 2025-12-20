@@ -5,7 +5,13 @@ import type { WhiteboardAction } from '@/hooks/usePhoenixRealtime';
 import { Button } from '@/components/ui/button';
 import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { latexToVisualUnicode, normalizeCoordinates } from '@/utils/phoenixMathUtils';
+import { 
+  latexToVisualUnicode, 
+  normalizeCoordinates, 
+  WhiteboardLayoutManager,
+  estimateTextWidth,
+  estimateTextHeight
+} from '@/utils/phoenixMathUtils';
 
 interface PhoenixWhiteboardProps {
   onStateChange?: (state: any) => void;
@@ -28,6 +34,7 @@ export interface PhoenixWhiteboardRef {
   loadState: (state: any) => void;
   clear: () => void;
   getWhiteboardLayout: () => { items: WhiteboardLayoutItem[]; canvasWidth: number; canvasHeight: number; nextY: number };
+  getLayoutManager: () => WhiteboardLayoutManager | null;
 }
 
 type Tool = 'select' | 'draw' | 'rectangle' | 'circle' | 'text' | 'eraser';
@@ -41,6 +48,9 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [activeTool, setActiveTool] = useState<Tool>('draw');
   const [activeColor, setActiveColor] = useState('#000000');
+  
+  // Layout manager for smart positioning
+  const layoutManagerRef = useRef<WhiteboardLayoutManager | null>(null);
   
   // Phoenix cursor state
   const [cursorPosition, setCursorPosition] = useState({ x: 400, y: 300 });
@@ -62,6 +72,9 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       isDrawingMode: true,
     });
 
+    // Initialize layout manager
+    layoutManagerRef.current = new WhiteboardLayoutManager(width, height);
+
     // Initialize free drawing brush
     if (canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.color = activeColor;
@@ -70,15 +83,21 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
 
     // Handle canvas changes
     canvas.on('object:added', () => {
+      updateLayoutManager(canvas);
       if (onStateChange) {
         onStateChange(canvas.toJSON());
       }
     });
 
     canvas.on('object:modified', () => {
+      updateLayoutManager(canvas);
       if (onStateChange) {
         onStateChange(canvas.toJSON());
       }
+    });
+    
+    canvas.on('object:removed', () => {
+      updateLayoutManager(canvas);
     });
 
     setFabricCanvas(canvas);
@@ -89,6 +108,12 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       const newHeight = container.clientHeight;
       canvas.setDimensions({ width: newWidth, height: newHeight });
       canvas.renderAll();
+      
+      // Update layout manager dimensions
+      if (layoutManagerRef.current) {
+        layoutManagerRef.current = new WhiteboardLayoutManager(newWidth, newHeight);
+        updateLayoutManager(canvas);
+      }
     };
 
     window.addEventListener('resize', handleResize);
@@ -97,6 +122,24 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       window.removeEventListener('resize', handleResize);
       canvas.dispose();
     };
+  }, []);
+
+  // Update layout manager with current objects
+  const updateLayoutManager = useCallback((canvas: FabricCanvas) => {
+    if (!layoutManagerRef.current) return;
+    
+    const objects = canvas.getObjects();
+    const regions = objects.map((obj: FabricObject) => {
+      const bounds = obj.getBoundingRect();
+      return {
+        left: bounds.left,
+        top: bounds.top,
+        width: bounds.width,
+        height: bounds.height
+      };
+    });
+    
+    layoutManagerRef.current.updateFromObjects(regions);
   }, []);
 
   // Update tool mode
@@ -184,6 +227,7 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       try {
         fabricCanvas.loadFromJSON(state, () => {
           fabricCanvas.renderAll();
+          updateLayoutManager(fabricCanvas);
           console.log('[WHITEBOARD] State loaded successfully');
         });
       } catch (error) {
@@ -197,8 +241,14 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       fabricCanvas.backgroundColor = '#ffffff';
       fabricCanvas.renderAll();
       setIsCursorVisible(false);
+      
+      // Clear layout manager
+      if (layoutManagerRef.current) {
+        layoutManagerRef.current.clear();
+      }
     },
-    getWhiteboardLayout
+    getWhiteboardLayout,
+    getLayoutManager: () => layoutManagerRef.current
   }));
 
   const executeWhiteboardAction = useCallback((action: WhiteboardAction) => {
@@ -238,26 +288,38 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   }, [fabricCanvas]);
 
   const handleMoveCursor = useCallback((params: { x: number; y: number; duration?: number }) => {
+    if (!fabricCanvas) return;
+    
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    
     setIsCursorVisible(true);
     setIsCursorActive(true);
-    setCursorPosition({ x: params.x, y: params.y });
+    setCursorPosition(pos);
     
     setTimeout(() => {
       setIsCursorActive(false);
     }, params.duration || 500);
-  }, []);
+  }, [fabricCanvas]);
 
   const handleDrawFreehand = useCallback((params: { points: Array<{ x: number; y: number }>; color?: string; strokeWidth?: number }) => {
     if (!fabricCanvas || !params.points?.length) return;
 
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
     setIsCursorVisible(true);
     setIsCursorActive(true);
-    setCursorPosition(params.points[0]);
+    
+    // Normalize all points
+    const normalizedPoints = params.points.map(p => normalizeCoordinates(p.x, p.y, canvasWidth, canvasHeight));
+    setCursorPosition(normalizedPoints[0]);
 
-    // Create SVG path string from points
-    let pathStr = `M ${params.points[0].x} ${params.points[0].y}`;
-    for (let i = 1; i < params.points.length; i++) {
-      pathStr += ` L ${params.points[i].x} ${params.points[i].y}`;
+    // Create SVG path string from normalized points
+    let pathStr = `M ${normalizedPoints[0].x} ${normalizedPoints[0].y}`;
+    for (let i = 1; i < normalizedPoints.length; i++) {
+      pathStr += ` L ${normalizedPoints[i].x} ${normalizedPoints[i].y}`;
     }
 
     const path = new Path(pathStr, {
@@ -277,30 +339,56 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const handleDrawText = useCallback((params: { text: string; x: number; y: number; fontSize?: number; color?: string }) => {
     if (!fabricCanvas) return;
 
-    // Get actual canvas dimensions for coordinate normalization
     const canvasWidth = fabricCanvas.width || 1000;
     const canvasHeight = fabricCanvas.height || 700;
+    const fontSize = params.fontSize || 20;
+
+    // Apply LaTeX to Unicode conversion for any math in the text
+    const displayText = latexToVisualUnicode(params.text);
+    
+    // Estimate text dimensions
+    const textWidth = estimateTextWidth(displayText, fontSize);
+    const textHeight = estimateTextHeight(displayText, fontSize);
 
     setIsCursorVisible(true);
     setIsCursorActive(true);
     
-    // Normalize coordinates from 1000x700 space to actual canvas
-    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
-    setCursorPosition(pos);
-
-    // Apply LaTeX to Unicode conversion for any math in the text
-    const displayText = latexToVisualUnicode(params.text);
+    // Normalize preferred coordinates
+    const preferredPos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    
+    // Use layout manager to find best position (avoiding collisions and overflow)
+    let finalPos = preferredPos;
+    if (layoutManagerRef.current) {
+      const result = layoutManagerRef.current.findBestPosition(
+        preferredPos.x, 
+        preferredPos.y, 
+        textWidth, 
+        textHeight
+      );
+      finalPos = { x: result.x, y: result.y };
+      
+      if (result.overflow) {
+        console.warn('[WHITEBOARD] Text placement had to be adjusted due to space constraints');
+      }
+    }
+    
+    setCursorPosition(finalPos);
 
     const text = new IText(displayText, {
-      left: pos.x,
-      top: pos.y,
+      left: finalPos.x,
+      top: finalPos.y,
       fill: params.color || '#000000',
-      fontSize: params.fontSize || 20,
+      fontSize: fontSize,
       fontFamily: 'Arial, "Segoe UI Symbol", "Apple Symbols", sans-serif',
     });
 
     fabricCanvas.add(text);
     fabricCanvas.renderAll();
+    
+    // Register this text in the layout manager
+    if (layoutManagerRef.current) {
+      layoutManagerRef.current.addOccupiedRegion(finalPos.x, finalPos.y, textWidth, textHeight);
+    }
     
     setTimeout(() => setIsCursorActive(false), 300);
   }, [fabricCanvas]);
@@ -311,7 +399,6 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     y: number; 
     width: number; 
     height: number; 
-    // New: explicit endpoint support
     x2?: number;
     y2?: number;
     color?: string; 
@@ -319,7 +406,6 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   }) => {
     if (!fabricCanvas) return;
 
-    // Get actual canvas dimensions for coordinate normalization
     const canvasWidth = fabricCanvas.width || 1000;
     const canvasHeight = fabricCanvas.height || 700;
 
@@ -327,52 +413,89 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     setIsCursorActive(true);
     
     // Normalize starting coordinates from 1000x700 space to actual canvas
-    const start = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
-    setCursorPosition(start);
-
+    const preferredStart = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    
     let shape: FabricObject | null = null;
 
     if (params.shape === 'rectangle') {
       const normalizedWidth = (params.width / 1000) * canvasWidth;
       const normalizedHeight = (params.height / 700) * canvasHeight;
       
+      // Find best position avoiding collisions
+      let finalPos = preferredStart;
+      if (layoutManagerRef.current) {
+        const result = layoutManagerRef.current.findBestPosition(
+          preferredStart.x, preferredStart.y, normalizedWidth, normalizedHeight
+        );
+        finalPos = { x: result.x, y: result.y };
+      }
+      
+      setCursorPosition(finalPos);
+      
       shape = new Rect({
-        left: start.x,
-        top: start.y,
+        left: finalPos.x,
+        top: finalPos.y,
         width: normalizedWidth,
         height: normalizedHeight,
         fill: params.fill || 'transparent',
         stroke: params.color || '#000000',
         strokeWidth: 2,
       });
+      
+      if (layoutManagerRef.current) {
+        layoutManagerRef.current.addOccupiedRegion(finalPos.x, finalPos.y, normalizedWidth, normalizedHeight);
+      }
     } else if (params.shape === 'circle' || params.shape === 'ellipse') {
       const normalizedWidth = (params.width / 1000) * canvasWidth;
       const normalizedHeight = (params.height / 700) * canvasHeight;
+      const radius = Math.min(normalizedWidth, normalizedHeight) / 2;
+      
+      // Find best position
+      let finalPos = preferredStart;
+      if (layoutManagerRef.current) {
+        const result = layoutManagerRef.current.findBestPosition(
+          preferredStart.x, preferredStart.y, radius * 2, radius * 2
+        );
+        finalPos = { x: result.x, y: result.y };
+      }
+      
+      setCursorPosition(finalPos);
       
       shape = new Circle({
-        left: start.x,
-        top: start.y,
-        radius: Math.min(normalizedWidth, normalizedHeight) / 2,
+        left: finalPos.x,
+        top: finalPos.y,
+        radius: radius,
         fill: params.fill || 'transparent',
         stroke: params.color || '#000000',
         strokeWidth: 2,
       });
+      
+      if (layoutManagerRef.current) {
+        layoutManagerRef.current.addOccupiedRegion(finalPos.x, finalPos.y, radius * 2, radius * 2);
+      }
     } else if (params.shape === 'arrow' || params.shape === 'line') {
-      // Support explicit x2,y2 endpoints OR width/height as delta
+      // Lines and arrows use explicit endpoints - no collision avoidance but stay in bounds
+      let start = preferredStart;
       let endX: number, endY: number;
       
       if (params.x2 !== undefined && params.y2 !== undefined) {
-        // Use explicit endpoints
         const end = normalizeCoordinates(params.x2, params.y2, canvasWidth, canvasHeight);
         endX = end.x;
         endY = end.y;
       } else {
-        // Treat width/height as endpoint coordinates relative to canvas size
-        // If the model provides "width: 500, height: 300", interpret as target point
         const end = normalizeCoordinates(params.x + params.width, params.y + params.height, canvasWidth, canvasHeight);
         endX = end.x;
         endY = end.y;
       }
+      
+      // Clamp endpoints to stay within bounds
+      const margin = 20;
+      start.x = Math.max(margin, Math.min(start.x, canvasWidth - margin));
+      start.y = Math.max(margin, Math.min(start.y, canvasHeight - margin));
+      endX = Math.max(margin, Math.min(endX, canvasWidth - margin));
+      endY = Math.max(margin, Math.min(endY, canvasHeight - margin));
+      
+      setCursorPosition(start);
       
       const pathStr = `M ${start.x} ${start.y} L ${endX} ${endY}`;
       shape = new Path(pathStr, {
@@ -413,30 +536,56 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const handleDrawEquation = useCallback((params: { latex: string; x: number; y: number; fontSize?: number }) => {
     if (!fabricCanvas) return;
 
-    // Get actual canvas dimensions for coordinate normalization
     const canvasWidth = fabricCanvas.width || 1000;
     const canvasHeight = fabricCanvas.height || 700;
+    const fontSize = params.fontSize || 28;
+
+    // Use the comprehensive LaTeX to Unicode converter
+    const visualText = latexToVisualUnicode(params.latex);
+    
+    // Estimate text dimensions
+    const textWidth = estimateTextWidth(visualText, fontSize);
+    const textHeight = estimateTextHeight(visualText, fontSize);
 
     setIsCursorVisible(true);
     setIsCursorActive(true);
     
-    // Normalize coordinates
-    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
-    setCursorPosition(pos);
-
-    // Use the comprehensive LaTeX to Unicode converter
-    const visualText = latexToVisualUnicode(params.latex);
+    // Normalize preferred coordinates
+    const preferredPos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    
+    // Use layout manager to find best position
+    let finalPos = preferredPos;
+    if (layoutManagerRef.current) {
+      const result = layoutManagerRef.current.findBestPosition(
+        preferredPos.x, 
+        preferredPos.y, 
+        textWidth, 
+        textHeight
+      );
+      finalPos = { x: result.x, y: result.y };
+      
+      if (result.overflow) {
+        console.warn('[WHITEBOARD] Equation placement had to be adjusted due to space constraints');
+      }
+    }
+    
+    setCursorPosition(finalPos);
 
     const text = new IText(visualText, {
-      left: pos.x,
-      top: pos.y,
+      left: finalPos.x,
+      top: finalPos.y,
       fill: '#1e40af',
-      fontSize: params.fontSize || 28,
+      fontSize: fontSize,
       fontFamily: 'Arial, "Segoe UI Symbol", "Apple Symbols", sans-serif',
     });
 
     fabricCanvas.add(text);
     fabricCanvas.renderAll();
+    
+    // Register in layout manager
+    if (layoutManagerRef.current) {
+      layoutManagerRef.current.addOccupiedRegion(finalPos.x, finalPos.y, textWidth, textHeight);
+    }
     
     setTimeout(() => setIsCursorActive(false), 300);
   }, [fabricCanvas]);
@@ -444,7 +593,6 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const handleHighlightArea = useCallback((params: { x: number; y: number; width: number; height: number; color?: string }) => {
     if (!fabricCanvas) return;
 
-    // Get actual canvas dimensions for coordinate normalization
     const canvasWidth = fabricCanvas.width || 1000;
     const canvasHeight = fabricCanvas.height || 700;
 
@@ -457,12 +605,17 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     
     const normalizedWidth = (params.width / 1000) * canvasWidth;
     const normalizedHeight = (params.height / 700) * canvasHeight;
+    
+    // Clamp to stay within bounds
+    const margin = 10;
+    const clampedX = Math.max(margin, Math.min(pos.x, canvasWidth - normalizedWidth - margin));
+    const clampedY = Math.max(margin, Math.min(pos.y, canvasHeight - normalizedHeight - margin));
 
     const highlight = new Rect({
-      left: pos.x,
-      top: pos.y,
-      width: normalizedWidth,
-      height: normalizedHeight,
+      left: clampedX,
+      top: clampedY,
+      width: Math.min(normalizedWidth, canvasWidth - clampedX - margin),
+      height: Math.min(normalizedHeight, canvasHeight - clampedY - margin),
       fill: params.color || 'rgba(255, 255, 0, 0.3)',
       stroke: '',
       strokeWidth: 0,
@@ -481,6 +634,11 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     fabricCanvas.backgroundColor = '#ffffff';
     fabricCanvas.renderAll();
     setIsCursorVisible(false);
+    
+    // Clear layout manager
+    if (layoutManagerRef.current) {
+      layoutManagerRef.current.clear();
+    }
   }, [fabricCanvas]);
 
   const handleToolClick = (tool: Tool) => {
