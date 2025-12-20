@@ -253,3 +253,190 @@ export const normalizeCoordinates = (
     y: Math.round(y * scaleY)
   };
 };
+
+/**
+ * Represents a bounding box for collision detection
+ */
+export interface BoundingBox {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/**
+ * Smart positioning system that finds optimal placement for new content
+ * avoiding existing objects and staying within canvas bounds
+ */
+export class WhiteboardLayoutManager {
+  private occupiedRegions: BoundingBox[] = [];
+  private canvasWidth: number;
+  private canvasHeight: number;
+  private padding: number;
+  private margin: number;
+  
+  constructor(canvasWidth: number, canvasHeight: number, padding: number = 20, margin: number = 40) {
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+    this.padding = padding;
+    this.margin = margin;
+  }
+  
+  /**
+   * Update occupied regions from current canvas objects
+   */
+  updateFromObjects(objects: Array<{ left: number; top: number; width: number; height: number }>) {
+    this.occupiedRegions = objects.map(obj => ({
+      left: obj.left - this.padding,
+      top: obj.top - this.padding,
+      right: obj.left + obj.width + this.padding,
+      bottom: obj.top + obj.height + this.padding
+    }));
+  }
+  
+  /**
+   * Check if a position collides with any occupied region
+   */
+  private collides(box: BoundingBox): boolean {
+    for (const region of this.occupiedRegions) {
+      if (!(box.right < region.left || 
+            box.left > region.right || 
+            box.bottom < region.top || 
+            box.top > region.bottom)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Check if a box is within canvas bounds
+   */
+  private isWithinBounds(box: BoundingBox): boolean {
+    return box.left >= this.margin &&
+           box.top >= this.margin &&
+           box.right <= this.canvasWidth - this.margin &&
+           box.bottom <= this.canvasHeight - this.margin;
+  }
+  
+  /**
+   * Find the best position for content of given size
+   * Returns position that avoids collisions and stays in bounds
+   */
+  findBestPosition(
+    preferredX: number, 
+    preferredY: number, 
+    width: number, 
+    height: number
+  ): { x: number; y: number; overflow: boolean } {
+    // First try the preferred position
+    let testBox: BoundingBox = {
+      left: preferredX,
+      top: preferredY,
+      right: preferredX + width,
+      bottom: preferredY + height
+    };
+    
+    if (!this.collides(testBox) && this.isWithinBounds(testBox)) {
+      return { x: preferredX, y: preferredY, overflow: false };
+    }
+    
+    // Search in a grid pattern from preferred position
+    const searchRadius = Math.max(this.canvasWidth, this.canvasHeight);
+    const stepSize = 50;
+    
+    // Try positions in expanding circles from preferred position
+    for (let radius = stepSize; radius < searchRadius; radius += stepSize) {
+      for (let angle = 0; angle < 360; angle += 30) {
+        const rad = (angle * Math.PI) / 180;
+        const testX = preferredX + radius * Math.cos(rad);
+        const testY = preferredY + radius * Math.sin(rad);
+        
+        testBox = {
+          left: testX,
+          top: testY,
+          right: testX + width,
+          bottom: testY + height
+        };
+        
+        if (!this.collides(testBox) && this.isWithinBounds(testBox)) {
+          return { x: testX, y: testY, overflow: false };
+        }
+      }
+    }
+    
+    // Fallback: scan from top-left to find any available space
+    for (let y = this.margin; y < this.canvasHeight - height - this.margin; y += stepSize) {
+      for (let x = this.margin; x < this.canvasWidth - width - this.margin; x += stepSize) {
+        testBox = {
+          left: x,
+          top: y,
+          right: x + width,
+          bottom: y + height
+        };
+        
+        if (!this.collides(testBox)) {
+          return { x, y, overflow: false };
+        }
+      }
+    }
+    
+    // Last resort: clamp to bounds and accept overlap
+    const clampedX = Math.max(this.margin, Math.min(preferredX, this.canvasWidth - width - this.margin));
+    const clampedY = Math.max(this.margin, Math.min(preferredY, this.canvasHeight - height - this.margin));
+    
+    return { x: clampedX, y: clampedY, overflow: true };
+  }
+  
+  /**
+   * Register a new occupied region
+   */
+  addOccupiedRegion(x: number, y: number, width: number, height: number) {
+    this.occupiedRegions.push({
+      left: x - this.padding,
+      top: y - this.padding,
+      right: x + width + this.padding,
+      bottom: y + height + this.padding
+    });
+  }
+  
+  /**
+   * Clear all occupied regions (for whiteboard clear)
+   */
+  clear() {
+    this.occupiedRegions = [];
+  }
+  
+  /**
+   * Get next Y position for sequential content (auto-flow)
+   */
+  getNextAutoPosition(): { x: number; y: number } {
+    if (this.occupiedRegions.length === 0) {
+      return { x: this.margin, y: this.margin };
+    }
+    
+    // Find the lowest point of all occupied regions
+    const maxBottom = Math.max(...this.occupiedRegions.map(r => r.bottom));
+    const nextY = Math.min(maxBottom + this.padding, this.canvasHeight - this.margin - 100);
+    
+    return { x: this.margin, y: nextY };
+  }
+}
+
+/**
+ * Estimates the display width of text in pixels (rough approximation)
+ */
+export const estimateTextWidth = (text: string, fontSize: number = 20): number => {
+  // Average character width is roughly 0.6 * fontSize for proportional fonts
+  const avgCharWidth = fontSize * 0.6;
+  return text.length * avgCharWidth;
+};
+
+/**
+ * Estimates the display height of text (including line breaks)
+ */
+export const estimateTextHeight = (text: string, fontSize: number = 20): number => {
+  const lineHeight = fontSize * 1.3;
+  const lines = text.split('\n').length;
+  return lines * lineHeight;
+};

@@ -31,14 +31,19 @@ import {
   Edit2,
   Check,
   X,
-  StopCircle
+  StopCircle,
+  Download,
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import { normalizeMathDelimiters } from '@/utils/phoenixMathUtils';
+import { normalizeMathDelimiters, latexToVisualUnicode } from '@/utils/phoenixMathUtils';
+import jsPDF from 'jspdf';
 
 interface TranscriptMessage {
   id: string;
@@ -86,6 +91,9 @@ const Phoenix: React.FC = () => {
   // Session rename state
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  
+  // Transcript panel visibility
+  const [showTranscript, setShowTranscript] = useState(true);
   
   // Abort controller for text mode cancellation
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -636,6 +644,75 @@ const Phoenix: React.FC = () => {
 
   // Check if stop button should be shown
   const showStopButton = (isConnected && isSpeaking) || isTextLoading;
+
+  // Export transcript as PDF with proper math rendering
+  const exportTranscriptPDF = useCallback(() => {
+    if (transcript.length === 0) {
+      toast({ title: 'No transcript to export', variant: 'destructive' });
+      return;
+    }
+    
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
+    let yPos = 20;
+    
+    // Title
+    const session = sessions.find(s => s.id === currentSessionId);
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(session?.title || 'Phoenix Session', margin, yPos);
+    yPos += 10;
+    
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Exported: ${new Date().toLocaleString()}`, margin, yPos);
+    yPos += 15;
+    
+    // Transcript messages
+    transcript.forEach((msg) => {
+      // Check if we need a new page
+      if (yPos > 270) {
+        pdf.addPage();
+        yPos = 20;
+      }
+      
+      // Role header
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(msg.role === 'assistant' ? 234, 88, 12 : 59, 130, 246);
+      pdf.text(msg.role === 'assistant' ? 'Phoenix' : 'You', margin, yPos);
+      yPos += 6;
+      
+      // Content - convert LaTeX to visual Unicode for PDF
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      
+      // Process content: normalize math and convert to visual characters
+      let content = normalizeMathDelimiters(msg.content);
+      // Convert remaining LaTeX to Unicode for PDF display
+      content = latexToVisualUnicode(content);
+      // Remove markdown formatting for clean PDF
+      content = content.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
+      
+      const lines = pdf.splitTextToSize(content, maxWidth);
+      lines.forEach((line: string) => {
+        if (yPos > 280) {
+          pdf.addPage();
+          yPos = 20;
+        }
+        pdf.text(line, margin, yPos);
+        yPos += 5;
+      });
+      
+      yPos += 8;
+    });
+    
+    pdf.save(`phoenix-session-${new Date().toISOString().split('T')[0]}.pdf`);
+    toast({ title: 'Transcript exported as PDF' });
+  }, [transcript, sessions, currentSessionId, toast]);
 
   // Render upgrade prompt for non-subscribers
   if (!hasLearnPlus) {
