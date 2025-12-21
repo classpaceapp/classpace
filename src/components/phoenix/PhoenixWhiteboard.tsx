@@ -1,10 +1,16 @@
 import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
-import { Canvas as FabricCanvas, Circle, Rect, Path, IText, FabricObject } from 'fabric';
+import { Canvas as FabricCanvas, Circle, Rect, Path, IText, FabricObject, PencilBrush } from 'fabric';
 import { PhoenixCursor } from './PhoenixCursor';
 import type { WhiteboardAction } from '@/hooks/usePhoenixRealtime';
 import { Button } from '@/components/ui/button';
-import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer, Save } from 'lucide-react';
+import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer, Save, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   latexToVisualUnicode, 
   normalizeCoordinates, 
@@ -40,6 +46,13 @@ export interface PhoenixWhiteboardRef {
 
 type Tool = 'select' | 'draw' | 'rectangle' | 'circle' | 'text' | 'eraser';
 
+const STROKE_WIDTHS = [
+  { label: 'Thin', value: 2 },
+  { label: 'Medium', value: 4 },
+  { label: 'Thick', value: 8 },
+  { label: 'Extra Thick', value: 12 },
+];
+
 export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhiteboardProps>(({
   onStateChange,
   onRequestSave,
@@ -48,8 +61,9 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
-  const [activeTool, setActiveTool] = useState<Tool>('draw');
+  const [activeTool, setActiveTool] = useState<Tool>('select');
   const [activeColor, setActiveColor] = useState('#000000');
+  const [strokeWidth, setStrokeWidth] = useState(4);
   
   // Layout manager for smart positioning
   const layoutManagerRef = useRef<WhiteboardLayoutManager | null>(null);
@@ -71,17 +85,41 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       width: width,
       height: height,
       backgroundColor: '#ffffff',
-      isDrawingMode: true,
+      isDrawingMode: false,
+      selection: true,
     });
 
     // Initialize layout manager
     layoutManagerRef.current = new WhiteboardLayoutManager(width, height);
 
-    // Initialize free drawing brush
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.color = activeColor;
-      canvas.freeDrawingBrush.width = 3;
-    }
+    // Initialize pencil brush properly
+    const pencilBrush = new PencilBrush(canvas);
+    pencilBrush.color = activeColor;
+    pencilBrush.width = strokeWidth;
+    canvas.freeDrawingBrush = pencilBrush;
+
+    // Handle keyboard delete
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && canvas) {
+        const activeObjects = canvas.getActiveObjects();
+        if (activeObjects.length > 0) {
+          activeObjects.forEach(obj => {
+            // Don't delete if user is editing text
+            if (obj.type === 'i-text' && (obj as IText).isEditing) {
+              return;
+            }
+            canvas.remove(obj);
+          });
+          canvas.discardActiveObject();
+          canvas.renderAll();
+          if (onStateChange) {
+            onStateChange(canvas.toJSON());
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
 
     // Handle canvas changes
     canvas.on('object:added', () => {
@@ -122,6 +160,7 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyDown);
       canvas.dispose();
     };
   }, []);
@@ -148,17 +187,34 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
   useEffect(() => {
     if (!fabricCanvas) return;
 
-    fabricCanvas.isDrawingMode = activeTool === 'draw' || activeTool === 'eraser';
+    const isDraw = activeTool === 'draw';
+    const isEraser = activeTool === 'eraser';
+    
+    fabricCanvas.isDrawingMode = isDraw || isEraser;
     fabricCanvas.selection = activeTool === 'select';
+    
+    // Make objects selectable only in select mode
+    fabricCanvas.getObjects().forEach(obj => {
+      obj.selectable = activeTool === 'select';
+      obj.evented = activeTool === 'select' || activeTool === 'eraser';
+    });
 
-    if (activeTool === 'draw' && fabricCanvas.freeDrawingBrush) {
-      fabricCanvas.freeDrawingBrush.color = activeColor;
-      fabricCanvas.freeDrawingBrush.width = 3;
-    } else if (activeTool === 'eraser' && fabricCanvas.freeDrawingBrush) {
-      fabricCanvas.freeDrawingBrush.color = '#ffffff';
-      fabricCanvas.freeDrawingBrush.width = 20;
+    if (isDraw) {
+      // Create fresh pencil brush for drawing
+      const pencilBrush = new PencilBrush(fabricCanvas);
+      pencilBrush.color = activeColor;
+      pencilBrush.width = strokeWidth;
+      fabricCanvas.freeDrawingBrush = pencilBrush;
+    } else if (isEraser) {
+      // For eraser, use a white brush
+      const eraserBrush = new PencilBrush(fabricCanvas);
+      eraserBrush.color = '#ffffff';
+      eraserBrush.width = strokeWidth * 3; // Eraser is thicker
+      fabricCanvas.freeDrawingBrush = eraserBrush;
     }
-  }, [activeTool, activeColor, fabricCanvas]);
+    
+    fabricCanvas.renderAll();
+  }, [activeTool, activeColor, strokeWidth, fabricCanvas]);
 
   // Get whiteboard layout for Phoenix context
   const getWhiteboardLayout = useCallback((): { items: WhiteboardLayoutItem[]; canvasWidth: number; canvasHeight: number; nextY: number } => {
@@ -665,16 +721,37 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
 
   const handleToolClick = (tool: Tool) => {
     if (!fabricCanvas) return;
+    
+    // First set the tool
     setActiveTool(tool);
 
-    if (tool === 'rectangle') {
+    if (tool === 'draw') {
+      // Enable drawing mode with pencil
+      fabricCanvas.isDrawingMode = true;
+      const pencilBrush = new PencilBrush(fabricCanvas);
+      pencilBrush.color = activeColor;
+      pencilBrush.width = strokeWidth;
+      fabricCanvas.freeDrawingBrush = pencilBrush;
+      fabricCanvas.renderAll();
+    } else if (tool === 'eraser') {
+      // Enable drawing mode with white brush
+      fabricCanvas.isDrawingMode = true;
+      const eraserBrush = new PencilBrush(fabricCanvas);
+      eraserBrush.color = '#ffffff';
+      eraserBrush.width = strokeWidth * 3;
+      fabricCanvas.freeDrawingBrush = eraserBrush;
+      fabricCanvas.renderAll();
+    } else if (tool === 'select') {
+      fabricCanvas.isDrawingMode = false;
+      fabricCanvas.selection = true;
+    } else if (tool === 'rectangle') {
       fabricCanvas.isDrawingMode = false;
       const rect = new Rect({
         left: 100,
         top: 100,
         fill: 'transparent',
         stroke: activeColor,
-        strokeWidth: 2,
+        strokeWidth: strokeWidth,
         width: 150,
         height: 100,
       });
@@ -688,7 +765,7 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
         top: 100,
         fill: 'transparent',
         stroke: activeColor,
-        strokeWidth: 2,
+        strokeWidth: strokeWidth,
         radius: 50,
       });
       fabricCanvas.add(circle);
@@ -780,6 +857,38 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
             <Eraser className="h-4 w-4" />
           </Button>
         </div>
+
+        {/* Stroke width picker */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 px-2 gap-1"
+              title="Stroke width"
+            >
+              <Minus className="h-4 w-4" />
+              <span className="text-xs">{strokeWidth}px</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {STROKE_WIDTHS.map((sw) => (
+              <DropdownMenuItem
+                key={sw.value}
+                onClick={() => setStrokeWidth(sw.value)}
+                className={cn(strokeWidth === sw.value && "bg-orange-100")}
+              >
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="bg-black rounded-full" 
+                    style={{ width: sw.value * 2, height: sw.value, minWidth: 8 }} 
+                  />
+                  <span>{sw.label} ({sw.value}px)</span>
+                </div>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Color picker */}
         <input
