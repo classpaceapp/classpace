@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface WhiteboardAction {
-  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard' | 'capture_screenshot' | 'draw_math_curve' | 'draw_coordinate_system' | 'draw_math_symbol' | 'draw_custom_curve';
+  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard' | 'capture_screenshot' | 'draw_math_curve' | 'draw_coordinate_system' | 'draw_math_symbol' | 'draw_custom_curve' | 'draw_handwriting';
   params: Record<string, any>;
 }
 

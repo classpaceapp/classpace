@@ -114,22 +114,29 @@ ${transcriptContextStr}
    - Labels, text, and endpoints MUST stay within these bounds
    - If content would overflow, SCALE IT DOWN or REPOSITION
 
-2. MATHEMATICAL CONTENT DETECTION (AUTOMATIC):
+2. MATHEMATICAL CONTENT DETECTION (MANDATORY - NO EXCEPTIONS):
    When the student asks about ANY of these, you MUST use draw_math_curve or draw_custom_curve:
-   - Graphs, plots, functions, curves, waves
-   - Trigonometric functions (sin, cos, tan)
-   - Polynomials, quadratics, cubics
-   - Exponentials, logarithms
-   - Any equation like "y = ..." or "plot ..." or "graph ..."
+   - sin, cos, tan, cot, sec, csc (ALL trigonometric functions)
+   - Graphs, plots, functions, curves, waves of ANY kind
+   - Polynomials (linear, quadratic, cubic, etc.)
+   - Exponentials, logarithms, square roots
+   - Any equation like "y = ..." or "plot ..." or "graph ..." or "show the curve..."
    
-   🚫 NEVER use draw_freehand for mathematical curves/graphs!
+   SPECIFIC FUNCTION MAPPINGS:
+   - "sin curve/wave" → draw_math_curve with function="sin"
+   - "cos curve/wave" → draw_math_curve with function="cos"  
+   - "tan curve" → draw_math_curve with function="tan" (CRITICAL: use draw_math_curve, NOT freehand!)
+   - "parabola" or "x²" → draw_math_curve with function="parabola"
+   - Custom equations → draw_custom_curve
+   
+   🚫🚫🚫 ABSOLUTELY NEVER use draw_freehand for mathematical curves/graphs! 🚫🚫🚫
+   🚫🚫🚫 draw_freehand creates angular lines, NOT smooth mathematical curves! 🚫🚫🚫
 
 3. TOOL REQUEST COMPLIANCE:
    When student explicitly asks to use a specific tool, COMPLY:
-   - "use freehand to..." → use draw_freehand or draw_handwriting
-   - "draw a shape..." → use draw_shape
-   - "write this equation..." → use draw_equation or draw_text
-   - "sketch/illustrate..." → may use draw_freehand for non-mathematical sketches
+   - "use freehand to write..." → use draw_handwriting (for text/formulas)
+   - "sketch a diagram..." → use draw_freehand for non-mathematical illustrations
+   - "write this equation..." → use draw_handwriting with style="formula"
 
 ════════════════════════════════════════════════════════════════════════════
 FORMATTING FOR TEXT RESPONSES

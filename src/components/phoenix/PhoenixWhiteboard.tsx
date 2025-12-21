@@ -7,6 +7,11 @@ import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointe
 import jsPDF from 'jspdf';
 import { cn } from '@/lib/utils';
 import {
+  smoothPoints,
+  pointsToSmoothSVGPath,
+  generateSymbolStrokes,
+} from '@/utils/phoenixHandwriting';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -386,6 +391,9 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       case 'draw_custom_curve':
         handleDrawCustomCurve(action.params as any);
         break;
+      case 'draw_handwriting':
+        handleDrawHandwriting(action.params as any);
+        break;
     }
   }, [fabricCanvas]);
 
@@ -418,10 +426,18 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     const normalizedPoints = params.points.map(p => normalizeCoordinates(p.x, p.y, canvasWidth, canvasHeight));
     setCursorPosition(normalizedPoints[0]);
 
-    // Create SVG path string from normalized points
-    let pathStr = `M ${normalizedPoints[0].x} ${normalizedPoints[0].y}`;
-    for (let i = 1; i < normalizedPoints.length; i++) {
-      pathStr += ` L ${normalizedPoints[i].x} ${normalizedPoints[i].y}`;
+    // Use smooth Bezier path instead of linear segments for human-like drawing
+    let pathStr: string;
+    if (normalizedPoints.length < 3) {
+      // Simple line for 2 points
+      pathStr = `M ${normalizedPoints[0].x} ${normalizedPoints[0].y}`;
+      for (let i = 1; i < normalizedPoints.length; i++) {
+        pathStr += ` L ${normalizedPoints[i].x} ${normalizedPoints[i].y}`;
+      }
+    } else {
+      // Use smooth Catmull-Rom spline for 3+ points
+      const smoothed = smoothPoints(normalizedPoints, 0.5, 6);
+      pathStr = pointsToSmoothSVGPath(smoothed);
     }
 
     const path = new Path(pathStr, {
@@ -1046,6 +1062,72 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     fabricCanvas.renderAll();
     setCursorPosition({ x: canvasXMin, y: yCenter });
     
+    setTimeout(() => setIsCursorActive(false), 300);
+  }, [fabricCanvas]);
+
+  // NEW: Handle handwriting-style text and formula rendering
+  const handleDrawHandwriting = useCallback((params: {
+    content: string;
+    x: number;
+    y: number;
+    fontSize?: number;
+    color?: string;
+    style?: 'formula' | 'text' | 'annotation';
+  }) => {
+    if (!fabricCanvas || !params.content) return;
+
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+    const fontSize = params.fontSize || 24;
+
+    setIsCursorVisible(true);
+    setIsCursorActive(true);
+
+    // Normalize position
+    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    
+    // Convert content to display-friendly text
+    const displayText = latexToVisualUnicode(params.content);
+    
+    // Estimate dimensions
+    const textWidth = estimateTextWidth(displayText, fontSize);
+    const textHeight = estimateTextHeight(displayText, fontSize);
+
+    // Use layout manager to find best position
+    let finalPos = pos;
+    if (layoutManagerRef.current) {
+      const result = layoutManagerRef.current.findBestPosition(
+        pos.x, pos.y, textWidth, textHeight
+      );
+      finalPos = { x: result.x, y: result.y };
+    }
+
+    setCursorPosition(finalPos);
+
+    // Choose styling based on style parameter
+    const isFormula = params.style === 'formula';
+    const textColor = params.color || (isFormula ? '#1e40af' : '#1f2937');
+    const fontFamily = isFormula 
+      ? '"Cambria Math", "Times New Roman", serif' 
+      : 'Arial, "Segoe UI Symbol", sans-serif';
+
+    const text = new IText(displayText, {
+      left: finalPos.x,
+      top: finalPos.y,
+      fill: textColor,
+      fontSize: fontSize,
+      fontFamily: fontFamily,
+      fontStyle: isFormula ? 'italic' : 'normal',
+    });
+
+    fabricCanvas.add(text);
+    fabricCanvas.renderAll();
+
+    // Register in layout manager
+    if (layoutManagerRef.current) {
+      layoutManagerRef.current.addOccupiedRegion(finalPos.x, finalPos.y, textWidth, textHeight);
+    }
+
     setTimeout(() => setIsCursorActive(false), 300);
   }, [fabricCanvas]);
 
