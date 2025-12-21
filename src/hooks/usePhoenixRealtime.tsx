@@ -193,9 +193,11 @@ export const usePhoenixRealtime = ({
         console.log('[PHOENIX-REALTIME] Speech detected - user is talking');
         setIsListening(false);
         
-        // INTERRUPT: ALWAYS stop Phoenix when user starts talking (unconditional)
-        // We don't check isSpeaking because it can be unreliable
-        console.log('[PHOENIX-REALTIME] User started speaking - interrupting any ongoing response');
+        // INTERRUPT: ALWAYS stop Phoenix when user starts talking
+        console.log('[PHOENIX-REALTIME] User started speaking - interrupting ongoing response');
+        
+        // Mark that we should NOT auto-reconnect audio
+        shouldReconnectAudioRef.current = false;
         
         // Mute audio immediately
         if (audioElRef.current) {
@@ -206,7 +208,7 @@ export const usePhoenixRealtime = ({
           audioElRef.current = newAudioEl;
         }
         
-        // Send cancel
+        // Send cancel to stop current response
         if (dcRef.current?.readyState === 'open') {
           try {
             dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
@@ -218,18 +220,7 @@ export const usePhoenixRealtime = ({
         
         setIsSpeaking(false);
         onSpeakingChange?.(false);
-        
-        // Reconnect audio after short delay
-        setTimeout(() => {
-          if (pcRef.current && audioElRef.current) {
-            const receivers = pcRef.current.getReceivers();
-            const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
-            if (audioReceiver?.track) {
-              const stream = new MediaStream([audioReceiver.track]);
-              audioElRef.current.srcObject = stream;
-            }
-          }
-        }, 200);
+        // NOTE: Audio will be reconnected when response.created fires for the new response
         break;
 
       case 'input_audio_buffer.speech_stopped':
@@ -245,7 +236,21 @@ export const usePhoenixRealtime = ({
         break;
 
       case 'response.created':
-        console.log('[PHOENIX-REALTIME] Response started');
+        console.log('[PHOENIX-REALTIME] Response started - reconnecting audio');
+        // A new response is starting - reconnect audio if it was disconnected
+        if (!shouldReconnectAudioRef.current) {
+          shouldReconnectAudioRef.current = true;
+        }
+        // Reconnect audio element to WebRTC stream for this new response
+        if (pcRef.current && audioElRef.current && !audioElRef.current.srcObject) {
+          const receivers = pcRef.current.getReceivers();
+          const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
+          if (audioReceiver?.track) {
+            const stream = new MediaStream([audioReceiver.track]);
+            audioElRef.current.srcObject = stream;
+            console.log('[PHOENIX-REALTIME] Audio reconnected for new response');
+          }
+        }
         break;
 
       case 'response.output_item.added':
@@ -374,16 +379,22 @@ export const usePhoenixRealtime = ({
     }
   }, [onWhiteboardAction]);
 
+  // Track if we should reconnect audio (set to true when new response starts)
+  const shouldReconnectAudioRef = useRef<boolean>(true);
+
   // Interrupt any ongoing response - stop audio and cancel response
-  // IMPORTANT: This is now UNCONDITIONAL - we always attempt to stop audio
-  // because isSpeaking state can be unreliable (response.audio.delta events may not fire)
+  // IMPORTANT: This is UNCONDITIONAL - we always stop audio and DON'T reconnect
+  // until a new response.created event arrives. This prevents old audio from resuming.
   const interruptResponse = useCallback(() => {
-    console.log('[PHOENIX-REALTIME] Interrupting any ongoing response (unconditional)...');
+    console.log('[PHOENIX-REALTIME] Interrupting ongoing response (unconditional)...');
     
-    // Set flag to ignore incoming events temporarily
+    // Set flag to ignore incoming audio events temporarily
     ignoreEventsRef.current = true;
     
-    // Mute audio immediately - don't check isSpeaking, just do it
+    // CRITICAL: Mark that we should NOT reconnect audio until new response
+    shouldReconnectAudioRef.current = false;
+    
+    // Mute audio immediately - pause, null out the stream, recreate element
     if (audioElRef.current) {
       audioElRef.current.pause();
       audioElRef.current.srcObject = null;
@@ -392,13 +403,13 @@ export const usePhoenixRealtime = ({
       audioElRef.current = newAudioEl;
     }
     
-    // Send cancel event - always attempt this
+    // Send cancel event to stop OpenAI's response generation
     if (dcRef.current?.readyState === 'open') {
       try {
         dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
-        console.log('[PHOENIX-REALTIME] Sent interrupt cancel');
+        console.log('[PHOENIX-REALTIME] Sent response.cancel');
       } catch (e) {
-        console.error('[PHOENIX-REALTIME] Failed to send interrupt cancel:', e);
+        console.error('[PHOENIX-REALTIME] Failed to send cancel:', e);
       }
     }
     
@@ -409,19 +420,27 @@ export const usePhoenixRealtime = ({
     setIsSpeaking(false);
     onSpeakingChange?.(false);
     
-    // Re-enable events after short delay
+    // Re-enable event processing after short delay (but NOT audio reconnection)
     setTimeout(() => {
       ignoreEventsRef.current = false;
-      if (pcRef.current && audioElRef.current) {
-        const receivers = pcRef.current.getReceivers();
-        const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
-        if (audioReceiver?.track) {
-          const stream = new MediaStream([audioReceiver.track]);
-          audioElRef.current.srcObject = stream;
-        }
-      }
+      // NOTE: We intentionally DO NOT reconnect audio here.
+      // Audio will be reconnected when response.created is received for the new response.
     }, 200);
   }, [onSpeakingChange]);
+
+  // Reconnect audio to the WebRTC stream (called when new response starts)
+  const reconnectAudio = useCallback(() => {
+    if (!pcRef.current || !audioElRef.current) return;
+    
+    console.log('[PHOENIX-REALTIME] Reconnecting audio for new response...');
+    const receivers = pcRef.current.getReceivers();
+    const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
+    if (audioReceiver?.track) {
+      const stream = new MediaStream([audioReceiver.track]);
+      audioElRef.current.srcObject = stream;
+    }
+    shouldReconnectAudioRef.current = true;
+  }, []);
 
   const sendTextMessage = useCallback((text: string) => {
     if (!dcRef.current || dcRef.current.readyState !== 'open') {
