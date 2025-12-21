@@ -3,7 +3,8 @@ import { Canvas as FabricCanvas, Circle, Rect, Path, IText, FabricObject, Pencil
 import { PhoenixCursor } from './PhoenixCursor';
 import type { WhiteboardAction } from '@/hooks/usePhoenixRealtime';
 import { Button } from '@/components/ui/button';
-import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer, Save, Minus } from 'lucide-react';
+import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer, Save, Minus, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
 import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -947,6 +948,38 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
         <div className="absolute inset-0" style={{ pointerEvents: 'auto' }}>
           <canvas ref={canvasRef} />
         </div>
+      </div>
+
+      {/* Download as PDF Footer */}
+      <div className="flex items-center justify-center p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200">
+        <button
+          onClick={() => {
+            if (!fabricCanvas) return;
+            
+            const dataURL = fabricCanvas.toDataURL({
+              format: 'png',
+              quality: 1,
+              multiplier: 2,
+            });
+            
+            const canvasWidth = fabricCanvas.width || 1000;
+            const canvasHeight = fabricCanvas.height || 700;
+            
+            // Create landscape PDF matching canvas aspect ratio
+            const pdf = new jsPDF({
+              orientation: canvasWidth > canvasHeight ? 'landscape' : 'portrait',
+              unit: 'px',
+              format: [canvasWidth, canvasHeight]
+            });
+            
+            pdf.addImage(dataURL, 'PNG', 0, 0, canvasWidth, canvasHeight);
+            pdf.save(`phoenix-whiteboard-${new Date().toISOString().split('T')[0]}.pdf`);
+          }}
+          className="group flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-sm"
+        >
+          <Download className="h-4 w-4 group-hover:scale-110 transition-transform" />
+          Download Whiteboard as PDF
+        </button>
       </div>
     </div>
   );
