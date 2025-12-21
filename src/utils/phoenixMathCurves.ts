@@ -82,12 +82,22 @@ export function generateMathCurvePoints(
         y = yCenter - amplitude * Math.cos((2 * Math.PI * shiftedX) / period) + verticalShift;
         break;
         
-      case 'tan':
-        const tanVal = Math.tan((2 * Math.PI * shiftedX) / period);
-        // Clamp extreme values to prevent visual artifacts
-        const clampedTan = Math.max(-10, Math.min(10, tanVal));
-        y = yCenter - amplitude * clampedTan + verticalShift;
+      case 'tan': {
+        // tan() has period π. We define `period` as the pixel-width of ONE full tan period.
+        // Therefore: θ = π * x / period
+        const theta = (Math.PI * shiftedX) / period;
+        const tanVal = Math.tan(theta);
+
+        // Treat near-asymptotes as discontinuities (do NOT clamp and connect)
+        if (!Number.isFinite(tanVal) || Math.abs(tanVal) > 6) {
+          // Mark discontinuity: a sentinel point; renderer should split paths.
+          points.push({ x: -1, y: -1 });
+          break;
+        }
+
+        y = yCenter - amplitude * tanVal + verticalShift;
         break;
+      }
         
       case 'parabola':
         // y = a(x - h)² + k where h is horizontal shift, k is vertical shift
