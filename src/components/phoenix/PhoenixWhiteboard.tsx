@@ -3,7 +3,7 @@ import { Canvas as FabricCanvas, Circle, Rect, Path, IText, FabricObject } from 
 import { PhoenixCursor } from './PhoenixCursor';
 import type { WhiteboardAction } from '@/hooks/usePhoenixRealtime';
 import { Button } from '@/components/ui/button';
-import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer } from 'lucide-react';
+import { Pencil, Square, Circle as CircleIcon, Type, Eraser, Trash2, MousePointer, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { 
   latexToVisualUnicode, 
@@ -15,6 +15,7 @@ import {
 
 interface PhoenixWhiteboardProps {
   onStateChange?: (state: any) => void;
+  onRequestSave?: () => void;
   isConnected?: boolean;
 }
 
@@ -41,6 +42,7 @@ type Tool = 'select' | 'draw' | 'rectangle' | 'circle' | 'text' | 'eraser';
 
 export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhiteboardProps>(({
   onStateChange,
+  onRequestSave,
   isConnected = false
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -768,12 +770,24 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
           title="Pick color"
         />
 
+        {/* Save button */}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onRequestSave?.()}
+          className="h-8 ml-auto text-green-700 border-green-300 hover:bg-green-50"
+          title="Save whiteboard"
+        >
+          <Save className="h-4 w-4 mr-1" />
+          Save
+        </Button>
+
         {/* Clear button */}
         <Button
           size="sm"
           variant="outline"
           onClick={handleClearWhiteboard}
-          className="h-8 ml-auto"
+          className="h-8"
         >
           <Trash2 className="h-4 w-4 mr-1" />
           Clear
