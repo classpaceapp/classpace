@@ -373,35 +373,55 @@ TEACHING APPROACH
       try {
         const actionsJson = whiteboardMatch[1];
         const parsed = JSON.parse(actionsJson);
-        if (Array.isArray(parsed)) {
-          // Validate and constrain all actions to bounds
-          const validatedActions = parsed.map(action => {
-            // Ensure coordinates are within bounds
-            if (action.params) {
-              if (action.params.x !== undefined) {
-                action.params.x = Math.max(safeMinX, Math.min(safeMaxX - 100, action.params.x));
+          // Validate and constrain all actions to safe bounds
+          const validatedActions = parsed.map((action: WhiteboardAction) => {
+            if (!action.params) return action;
+            const p = action.params;
+
+            // Generic coordinate clamping
+            if (p.x !== undefined) {
+              p.x = Math.max(safeMinX, Math.min(safeMaxX - 100, p.x));
+            }
+            if (p.y !== undefined) {
+              p.y = Math.max(safeMinY, Math.min(safeMaxY - 50, p.y));
+            }
+
+            // draw_math_curve / draw_coordinate_system: clamp pixel bounds
+            if (action.type === 'draw_math_curve' || action.type === 'draw_coordinate_system') {
+              if (p.xMin !== undefined) p.xMin = Math.max(safeMinX, p.xMin);
+              if (p.xMax !== undefined) p.xMax = Math.min(safeMaxX, p.xMax);
+              if (p.yCenter !== undefined) {
+                p.yCenter = Math.max(safeMinY + 50, Math.min(safeMaxY - 50, p.yCenter));
               }
-              if (action.params.y !== undefined) {
-                action.params.y = Math.max(safeMinY, Math.min(safeMaxY - 50, action.params.y));
+              if (p.amplitude !== undefined) {
+                // limit amplitude so curve stays on-screen
+                const maxAmp = Math.min(p.yCenter - safeMinY, safeMaxY - p.yCenter) - 10;
+                p.amplitude = Math.min(p.amplitude, Math.max(20, maxAmp));
               }
-              if (action.params.xMin !== undefined && action.type !== 'draw_custom_curve') {
-                action.params.xMin = Math.max(safeMinX, action.params.xMin);
-              }
-              if (action.params.xMax !== undefined && action.type !== 'draw_custom_curve') {
-                action.params.xMax = Math.min(safeMaxX, action.params.xMax);
-              }
-              // Constrain points array
-              if (action.params.points && Array.isArray(action.params.points)) {
-                action.params.points = action.params.points.map((p: any) => ({
-                  x: Math.max(safeMinX, Math.min(safeMaxX, p.x)),
-                  y: Math.max(safeMinY, Math.min(safeMaxY, p.y))
-                }));
+              if (p.originX !== undefined) p.originX = Math.max(safeMinX + 30, Math.min(safeMaxX - 30, p.originX));
+              if (p.originY !== undefined) p.originY = Math.max(safeMinY + 30, Math.min(safeMaxY - 30, p.originY));
+            }
+
+            // draw_custom_curve: clamp canvas bounds (math domain left untouched)
+            if (action.type === 'draw_custom_curve') {
+              if (p.canvasXMin !== undefined) p.canvasXMin = Math.max(safeMinX, p.canvasXMin);
+              if (p.canvasXMax !== undefined) p.canvasXMax = Math.min(safeMaxX, p.canvasXMax);
+              if (p.yCenter !== undefined) {
+                p.yCenter = Math.max(safeMinY + 40, Math.min(safeMaxY - 40, p.yCenter));
               }
             }
+
+            // Constrain freehand points array
+            if (p.points && Array.isArray(p.points)) {
+              p.points = p.points.map((pt: any) => ({
+                x: Math.max(safeMinX, Math.min(safeMaxX, pt.x)),
+                y: Math.max(safeMinY, Math.min(safeMaxY, pt.y))
+              }));
+            }
+
             return action;
           });
           whiteboardActions.push(...validatedActions);
-        }
         // Remove the whiteboard block from content shown to user
         content = content.replace(/```whiteboard\n[\s\S]*?\n```/g, '').trim();
       } catch (e) {

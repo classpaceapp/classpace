@@ -66,99 +66,124 @@ export function generateMathCurvePoints(
   
   const points: Array<{x: number; y: number}> = [];
   const step = (xMax - xMin) / samples;
-  
+  const margin = 20;
+
+  let prevY: number | null = null;
+
   for (let i = 0; i <= samples; i++) {
     const x = xMin + i * step;
     const shiftedX = x - horizontalShift;
-    let y: number;
-    
+    let y: number | null = null;
+    let isDiscontinuity = false;
+
     switch (fn) {
       case 'sin':
-        // y = amplitude * sin(2π * x / period) + yCenter
         y = yCenter - amplitude * Math.sin((2 * Math.PI * shiftedX) / period) + verticalShift;
         break;
-        
+
       case 'cos':
         y = yCenter - amplitude * Math.cos((2 * Math.PI * shiftedX) / period) + verticalShift;
         break;
-        
+
       case 'tan': {
-        // tan() has period π. We define `period` as the pixel-width of ONE full tan period.
-        // Therefore: θ = π * x / period
+        // tan has period π; `period` = pixel width of one full tan cycle
         const theta = (Math.PI * shiftedX) / period;
         const tanVal = Math.tan(theta);
-
-        // Treat near-asymptotes as discontinuities (do NOT clamp and connect)
         if (!Number.isFinite(tanVal) || Math.abs(tanVal) > 6) {
-          // Mark discontinuity: a sentinel point; renderer should split paths.
-          points.push({ x: -1, y: -1 });
-          break;
+          isDiscontinuity = true;
+        } else {
+          y = yCenter - amplitude * tanVal + verticalShift;
         }
-
-        y = yCenter - amplitude * tanVal + verticalShift;
         break;
       }
-        
-      case 'parabola':
-        // y = a(x - h)² + k where h is horizontal shift, k is vertical shift
-        const normalizedX = (shiftedX - (xMin + xMax) / 2) / 100; // Normalize to reasonable scale
+
+      case 'parabola': {
+        const normalizedX = (shiftedX - (xMin + xMax) / 2) / 100;
         y = yCenter - amplitude * coefficient * normalizedX * normalizedX + verticalShift;
         break;
-        
-      case 'cubic':
+      }
+
+      case 'cubic': {
         const normX = (shiftedX - (xMin + xMax) / 2) / 100;
         y = yCenter - amplitude * coefficient * normX * normX * normX + verticalShift;
         break;
-        
-      case 'exponential':
-        const expX = (shiftedX - xMin) / (xMax - xMin) * 4 - 2; // Map to [-2, 2]
+      }
+
+      case 'exponential': {
+        const expX = (shiftedX - xMin) / (xMax - xMin) * 4 - 2;
         const expVal = Math.pow(coefficient || Math.E, expX);
         y = yCenter - amplitude * (expVal - 1) / (Math.E * Math.E - 1) + verticalShift;
         break;
-        
-      case 'logarithm':
-        const logX = (shiftedX - xMin) / (xMax - xMin) * 9 + 1; // Map to [1, 10]
-        y = yCenter - amplitude * Math.log(logX) / Math.log(10) + verticalShift;
+      }
+
+      case 'logarithm': {
+        const logX = (shiftedX - xMin) / (xMax - xMin) * 9 + 1;
+        if (logX <= 0) {
+          isDiscontinuity = true;
+        } else {
+          y = yCenter - amplitude * Math.log(logX) / Math.log(10) + verticalShift;
+        }
         break;
-        
-      case 'absolute':
+      }
+
+      case 'absolute': {
         const absX = (shiftedX - (xMin + xMax) / 2) / 50;
         y = yCenter - amplitude * Math.abs(absX) + verticalShift;
         break;
-        
-      case 'sqrt':
+      }
+
+      case 'sqrt': {
         const sqrtProgress = (shiftedX - xMin) / (xMax - xMin);
-        if (sqrtProgress >= 0) {
+        if (sqrtProgress < 0) {
+          isDiscontinuity = true;
+        } else {
           y = yCenter - amplitude * Math.sqrt(sqrtProgress) + verticalShift;
-        } else {
-          continue; // Skip negative domain for sqrt
         }
         break;
-        
-      case 'reciprocal':
+      }
+
+      case 'reciprocal': {
         const recX = (shiftedX - (xMin + xMax) / 2) / 50;
-        if (Math.abs(recX) > 0.1) {
-          y = yCenter - amplitude / recX + verticalShift;
+        if (Math.abs(recX) <= 0.1) {
+          isDiscontinuity = true;
         } else {
-          continue; // Skip near-zero to avoid asymptote
+          y = yCenter - amplitude / recX + verticalShift;
         }
         break;
-        
+      }
+
       case 'linear':
-      default:
+      default: {
         const slope = coefficient || 1;
         const linX = (shiftedX - (xMin + xMax) / 2) / 100;
         y = yCenter - amplitude * slope * linX + verticalShift;
         break;
+      }
     }
-    
-    // Clamp y to canvas bounds with margin
-    const margin = 20;
+
+    // Handle discontinuities: insert path-break marker
+    if (isDiscontinuity || y === null) {
+      if (prevY !== null) {
+        points.push({ x: -1, y: -1 }); // sentinel for path break
+      }
+      prevY = null;
+      continue;
+    }
+
+    // Clamp to canvas bounds
     y = Math.max(margin, Math.min(canvasHeight - margin, y));
-    
+
+    // Large jump detection (catches any function with implicit asymptotes)
+    if (prevY !== null && Math.abs(y - prevY) > canvasHeight * 0.4) {
+      points.push({ x: -1, y: -1 });
+      prevY = null;
+      continue;
+    }
+
     points.push({ x: Math.round(x), y: Math.round(y) });
+    prevY = y;
   }
-  
+
   return points;
 }
 
