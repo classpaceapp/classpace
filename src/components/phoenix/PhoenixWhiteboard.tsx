@@ -24,8 +24,11 @@ import {
   generateCoordinateSystem,
   generateMathSymbolPath,
   pointsToSmoothPath,
+  generateCustomCurvePoints,
+  pointsToMultiPath,
   type MathCurveParams,
   type CoordinateSystemParams,
+  type CustomEquationParams,
 } from '@/utils/phoenixMathCurves';
 
 interface PhoenixWhiteboardProps {
@@ -379,6 +382,9 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
         break;
       case 'draw_math_symbol':
         handleDrawMathSymbol(action.params as any);
+        break;
+      case 'draw_custom_curve':
+        handleDrawCustomCurve(action.params as any);
         break;
     }
   }, [fabricCanvas]);
@@ -960,6 +966,85 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
 
     fabricCanvas.renderAll();
     setCursorPosition(pos);
+    
+    setTimeout(() => setIsCursorActive(false), 300);
+  }, [fabricCanvas]);
+
+  // NEW: Handle custom user-defined equation curves
+  const handleDrawCustomCurve = useCallback((params: {
+    equation: string;
+    xMin: number;
+    xMax: number;
+    canvasXMin?: number;
+    canvasXMax?: number;
+    yCenter?: number;
+    yScale?: number;
+    color?: string;
+    strokeWidth?: number;
+    label?: string;
+  }) => {
+    if (!fabricCanvas || !params.equation) return;
+
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
+    setIsCursorVisible(true);
+    setIsCursorActive(true);
+
+    // Default parameters
+    const canvasXMin = params.canvasXMin ?? 80;
+    const canvasXMax = params.canvasXMax ?? canvasWidth - 80;
+    const yCenter = params.yCenter ?? canvasHeight / 2;
+    const yScale = params.yScale ?? 40;
+
+    const curveParams: CustomEquationParams = {
+      equation: params.equation,
+      xMin: params.xMin,
+      xMax: params.xMax,
+      canvasXMin,
+      canvasXMax,
+      yCenter,
+      yScale,
+      color: params.color,
+      label: params.label,
+    };
+
+    const points = generateCustomCurvePoints(curveParams, canvasWidth, canvasHeight);
+    
+    if (points.length < 2) {
+      console.warn('[WHITEBOARD] Not enough points for custom curve');
+      return;
+    }
+
+    // Generate multiple path segments (handles discontinuities)
+    const pathStrings = pointsToMultiPath(points);
+    
+    pathStrings.forEach(pathStr => {
+      const path = new Path(pathStr, {
+        stroke: params.color || '#dc2626',
+        strokeWidth: params.strokeWidth || 3,
+        fill: '',
+        strokeLineCap: 'round',
+        strokeLineJoin: 'round',
+      });
+      fabricCanvas.add(path);
+    });
+    
+    // Add label if provided
+    if (params.label) {
+      const labelText = new IText(params.label, {
+        left: canvasXMax - 120,
+        top: yCenter - 100,
+        fill: params.color || '#dc2626',
+        fontSize: 16,
+        fontFamily: 'Arial, sans-serif',
+        fontStyle: 'italic',
+      });
+      fabricCanvas.add(labelText);
+    }
+
+    fabricCanvas.renderAll();
+    setCursorPosition({ x: canvasXMin, y: yCenter });
     
     setTimeout(() => setIsCursorActive(false), 300);
   }, [fabricCanvas]);

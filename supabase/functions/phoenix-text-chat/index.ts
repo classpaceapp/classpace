@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface WhiteboardAction {
-  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard' | 'draw_math_curve' | 'draw_coordinate_system' | 'draw_math_symbol';
+  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard' | 'draw_math_curve' | 'draw_coordinate_system' | 'draw_math_symbol' | 'draw_custom_curve';
   params: Record<string, any>;
 }
 
@@ -108,7 +108,7 @@ Include a JSON block at the END of your response for whiteboard actions:
 ⚡ PRIORITY ACTIONS - USE THESE FOR MATHEMATICAL CONTENT ⚡
 ═══════════════════════════════════════════════════════════════════
 
-1. draw_math_curve - ALWAYS USE THIS for plotting functions!
+1. draw_math_curve - Use for STANDARD functions (sin, cos, parabola, etc.)
    Generates mathematically precise, smooth curves computed on the frontend.
    
    {"type": "draw_math_curve", "params": {
@@ -121,14 +121,36 @@ Include a JSON block at the END of your response for whiteboard actions:
      "color": "#2563eb",
      "label": "y = sin(x)"  // Optional label
    }}
+
+2. draw_custom_curve - Use for ANY user-defined equation!
+   Parses and plots custom equations like "x² + 2x - 3", "sin(x) + cos(2x)", etc.
+   
+   {"type": "draw_custom_curve", "params": {
+     "equation": "x^2 + 2*x - 3",  // The equation (use ^ for powers, * for multiplication)
+     "xMin": -5,         // Mathematical domain start
+     "xMax": 5,          // Mathematical domain end
+     "canvasXMin": 100,  // Canvas x start position
+     "canvasXMax": 700,  // Canvas x end position
+     "yCenter": 350,     // Y position for y=0
+     "yScale": 30,       // Pixels per mathematical unit (controls curve height)
+     "color": "#dc2626",
+     "label": "y = x² + 2x - 3"
+   }}
+   
+   SUPPORTED SYNTAX:
+   - Powers: x^2, x^3, x², x³
+   - Trig: sin(x), cos(x), tan(x), asin(x), acos(x), atan(x)
+   - Other: sqrt(x), abs(x), log(x), ln(x), exp(x)
+   - Constants: π (or pi), e
+   - Operators: +, -, *, /
+   - Implicit multiplication: 2x means 2*x
    
    EXAMPLES:
-   - Sine wave: {"type": "draw_math_curve", "params": {"function": "sin", "xMin": 100, "xMax": 700, "yCenter": 300, "amplitude": 100, "period": 300, "color": "#dc2626", "label": "y = sin(x)"}}
-   - Cosine wave: {"type": "draw_math_curve", "params": {"function": "cos", "xMin": 100, "xMax": 700, "yCenter": 300, "amplitude": 100, "period": 300, "color": "#2563eb", "label": "y = cos(x)"}}
-   - Parabola: {"type": "draw_math_curve", "params": {"function": "parabola", "xMin": 100, "xMax": 700, "yCenter": 450, "amplitude": 100}}
-   - Exponential: {"type": "draw_math_curve", "params": {"function": "exponential", "xMin": 100, "xMax": 500, "yCenter": 400, "amplitude": 150}}
+   - Quadratic: {"type": "draw_custom_curve", "params": {"equation": "x^2 + 2*x - 3", "xMin": -5, "xMax": 3, "canvasXMin": 100, "canvasXMax": 700, "yCenter": 350, "yScale": 30}}
+   - Combined trig: {"type": "draw_custom_curve", "params": {"equation": "sin(x) + 0.5*cos(2*x)", "xMin": -6.28, "xMax": 6.28, "canvasXMin": 100, "canvasXMax": 700, "yCenter": 350, "yScale": 80}}
+   - Polynomial: {"type": "draw_custom_curve", "params": {"equation": "x^3 - 3*x", "xMin": -2.5, "xMax": 2.5, "canvasXMin": 100, "canvasXMax": 700, "yCenter": 350, "yScale": 40}}
 
-2. draw_coordinate_system - ALWAYS USE THIS before drawing curves!
+3. draw_coordinate_system - ALWAYS USE THIS before drawing curves!
    Creates properly labeled axes with tick marks computed precisely.
    
    {"type": "draw_coordinate_system", "params": {
@@ -143,7 +165,7 @@ Include a JSON block at the END of your response for whiteboard actions:
      "showGrid": false  // Optional grid lines
    }}
 
-3. draw_math_symbol - Use for integral signs, derivatives, etc.
+4. draw_math_symbol - Use for integral signs, derivatives, etc.
    Renders clean mathematical symbols as smooth paths.
    
    {"type": "draw_math_symbol", "params": {

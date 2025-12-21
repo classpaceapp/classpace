@@ -34,7 +34,9 @@ import {
   Download,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import phoenixLogo from '@/assets/phoenix-logo.png';
 import { cn } from '@/lib/utils';
@@ -94,6 +96,9 @@ const Phoenix: React.FC = () => {
   
   // Transcript panel visibility
   const [showTranscript, setShowTranscript] = useState(true);
+  
+  // Expanded whiteboard mode
+  const [isWhiteboardExpanded, setIsWhiteboardExpanded] = useState(false);
   
   // Abort controller for text mode cancellation
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -845,9 +850,15 @@ const Phoenix: React.FC = () => {
 
   return (
     <DashboardLayout userRole="learner">
-      <div className="flex h-[calc(100vh-80px)] bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 overflow-hidden">
+      <div className={cn(
+        "flex bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 overflow-hidden transition-all duration-300",
+        isWhiteboardExpanded ? "h-screen fixed inset-0 z-50" : "h-[calc(100vh-80px)]"
+      )}>
         {/* Left Sidebar - Sessions & Controls */}
-        <div className="hidden md:flex w-80 bg-white/70 backdrop-blur-xl border-r border-gray-200 flex-col shadow-xl">
+        <div className={cn(
+          "bg-white/70 backdrop-blur-xl border-r border-gray-200 flex-col shadow-xl transition-all duration-300",
+          isWhiteboardExpanded ? "hidden" : "hidden md:flex w-80"
+        )}>
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3 mb-4">
@@ -1137,9 +1148,37 @@ const Phoenix: React.FC = () => {
         </div>
 
         {/* Center - Whiteboard */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 relative">
+          {/* Expand Toggle Button */}
+          {currentSessionId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsWhiteboardExpanded(!isWhiteboardExpanded)}
+              className={cn(
+                "absolute top-6 right-6 z-10 bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white border border-gray-200",
+                isWhiteboardExpanded && "top-4 right-4"
+              )}
+            >
+              {isWhiteboardExpanded ? (
+                <>
+                  <Minimize2 className="h-4 w-4 mr-2" />
+                  Exit Fullscreen
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="h-4 w-4 mr-2" />
+                  Expand
+                </>
+              )}
+            </Button>
+          )}
+          
           {/* Whiteboard Area */}
-          <div className="flex-1 p-4">
+          <div className={cn(
+            "flex-1 p-4 transition-all duration-300",
+            isWhiteboardExpanded && "p-6"
+          )}>
             {currentSessionId ? (
               <PhoenixWhiteboard
                 ref={whiteboardRef}

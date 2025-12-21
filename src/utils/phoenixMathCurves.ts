@@ -576,3 +576,175 @@ export const STANDARD_PERIODS = {
   piPeriod: 200,   // π period (for tan)
   twoPi: 400,      // 2π period (for sin/cos)
 };
+
+/**
+ * Custom equation parameters for user-defined functions
+ */
+export interface CustomEquationParams {
+  equation: string;     // e.g., "x^2 + 2x - 3", "sin(x) + cos(2x)"
+  xMin: number;         // Domain start (mathematical units)
+  xMax: number;         // Domain end (mathematical units)
+  canvasXMin: number;   // Canvas x start
+  canvasXMax: number;   // Canvas x end
+  yCenter: number;      // Y position for y=0
+  yScale: number;       // Pixels per mathematical unit
+  color?: string;
+  label?: string;
+}
+
+/**
+ * Parses and evaluates custom mathematical equations
+ * Supports: x^n, x², x³, sqrt(x), sin(x), cos(x), tan(x), log(x), ln(x), exp(x), abs(x), π, e
+ */
+export function parseAndEvaluateEquation(equation: string, x: number): number | null {
+  try {
+    // Normalize the equation string
+    let expr = equation.trim().toLowerCase();
+    
+    // Handle "y = ..." format
+    if (expr.includes('=')) {
+      expr = expr.split('=')[1].trim();
+    }
+    
+    // Replace common mathematical notation with JavaScript equivalents
+    expr = expr
+      // Handle superscript numbers
+      .replace(/²/g, '^2')
+      .replace(/³/g, '^3')
+      .replace(/⁴/g, '^4')
+      .replace(/⁵/g, '^5')
+      // Handle implicit multiplication
+      .replace(/(\d)([x])/g, '$1*$2')         // 2x -> 2*x
+      .replace(/(\d)\(/g, '$1*(')              // 2( -> 2*(
+      .replace(/\)(\d)/g, ')*$1')              // )2 -> )*2
+      .replace(/\)([x])/g, ')*$1')             // )x -> )*x
+      .replace(/([x])\(/g, '$1*(')             // x( -> x*(
+      .replace(/\)\(/g, ')*(')                 // )( -> )*(
+      .replace(/([x])([a-z])/g, '$1*$2')       // xa -> x*a (but careful with functions)
+      // Mathematical constants
+      .replace(/π|pi/g, `${Math.PI}`)
+      .replace(/\be\b(?!\^|x)/g, `${Math.E}`)  // e constant (not exp)
+      // Trig functions
+      .replace(/sin\s*\(/g, 'Math.sin(')
+      .replace(/cos\s*\(/g, 'Math.cos(')
+      .replace(/tan\s*\(/g, 'Math.tan(')
+      .replace(/asin\s*\(/g, 'Math.asin(')
+      .replace(/acos\s*\(/g, 'Math.acos(')
+      .replace(/atan\s*\(/g, 'Math.atan(')
+      // Other functions
+      .replace(/sqrt\s*\(/g, 'Math.sqrt(')
+      .replace(/√\s*\(/g, 'Math.sqrt(')
+      .replace(/abs\s*\(/g, 'Math.abs(')
+      .replace(/log\s*\(/g, 'Math.log10(')     // log = log base 10
+      .replace(/ln\s*\(/g, 'Math.log(')        // ln = natural log
+      .replace(/exp\s*\(/g, 'Math.exp(')
+      // Handle power notation (must be after function replacements)
+      .replace(/\^/g, '**');
+    
+    // Replace x with actual value
+    expr = expr.replace(/x/g, `(${x})`);
+    
+    // Validate - only allow safe characters
+    if (!/^[\d\s\+\-\*\/\.\(\)Math\.sincostalogexpsqrtabc10]+$/.test(expr)) {
+      console.warn('[MATH] Potentially unsafe expression:', expr);
+      return null;
+    }
+    
+    // Evaluate
+    const result = Function('"use strict"; return (' + expr + ')')();
+    
+    // Handle non-finite results
+    if (!Number.isFinite(result)) {
+      return null;
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('[MATH] Failed to evaluate equation:', equation, error);
+    return null;
+  }
+}
+
+/**
+ * Generates curve points for a custom user-defined equation
+ */
+export function generateCustomCurvePoints(
+  params: CustomEquationParams,
+  canvasWidth: number,
+  canvasHeight: number,
+  samples: number = 200
+): Array<{x: number; y: number}> {
+  const {
+    equation,
+    xMin,
+    xMax,
+    canvasXMin,
+    canvasXMax,
+    yCenter,
+    yScale
+  } = params;
+  
+  const points: Array<{x: number; y: number}> = [];
+  const mathStep = (xMax - xMin) / samples;
+  const canvasStep = (canvasXMax - canvasXMin) / samples;
+  
+  let prevY: number | null = null;
+  
+  for (let i = 0; i <= samples; i++) {
+    const mathX = xMin + i * mathStep;
+    const canvasX = canvasXMin + i * canvasStep;
+    
+    const mathY = parseAndEvaluateEquation(equation, mathX);
+    
+    if (mathY === null) {
+      // Discontinuity - skip point
+      prevY = null;
+      continue;
+    }
+    
+    // Convert mathematical y to canvas y (flip because canvas y is inverted)
+    let canvasY = yCenter - mathY * yScale;
+    
+    // Clamp to canvas bounds
+    const margin = 20;
+    canvasY = Math.max(margin, Math.min(canvasHeight - margin, canvasY));
+    
+    // Check for large jumps (asymptotes/discontinuities)
+    if (prevY !== null && Math.abs(canvasY - prevY) > canvasHeight * 0.4) {
+      // Likely an asymptote - skip this point to break the line
+      points.push({ x: -1, y: -1 }); // Marker for path break
+    }
+    
+    points.push({ x: Math.round(canvasX), y: Math.round(canvasY) });
+    prevY = canvasY;
+  }
+  
+  return points;
+}
+
+/**
+ * Creates multiple path segments from points, splitting at discontinuities
+ */
+export function pointsToMultiPath(points: Array<{x: number; y: number}>): string[] {
+  const paths: string[] = [];
+  let currentPath: Array<{x: number; y: number}> = [];
+  
+  for (const point of points) {
+    if (point.x === -1 && point.y === -1) {
+      // Path break marker
+      if (currentPath.length >= 2) {
+        paths.push(pointsToSmoothPath(currentPath));
+      }
+      currentPath = [];
+    } else {
+      currentPath.push(point);
+    }
+  }
+  
+  // Push final segment
+  if (currentPath.length >= 2) {
+    paths.push(pointsToSmoothPath(currentPath));
+  }
+  
+  return paths;
+}
