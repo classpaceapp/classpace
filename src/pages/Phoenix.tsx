@@ -254,17 +254,31 @@ const Phoenix: React.FC = () => {
         setTranscript([]);
       }
       
+      // Set restore guard BEFORE clearing/loading to prevent autosave
+      isRestoringWhiteboardRef.current = true;
+      
       // Clear then load whiteboard state
       whiteboardRef.current?.clear();
       if (data.whiteboard_state && Object.keys(data.whiteboard_state).length > 0) {
         // Small delay to ensure clear completes
         setTimeout(() => {
           whiteboardRef.current?.loadState(data.whiteboard_state);
+          // Release restore guard after load completes
+          setTimeout(() => {
+            isRestoringWhiteboardRef.current = false;
+            console.log('[PHOENIX] Whiteboard restore complete, autosave re-enabled');
+          }, 300);
+        }, 100);
+      } else {
+        // No whiteboard state to load, release guard immediately
+        setTimeout(() => {
+          isRestoringWhiteboardRef.current = false;
         }, 100);
       }
       
       console.log('[PHOENIX] Session loaded:', sessionId);
     } catch (error: any) {
+      isRestoringWhiteboardRef.current = false;
       console.error('[PHOENIX] Error loading session:', error);
     }
   };
@@ -283,34 +297,74 @@ const Phoenix: React.FC = () => {
 
   // Debounced whiteboard save to prevent too many DB writes
   const whiteboardSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Guard to prevent autosave during restore
+  const isRestoringWhiteboardRef = useRef<boolean>(false);
+  // Track session ID at time of scheduled save for safety
+  const pendingSaveSessionIdRef = useRef<string | null>(null);
   
-  const saveWhiteboardState = useCallback(async (state: any) => {
-    if (!currentSessionId) return;
+  const saveWhiteboardState = useCallback(async (state: any, sessionId: string, showToast: boolean = false) => {
+    if (!sessionId) return;
     
-    console.log('[PHOENIX] Saving whiteboard state, objects:', state?.objects?.length || 0);
+    console.log('[PHOENIX] Saving whiteboard state to session:', sessionId, 'objects:', state?.objects?.length || 0);
     
-    await supabase
+    const { error } = await supabase
       .from('phoenix_sessions')
       .update({
         whiteboard_state: state as any,
         updated_at: new Date().toISOString()
       })
-      .eq('id', currentSessionId);
-  }, [currentSessionId]);
+      .eq('id', sessionId);
+    
+    if (error) {
+      console.error('[PHOENIX] Failed to save whiteboard:', error);
+      if (showToast) {
+        toast({ title: 'Failed to save whiteboard', variant: 'destructive' });
+      }
+    } else if (showToast) {
+      toast({ title: 'Whiteboard saved' });
+    }
+  }, [toast]);
   
-  // Handle whiteboard state changes - debounced auto-save
+  // Handle whiteboard state changes - debounced auto-save (5 seconds)
   const handleWhiteboardStateChange = useCallback((state: any) => {
-    if (!currentSessionId) return;
+    // Skip autosave if we're currently restoring state or no session
+    if (!currentSessionId || isRestoringWhiteboardRef.current) {
+      console.log('[PHOENIX] Skipping autosave (restoring or no session)');
+      return;
+    }
     
     // Clear existing timeout
     if (whiteboardSaveTimeoutRef.current) {
       clearTimeout(whiteboardSaveTimeoutRef.current);
     }
     
-    // Debounce saves to every 2 seconds to avoid too many DB writes
+    // Capture session ID at schedule time for safety
+    const sessionIdAtSchedule = currentSessionId;
+    pendingSaveSessionIdRef.current = sessionIdAtSchedule;
+    
+    // Debounce saves to every 5 seconds to avoid too many DB writes
     whiteboardSaveTimeoutRef.current = setTimeout(() => {
-      saveWhiteboardState(state);
-    }, 2000);
+      // Only save if session hasn't changed
+      if (pendingSaveSessionIdRef.current === sessionIdAtSchedule) {
+        saveWhiteboardState(state, sessionIdAtSchedule, false);
+      } else {
+        console.log('[PHOENIX] Skipping stale autosave (session changed)');
+      }
+    }, 5000);
+  }, [currentSessionId, saveWhiteboardState]);
+  
+  // Manual save handler for Save button
+  const handleManualSave = useCallback(() => {
+    if (!currentSessionId || !whiteboardRef.current) return;
+    
+    // Clear any pending autosave
+    if (whiteboardSaveTimeoutRef.current) {
+      clearTimeout(whiteboardSaveTimeoutRef.current);
+      whiteboardSaveTimeoutRef.current = null;
+    }
+    
+    const state = whiteboardRef.current.getState();
+    saveWhiteboardState(state, currentSessionId, true);
   }, [currentSessionId, saveWhiteboardState]);
 
   // Flush current session state to DB (call before switching/creating sessions)
@@ -1080,6 +1134,7 @@ const Phoenix: React.FC = () => {
                 ref={whiteboardRef}
                 isConnected={isPhoenixActive}
                 onStateChange={handleWhiteboardStateChange}
+                onRequestSave={handleManualSave}
               />
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center">

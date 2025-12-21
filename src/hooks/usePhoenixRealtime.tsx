@@ -193,40 +193,43 @@ export const usePhoenixRealtime = ({
         console.log('[PHOENIX-REALTIME] Speech detected - user is talking');
         setIsListening(false);
         
-        // INTERRUPT: If Phoenix is speaking, stop immediately when user starts talking
-        if (isSpeaking) {
-          console.log('[PHOENIX-REALTIME] User started speaking while Phoenix was speaking - interrupting');
-          // Mute audio immediately
-          if (audioElRef.current) {
-            audioElRef.current.pause();
-            audioElRef.current.srcObject = null;
-            const newAudioEl = document.createElement('audio');
-            newAudioEl.autoplay = true;
-            audioElRef.current = newAudioEl;
-          }
-          // Send cancel
-          if (dcRef.current?.readyState === 'open') {
-            try {
-              dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
-            } catch (e) {
-              console.error('[PHOENIX-REALTIME] Failed to send speech interrupt cancel:', e);
-            }
-          }
-          setIsSpeaking(false);
-          onSpeakingChange?.(false);
-          
-          // Reconnect audio after short delay
-          setTimeout(() => {
-            if (pcRef.current && audioElRef.current) {
-              const receivers = pcRef.current.getReceivers();
-              const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
-              if (audioReceiver?.track) {
-                const stream = new MediaStream([audioReceiver.track]);
-                audioElRef.current.srcObject = stream;
-              }
-            }
-          }, 200);
+        // INTERRUPT: ALWAYS stop Phoenix when user starts talking (unconditional)
+        // We don't check isSpeaking because it can be unreliable
+        console.log('[PHOENIX-REALTIME] User started speaking - interrupting any ongoing response');
+        
+        // Mute audio immediately
+        if (audioElRef.current) {
+          audioElRef.current.pause();
+          audioElRef.current.srcObject = null;
+          const newAudioEl = document.createElement('audio');
+          newAudioEl.autoplay = true;
+          audioElRef.current = newAudioEl;
         }
+        
+        // Send cancel
+        if (dcRef.current?.readyState === 'open') {
+          try {
+            dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
+            console.log('[PHOENIX-REALTIME] Sent speech-interrupt cancel');
+          } catch (e) {
+            console.error('[PHOENIX-REALTIME] Failed to send speech interrupt cancel:', e);
+          }
+        }
+        
+        setIsSpeaking(false);
+        onSpeakingChange?.(false);
+        
+        // Reconnect audio after short delay
+        setTimeout(() => {
+          if (pcRef.current && audioElRef.current) {
+            const receivers = pcRef.current.getReceivers();
+            const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
+            if (audioReceiver?.track) {
+              const stream = new MediaStream([audioReceiver.track]);
+              audioElRef.current.srcObject = stream;
+            }
+          }
+        }, 200);
         break;
 
       case 'input_audio_buffer.speech_stopped':
@@ -372,15 +375,15 @@ export const usePhoenixRealtime = ({
   }, [onWhiteboardAction]);
 
   // Interrupt any ongoing response - stop audio and cancel response
+  // IMPORTANT: This is now UNCONDITIONAL - we always attempt to stop audio
+  // because isSpeaking state can be unreliable (response.audio.delta events may not fire)
   const interruptResponse = useCallback(() => {
-    if (!isSpeaking) return;
-    
-    console.log('[PHOENIX-REALTIME] Interrupting ongoing response...');
+    console.log('[PHOENIX-REALTIME] Interrupting any ongoing response (unconditional)...');
     
     // Set flag to ignore incoming events temporarily
     ignoreEventsRef.current = true;
     
-    // Mute audio immediately
+    // Mute audio immediately - don't check isSpeaking, just do it
     if (audioElRef.current) {
       audioElRef.current.pause();
       audioElRef.current.srcObject = null;
@@ -389,7 +392,7 @@ export const usePhoenixRealtime = ({
       audioElRef.current = newAudioEl;
     }
     
-    // Send cancel event
+    // Send cancel event - always attempt this
     if (dcRef.current?.readyState === 'open') {
       try {
         dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
@@ -418,7 +421,7 @@ export const usePhoenixRealtime = ({
         }
       }
     }, 200);
-  }, [isSpeaking, onSpeakingChange]);
+  }, [onSpeakingChange]);
 
   const sendTextMessage = useCallback((text: string) => {
     if (!dcRef.current || dcRef.current.readyState !== 'open') {
