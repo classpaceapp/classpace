@@ -225,10 +225,30 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     getState: () => fabricCanvas?.toJSON() || {},
     loadState: (state: any) => {
       if (!fabricCanvas || !state) return;
-      console.log('[WHITEBOARD] Loading state...');
+      console.log('[WHITEBOARD] Loading state...', state?.objects?.length || 0, 'objects');
       try {
         fabricCanvas.loadFromJSON(state, () => {
+          // Force a proper re-render after load
+          fabricCanvas.requestRenderAll();
+          
+          // Force dimension recalculation by toggling background
+          const bg = fabricCanvas.backgroundColor;
+          fabricCanvas.backgroundColor = bg;
+          
+          // Multiple render passes to ensure visibility
           fabricCanvas.renderAll();
+          
+          // Additional delayed render to catch any timing issues
+          setTimeout(() => {
+            fabricCanvas.renderAll();
+            // Force object recalculation
+            fabricCanvas.getObjects().forEach(obj => {
+              obj.setCoords();
+            });
+            fabricCanvas.requestRenderAll();
+            console.log('[WHITEBOARD] State loaded and rendered, objects:', fabricCanvas.getObjects().length);
+          }, 50);
+          
           updateLayoutManager(fabricCanvas);
           console.log('[WHITEBOARD] State loaded successfully');
         });
