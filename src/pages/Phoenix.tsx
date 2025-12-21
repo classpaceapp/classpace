@@ -155,6 +155,14 @@ const Phoenix: React.FC = () => {
       whiteboardRef.current?.clear();
       setTranscript([]);
     }
+    
+    // Cleanup debounce timeout when session changes
+    return () => {
+      if (whiteboardSaveTimeoutRef.current) {
+        clearTimeout(whiteboardSaveTimeoutRef.current);
+        whiteboardSaveTimeoutRef.current = null;
+      }
+    };
   }, [currentSessionId]);
 
   const scrollToBottom = () => {
@@ -273,8 +281,13 @@ const Phoenix: React.FC = () => {
       .eq('id', currentSessionId);
   };
 
+  // Debounced whiteboard save to prevent too many DB writes
+  const whiteboardSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const saveWhiteboardState = useCallback(async (state: any) => {
     if (!currentSessionId) return;
+    
+    console.log('[PHOENIX] Saving whiteboard state, objects:', state?.objects?.length || 0);
     
     await supabase
       .from('phoenix_sessions')
@@ -284,6 +297,21 @@ const Phoenix: React.FC = () => {
       })
       .eq('id', currentSessionId);
   }, [currentSessionId]);
+  
+  // Handle whiteboard state changes - debounced auto-save
+  const handleWhiteboardStateChange = useCallback((state: any) => {
+    if (!currentSessionId) return;
+    
+    // Clear existing timeout
+    if (whiteboardSaveTimeoutRef.current) {
+      clearTimeout(whiteboardSaveTimeoutRef.current);
+    }
+    
+    // Debounce saves to every 2 seconds to avoid too many DB writes
+    whiteboardSaveTimeoutRef.current = setTimeout(() => {
+      saveWhiteboardState(state);
+    }, 2000);
+  }, [currentSessionId, saveWhiteboardState]);
 
   // Flush current session state to DB (call before switching/creating sessions)
   const flushCurrentSession = useCallback(async () => {
@@ -1051,10 +1079,7 @@ const Phoenix: React.FC = () => {
               <PhoenixWhiteboard
                 ref={whiteboardRef}
                 isConnected={isPhoenixActive}
-                onStateChange={(state) => {
-                  // Save whiteboard state to current session
-                  saveWhiteboardState(state);
-                }}
+                onStateChange={handleWhiteboardStateChange}
               />
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center">

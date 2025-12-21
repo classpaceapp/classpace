@@ -192,6 +192,41 @@ export const usePhoenixRealtime = ({
       case 'input_audio_buffer.speech_started':
         console.log('[PHOENIX-REALTIME] Speech detected - user is talking');
         setIsListening(false);
+        
+        // INTERRUPT: If Phoenix is speaking, stop immediately when user starts talking
+        if (isSpeaking) {
+          console.log('[PHOENIX-REALTIME] User started speaking while Phoenix was speaking - interrupting');
+          // Mute audio immediately
+          if (audioElRef.current) {
+            audioElRef.current.pause();
+            audioElRef.current.srcObject = null;
+            const newAudioEl = document.createElement('audio');
+            newAudioEl.autoplay = true;
+            audioElRef.current = newAudioEl;
+          }
+          // Send cancel
+          if (dcRef.current?.readyState === 'open') {
+            try {
+              dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
+            } catch (e) {
+              console.error('[PHOENIX-REALTIME] Failed to send speech interrupt cancel:', e);
+            }
+          }
+          setIsSpeaking(false);
+          onSpeakingChange?.(false);
+          
+          // Reconnect audio after short delay
+          setTimeout(() => {
+            if (pcRef.current && audioElRef.current) {
+              const receivers = pcRef.current.getReceivers();
+              const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
+              if (audioReceiver?.track) {
+                const stream = new MediaStream([audioReceiver.track]);
+                audioElRef.current.srcObject = stream;
+              }
+            }
+          }, 200);
+        }
         break;
 
       case 'input_audio_buffer.speech_stopped':
@@ -336,6 +371,55 @@ export const usePhoenixRealtime = ({
     }
   }, [onWhiteboardAction]);
 
+  // Interrupt any ongoing response - stop audio and cancel response
+  const interruptResponse = useCallback(() => {
+    if (!isSpeaking) return;
+    
+    console.log('[PHOENIX-REALTIME] Interrupting ongoing response...');
+    
+    // Set flag to ignore incoming events temporarily
+    ignoreEventsRef.current = true;
+    
+    // Mute audio immediately
+    if (audioElRef.current) {
+      audioElRef.current.pause();
+      audioElRef.current.srcObject = null;
+      const newAudioEl = document.createElement('audio');
+      newAudioEl.autoplay = true;
+      audioElRef.current = newAudioEl;
+    }
+    
+    // Send cancel event
+    if (dcRef.current?.readyState === 'open') {
+      try {
+        dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
+        console.log('[PHOENIX-REALTIME] Sent interrupt cancel');
+      } catch (e) {
+        console.error('[PHOENIX-REALTIME] Failed to send interrupt cancel:', e);
+      }
+    }
+    
+    // Clear pending function calls
+    pendingFunctionArgsRef.current.clear();
+    
+    // Reset states
+    setIsSpeaking(false);
+    onSpeakingChange?.(false);
+    
+    // Re-enable events after short delay
+    setTimeout(() => {
+      ignoreEventsRef.current = false;
+      if (pcRef.current && audioElRef.current) {
+        const receivers = pcRef.current.getReceivers();
+        const audioReceiver = receivers.find(r => r.track?.kind === 'audio');
+        if (audioReceiver?.track) {
+          const stream = new MediaStream([audioReceiver.track]);
+          audioElRef.current.srcObject = stream;
+        }
+      }
+    }, 200);
+  }, [isSpeaking, onSpeakingChange]);
+
   const sendTextMessage = useCallback((text: string) => {
     if (!dcRef.current || dcRef.current.readyState !== 'open') {
       console.error('[PHOENIX-REALTIME] Data channel not ready');
@@ -346,6 +430,9 @@ export const usePhoenixRealtime = ({
       console.error('[PHOENIX-REALTIME] Session not ready yet');
       return;
     }
+
+    // INTERRUPT: Stop any ongoing response before sending new message
+    interruptResponse();
 
     console.log('[PHOENIX-REALTIME] Sending text message:', text);
 
@@ -367,7 +454,7 @@ export const usePhoenixRealtime = ({
     dcRef.current.send(JSON.stringify({ type: 'response.create' }));
     
     onTranscript?.(text, 'user');
-  }, [onTranscript]);
+  }, [onTranscript, interruptResponse]);
 
   // Send whiteboard context as text (since realtime model doesn't support images)
   // triggerResponse: if false, injects context silently without prompting AI to respond
