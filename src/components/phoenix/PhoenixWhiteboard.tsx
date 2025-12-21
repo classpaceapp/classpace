@@ -768,13 +768,14 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     setIsCursorActive(true);
 
     // Default parameters for nice curve display
-    const xMin = params.xMin ?? 50;
-    const xMax = params.xMax ?? canvasWidth - 50;
-    const yCenter = params.yCenter ?? canvasHeight / 2;
+    const margin = 40;
+    const xMin = Math.max(margin, params.xMin ?? margin);
+    const xMax = Math.min(canvasWidth - margin, params.xMax ?? canvasWidth - margin);
+    const yCenter = Math.max(margin, Math.min(canvasHeight - margin, params.yCenter ?? canvasHeight / 2));
     const amplitude = params.amplitude ?? 80;
-    const period = params.period ?? (xMax - xMin) / 2; // Two full cycles by default
+    const period = params.period ?? (xMax - xMin) / 2; // default: ~2 cycles across the width
 
-    // Generate mathematically precise curve points
+    // Generate mathematically precise curve points (with discontinuity markers)
     const curveParams: MathCurveParams = {
       function: params.function as any,
       xMin,
@@ -782,34 +783,37 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       yCenter,
       amplitude,
       period,
-      samples: 150, // High sample count for smooth curves
+      samples: 220, // High sample count for smooth curves
     };
 
     const points = generateMathCurvePoints(curveParams, canvasWidth, canvasHeight);
-    
-    if (points.length < 2) {
+
+    // Split into multiple path segments (handles discontinuities like tan, 1/x)
+    const pathStrings = pointsToMultiPath(points);
+
+    if (pathStrings.length === 0) {
       console.warn('[WHITEBOARD] Not enough points for curve');
       return;
     }
 
-    // Create smooth path using Bezier curves
-    const pathStr = pointsToSmoothPath(points);
-    
-    const path = new Path(pathStr, {
-      stroke: params.color || '#2563eb',
-      strokeWidth: params.strokeWidth || 3,
-      fill: '',
-      strokeLineCap: 'round',
-      strokeLineJoin: 'round',
+    pathStrings.forEach((pathStr) => {
+      const path = new Path(pathStr, {
+        stroke: params.color || '#2563eb',
+        strokeWidth: params.strokeWidth || 3,
+        fill: '',
+        strokeLineCap: 'round',
+        strokeLineJoin: 'round',
+      });
+      fabricCanvas.add(path);
     });
 
-    fabricCanvas.add(path);
-    
     // Add label if provided
     if (params.label) {
+      const labelX = Math.min(xMax - 140, canvasWidth - margin - 140);
+      const labelY = Math.max(margin, yCenter - amplitude - 30);
       const labelText = new IText(params.label, {
-        left: xMax - 80,
-        top: yCenter - amplitude - 30,
+        left: labelX,
+        top: labelY,
         fill: params.color || '#2563eb',
         fontSize: 16,
         fontFamily: 'Arial, sans-serif',
@@ -819,8 +823,8 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
     }
 
     fabricCanvas.renderAll();
-    setCursorPosition({ x: points[0].x, y: points[0].y });
-    
+    setCursorPosition({ x: xMin, y: yCenter });
+
     setTimeout(() => setIsCursorActive(false), 300);
   }, [fabricCanvas]);
 
