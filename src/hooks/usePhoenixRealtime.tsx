@@ -195,10 +195,10 @@ export const usePhoenixRealtime = ({
       case 'input_audio_buffer.speech_started':
         console.log('[PHOENIX-REALTIME] Speech detected - user is talking');
         setIsListening(false);
-        
+
         // Mark that we should NOT auto-reconnect audio
         shouldReconnectAudioRef.current = false;
-        
+
         // Mute audio immediately
         if (audioElRef.current) {
           audioElRef.current.pause();
@@ -207,21 +207,18 @@ export const usePhoenixRealtime = ({
           newAudioEl.autoplay = true;
           audioElRef.current = newAudioEl;
         }
-        
-        // ONLY send cancel if there's actually an active response to cancel
-        // This prevents the "no active response found" error from OpenAI
-        if (activeResponseRef.current && dcRef.current?.readyState === 'open') {
+
+        // Attempt to cancel; if there is no active response, OpenAI may return an error.
+        // We intentionally ignore the "no active response" error in the error handler.
+        if (dcRef.current?.readyState === 'open') {
           try {
             dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
-            console.log('[PHOENIX-REALTIME] Sent speech-interrupt cancel (active response existed)');
-            activeResponseRef.current = false;
+            console.log('[PHOENIX-REALTIME] Sent speech-interrupt cancel');
           } catch (e) {
             console.error('[PHOENIX-REALTIME] Failed to send speech interrupt cancel:', e);
           }
-        } else {
-          console.log('[PHOENIX-REALTIME] No active response to cancel, just muting audio');
         }
-        
+
         setIsSpeaking(false);
         onSpeakingChange?.(false);
         // NOTE: Audio will be reconnected when response.created fires for the new response
@@ -320,15 +317,28 @@ export const usePhoenixRealtime = ({
         onSpeakingChange?.(false);
         break;
 
-      case 'error':
+      case 'error': {
+        const msg = event?.error?.message || 'Unknown error';
+
+        // OpenAI will emit this when we send response.cancel but there's no active response.
+        // That's expected and should not show a scary destructive toast.
+        if (
+          typeof msg === 'string' &&
+          (msg.toLowerCase().includes('no active response') || msg.toLowerCase().includes('cancellation failed'))
+        ) {
+          console.log('[PHOENIX-REALTIME] Ignoring benign cancel error:', msg);
+          break;
+        }
+
         console.error('[PHOENIX-REALTIME] API Error:', event.error);
-        onError?.(event.error?.message || 'Unknown error');
+        onError?.(msg);
         toast({
           title: 'Phoenix Error',
-          description: event.error?.message || 'Something went wrong',
+          description: msg,
           variant: 'destructive',
         });
         break;
+      }
 
       default:
         // Log other events for debugging
@@ -390,17 +400,17 @@ export const usePhoenixRealtime = ({
   const shouldReconnectAudioRef = useRef<boolean>(true);
 
   // Interrupt any ongoing response - stop audio and cancel response
-  // IMPORTANT: We always stop audio, but ONLY send cancel if there's an active response
-  // to avoid the "no active response found" error from OpenAI
+  // We always stop audio; we also attempt to cancel even if OpenAI has no active response.
+  // The specific "no active response" error is ignored in the error handler.
   const interruptResponse = useCallback(() => {
     console.log('[PHOENIX-REALTIME] Interrupting ongoing response...');
-    
+
     // Set flag to ignore incoming audio events temporarily
     ignoreEventsRef.current = true;
-    
+
     // CRITICAL: Mark that we should NOT reconnect audio until new response
     shouldReconnectAudioRef.current = false;
-    
+
     // Mute audio immediately - pause, null out the stream, recreate element
     if (audioElRef.current) {
       audioElRef.current.pause();
@@ -409,27 +419,24 @@ export const usePhoenixRealtime = ({
       newAudioEl.autoplay = true;
       audioElRef.current = newAudioEl;
     }
-    
-    // ONLY send cancel if there's actually an active response
-    if (activeResponseRef.current && dcRef.current?.readyState === 'open') {
+
+    // Attempt to cancel current response generation
+    if (dcRef.current?.readyState === 'open') {
       try {
         dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
-        console.log('[PHOENIX-REALTIME] Sent response.cancel (active response existed)');
-        activeResponseRef.current = false;
+        console.log('[PHOENIX-REALTIME] Sent response.cancel');
       } catch (e) {
         console.error('[PHOENIX-REALTIME] Failed to send cancel:', e);
       }
-    } else {
-      console.log('[PHOENIX-REALTIME] No active response to cancel, just muting audio');
     }
-    
+
     // Clear pending function calls
     pendingFunctionArgsRef.current.clear();
-    
+
     // Reset states
     setIsSpeaking(false);
     onSpeakingChange?.(false);
-    
+
     // Re-enable event processing after short delay (but NOT audio reconnection)
     setTimeout(() => {
       ignoreEventsRef.current = false;
@@ -521,6 +528,36 @@ export const usePhoenixRealtime = ({
     }
   }, []);
 
+  // Stop Phoenix output audio immediately (without ending the session)
+  const stopSpeaking = useCallback(() => {
+    console.log('[PHOENIX-REALTIME] Stop speaking (mute output + cancel)...');
+
+    // Keep audio disconnected until the next response starts
+    shouldReconnectAudioRef.current = false;
+
+    if (audioElRef.current) {
+      audioElRef.current.pause();
+      audioElRef.current.srcObject = null;
+      const newAudioEl = document.createElement('audio');
+      newAudioEl.autoplay = true;
+      audioElRef.current = newAudioEl;
+    }
+
+    // Attempt cancel (benign "no active response" errors are ignored)
+    if (dcRef.current?.readyState === 'open') {
+      try {
+        dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
+        console.log('[PHOENIX-REALTIME] Sent response.cancel (stopSpeaking)');
+      } catch (e) {
+        console.error('[PHOENIX-REALTIME] Failed to send cancel (stopSpeaking):', e);
+      }
+    }
+
+    setIsSpeaking(false);
+    setIsListening(true);
+    onSpeakingChange?.(false);
+  }, [onSpeakingChange]);
+
   // NOTE: The gpt-4o-realtime-preview model does NOT support image inputs.
   // Instead of sending screenshots, we send a text description of the whiteboard.
   const sendScreenshot = useCallback((imageBase64: string, context: string) => {
@@ -534,10 +571,10 @@ export const usePhoenixRealtime = ({
   // Stop Phoenix mid-response (cancel current response and mute audio)
   const stop = useCallback(() => {
     console.log('[PHOENIX-REALTIME] Stopping Phoenix...');
-    
+
     // Set flag to ignore incoming events
     ignoreEventsRef.current = true;
-    
+
     // Mute audio immediately to stop playback
     if (audioElRef.current) {
       audioElRef.current.pause();
@@ -547,28 +584,25 @@ export const usePhoenixRealtime = ({
       newAudioEl.autoplay = true;
       audioElRef.current = newAudioEl;
     }
-    
-    // ONLY send cancel if there's actually an active response
-    if (activeResponseRef.current && dcRef.current?.readyState === 'open') {
+
+    // Attempt to cancel
+    if (dcRef.current?.readyState === 'open') {
       try {
         dcRef.current.send(JSON.stringify({ type: 'response.cancel' }));
-        console.log('[PHOENIX-REALTIME] Sent response.cancel (active response existed)');
-        activeResponseRef.current = false;
+        console.log('[PHOENIX-REALTIME] Sent response.cancel');
       } catch (e) {
         console.error('[PHOENIX-REALTIME] Failed to send cancel:', e);
       }
-    } else {
-      console.log('[PHOENIX-REALTIME] No active response to cancel');
     }
-    
+
     // Clear pending function calls
     pendingFunctionArgsRef.current.clear();
-    
+
     // Reset states
     setIsSpeaking(false);
     setIsListening(true);
     onSpeakingChange?.(false);
-    
+
     // Re-enable events after a short delay (for next response)
     setTimeout(() => {
       ignoreEventsRef.current = false;
@@ -582,7 +616,7 @@ export const usePhoenixRealtime = ({
         }
       }
     }, 500);
-    
+
     toast({
       title: "Phoenix stopped",
       description: "Ready for your next question",
@@ -624,6 +658,7 @@ export const usePhoenixRealtime = ({
     connect,
     disconnect,
     stop,
+    stopSpeaking,
     sendTextMessage,
     sendScreenshot,
     sendWhiteboardContext

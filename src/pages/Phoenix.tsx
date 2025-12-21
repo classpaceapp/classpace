@@ -113,6 +113,7 @@ const Phoenix: React.FC = () => {
     connect,
     disconnect,
     stop: stopVoice,
+    stopSpeaking,
     sendTextMessage: sendVoiceTextMessage,
     sendScreenshot,
     sendWhiteboardContext
@@ -916,6 +917,16 @@ const Phoenix: React.FC = () => {
                     >
                       <PhoneOff className="h-4 w-4 mr-2" />
                       End Session
+                    </Button>
+
+                    {/* Manual stop speaking (mute output immediately, keep session connected) */}
+                    <Button
+                      onClick={() => stopSpeaking()}
+                      variant="secondary"
+                      className="w-full"
+                    >
+                      <VolumeX className="h-4 w-4 mr-2" />
+                      Stop speaking
                     </Button>
                   </div>
                 )
