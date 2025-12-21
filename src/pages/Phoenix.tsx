@@ -16,7 +16,6 @@ import {
   Mic, 
   MicOff, 
   Loader2,
-  Sparkles,
   Volume2,
   VolumeX,
   Send,
@@ -37,6 +36,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import phoenixLogo from '@/assets/phoenix-logo.png';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -823,7 +823,7 @@ const Phoenix: React.FC = () => {
                 <span className="text-sm">Real-time voice conversation</span>
               </div>
               <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
-                <Sparkles className="h-5 w-5 text-orange-600" />
+                <img src={phoenixLogo} alt="Phoenix" className="h-5 w-5" />
                 <span className="text-sm">AI-controlled whiteboard with visual teaching</span>
               </div>
               <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
@@ -851,8 +851,8 @@ const Phoenix: React.FC = () => {
           {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
-                <Sparkles className="h-6 w-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg overflow-hidden">
+                <img src={phoenixLogo} alt="Phoenix" className="h-8 w-8 object-contain" />
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
@@ -1149,10 +1149,10 @@ const Phoenix: React.FC = () => {
               />
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center">
-                <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-8 shadow-2xl">
-                  <Sparkles className="h-16 w-16 text-white" />
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-8 shadow-2xl overflow-hidden">
+                <img src={phoenixLogo} alt="Phoenix" className="h-20 w-20 object-contain" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
                   Welcome to Phoenix
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-md mb-8">

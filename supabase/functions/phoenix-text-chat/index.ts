@@ -100,7 +100,7 @@ Include a JSON block at the END of your response for whiteboard actions:
 \`\`\`whiteboard
 [
   {"type": "draw_text", "params": {"text": "x² + y² = z²", "x": 100, "y": 50, "fontSize": 28}},
-  {"type": "draw_text", "params": {"text": "Step 2: Solve", "x": 100, "y": 100, "fontSize": 24}}
+  {"type": "draw_freehand", "params": {"points": [{"x": 100, "y": 150}, {"x": 120, "y": 130}, {"x": 150, "y": 150}], "color": "#000000", "strokeWidth": 3}}
 ]
 \`\`\`
 
@@ -120,10 +120,37 @@ CRITICAL WHITEBOARD RULES - FOLLOW THESE EXACTLY:
 7. Use fontSize 24-32 for readability
 8. x position should usually be 50-100 for left-aligned content
 
+FREEHAND DRAWING - USE THIS FOR VISUAL EXPLANATIONS:
+The draw_freehand action is POWERFUL for creating handwritten-style math, diagrams, and visual explanations.
+USE draw_freehand when:
+- Drawing mathematical curves, graphs, or plots (parabolas, sine waves, exponential curves)
+- Creating visual diagrams (vectors, geometric shapes with labels, coordinate axes)
+- Illustrating physical concepts (force diagrams, circuit diagrams, chemical bonds)
+- Showing step-by-step solutions where handwriting would be more intuitive
+- Drawing arrows, underlines, circles around important parts, annotations
+
+draw_freehand example for a parabola:
+{"type": "draw_freehand", "params": {"points": [
+  {"x": 50, "y": 200}, {"x": 75, "y": 150}, {"x": 100, "y": 120}, {"x": 125, "y": 100}, 
+  {"x": 150, "y": 90}, {"x": 175, "y": 100}, {"x": 200, "y": 120}, {"x": 225, "y": 150}, {"x": 250, "y": 200}
+], "color": "#2563eb", "strokeWidth": 3}}
+
+draw_freehand example for an arrow:
+{"type": "draw_freehand", "params": {"points": [
+  {"x": 100, "y": 100}, {"x": 200, "y": 100}, {"x": 185, "y": 90}, {"x": 200, "y": 100}, {"x": 185, "y": 110}
+], "color": "#000000", "strokeWidth": 2}}
+
+PREFER freehand for:
+- Mathematical graphs and curves
+- Physics diagrams and force vectors
+- Geometric constructions
+- Annotations and emphasis marks
+- Any visual that benefits from a hand-drawn aesthetic
+
 Available actions:
 - draw_text: {"type": "draw_text", "params": {"text": string, "x": number, "y": number, "fontSize?": number, "color?": string}}
 - draw_shape: {"type": "draw_shape", "params": {"shape": "rectangle"|"circle"|"line"|"arrow", "x": number, "y": number, "width": number, "height": number, "color?": string}}
-- draw_freehand: {"type": "draw_freehand", "params": {"points": [{x, y}...], "color?": string}}
+- draw_freehand: {"type": "draw_freehand", "params": {"points": [{x, y}...], "color?": string, "strokeWidth?": number}} - USE THIS for curves, graphs, diagrams!
 - highlight_area: {"type": "highlight_area", "params": {"x": number, "y": number, "width": number, "height": number}}
 - clear_whiteboard: {"type": "clear_whiteboard", "params": {}} - USE ONLY WHEN ASKED OR WHEN BOARD IS FULL
 - move_cursor: {"type": "move_cursor", "params": {"x": number, "y": number}}
@@ -133,7 +160,8 @@ TEACHING APPROACH:
 2. Break complex concepts into digestible steps
 3. Use equations and formulas when teaching math/science
 4. ALWAYS use the whiteboard to illustrate concepts - students learn visually
-5. Check for understanding regularly`;
+5. Use draw_freehand for curves, graphs, and diagrams - it's more intuitive than text
+6. Check for understanding regularly`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
