@@ -19,6 +19,14 @@ import {
   estimateTextWidth,
   estimateTextHeight
 } from '@/utils/phoenixMathUtils';
+import {
+  generateMathCurvePoints,
+  generateCoordinateSystem,
+  generateMathSymbolPath,
+  pointsToSmoothPath,
+  type MathCurveParams,
+  type CoordinateSystemParams,
+} from '@/utils/phoenixMathCurves';
 
 interface PhoenixWhiteboardProps {
   onStateChange?: (state: any) => void;
@@ -363,6 +371,15 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
       case 'capture_screenshot':
         // Handled by parent
         break;
+      case 'draw_math_curve':
+        handleDrawMathCurve(action.params as any);
+        break;
+      case 'draw_coordinate_system':
+        handleDrawCoordinateSystem(action.params as any);
+        break;
+      case 'draw_math_symbol':
+        handleDrawMathSymbol(action.params as any);
+        break;
     }
   }, [fabricCanvas]);
 
@@ -703,6 +720,246 @@ export const PhoenixWhiteboard = forwardRef<PhoenixWhiteboardRef, PhoenixWhitebo
 
     fabricCanvas.add(highlight);
     fabricCanvas.renderAll();
+    
+    setTimeout(() => setIsCursorActive(false), 300);
+  }, [fabricCanvas]);
+
+  // NEW: Handle mathematically precise curve drawing
+  const handleDrawMathCurve = useCallback((params: {
+    function: string;
+    xMin?: number;
+    xMax?: number;
+    yCenter?: number;
+    amplitude?: number;
+    period?: number;
+    color?: string;
+    strokeWidth?: number;
+    showAxes?: boolean;
+    label?: string;
+  }) => {
+    if (!fabricCanvas) return;
+
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
+    setIsCursorVisible(true);
+    setIsCursorActive(true);
+
+    // Default parameters for nice curve display
+    const xMin = params.xMin ?? 50;
+    const xMax = params.xMax ?? canvasWidth - 50;
+    const yCenter = params.yCenter ?? canvasHeight / 2;
+    const amplitude = params.amplitude ?? 80;
+    const period = params.period ?? (xMax - xMin) / 2; // Two full cycles by default
+
+    // Generate mathematically precise curve points
+    const curveParams: MathCurveParams = {
+      function: params.function as any,
+      xMin,
+      xMax,
+      yCenter,
+      amplitude,
+      period,
+      samples: 150, // High sample count for smooth curves
+    };
+
+    const points = generateMathCurvePoints(curveParams, canvasWidth, canvasHeight);
+    
+    if (points.length < 2) {
+      console.warn('[WHITEBOARD] Not enough points for curve');
+      return;
+    }
+
+    // Create smooth path using Bezier curves
+    const pathStr = pointsToSmoothPath(points);
+    
+    const path = new Path(pathStr, {
+      stroke: params.color || '#2563eb',
+      strokeWidth: params.strokeWidth || 3,
+      fill: '',
+      strokeLineCap: 'round',
+      strokeLineJoin: 'round',
+    });
+
+    fabricCanvas.add(path);
+    
+    // Add label if provided
+    if (params.label) {
+      const labelText = new IText(params.label, {
+        left: xMax - 80,
+        top: yCenter - amplitude - 30,
+        fill: params.color || '#2563eb',
+        fontSize: 16,
+        fontFamily: 'Arial, sans-serif',
+        fontStyle: 'italic',
+      });
+      fabricCanvas.add(labelText);
+    }
+
+    fabricCanvas.renderAll();
+    setCursorPosition({ x: points[0].x, y: points[0].y });
+    
+    setTimeout(() => setIsCursorActive(false), 300);
+  }, [fabricCanvas]);
+
+  // NEW: Handle coordinate system with proper axes and labels
+  const handleDrawCoordinateSystem = useCallback((params: {
+    originX?: number;
+    originY?: number;
+    width?: number;
+    height?: number;
+    xMin?: number;
+    xMax?: number;
+    yMin?: number;
+    yMax?: number;
+    xStep?: number;
+    yStep?: number;
+    showGrid?: boolean;
+    color?: string;
+  }) => {
+    if (!fabricCanvas) return;
+
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
+    setIsCursorVisible(true);
+    setIsCursorActive(true);
+
+    // Default: centered coordinate system
+    const originX = params.originX ?? canvasWidth / 2;
+    const originY = params.originY ?? canvasHeight / 2;
+    const width = params.width ?? canvasWidth - 100;
+    const height = params.height ?? canvasHeight - 100;
+
+    const coordParams: CoordinateSystemParams = {
+      originX,
+      originY,
+      width,
+      height,
+      xMin: params.xMin ?? -5,
+      xMax: params.xMax ?? 5,
+      yMin: params.yMin ?? -3,
+      yMax: params.yMax ?? 3,
+      xStep: params.xStep ?? 1,
+      yStep: params.yStep ?? 1,
+      showGrid: params.showGrid ?? false,
+      labels: true,
+    };
+
+    const { axes, ticks, labels, gridLines } = generateCoordinateSystem(
+      coordParams, 
+      canvasWidth, 
+      canvasHeight
+    );
+
+    const strokeColor = params.color || '#000000';
+
+    // Draw grid lines first (behind everything)
+    if (gridLines) {
+      gridLines.forEach(line => {
+        if (line.points.length >= 2) {
+          let pathStr = `M ${line.points[0].x} ${line.points[0].y}`;
+          for (let i = 1; i < line.points.length; i++) {
+            pathStr += ` L ${line.points[i].x} ${line.points[i].y}`;
+          }
+          const path = new Path(pathStr, {
+            stroke: line.color,
+            strokeWidth: line.strokeWidth,
+            fill: '',
+          });
+          fabricCanvas.add(path);
+        }
+      });
+    }
+
+    // Draw axes
+    axes.forEach(axis => {
+      if (axis.points.length >= 2) {
+        let pathStr = `M ${axis.points[0].x} ${axis.points[0].y}`;
+        for (let i = 1; i < axis.points.length; i++) {
+          pathStr += ` L ${axis.points[i].x} ${axis.points[i].y}`;
+        }
+        const path = new Path(pathStr, {
+          stroke: strokeColor,
+          strokeWidth: axis.strokeWidth,
+          fill: '',
+        });
+        fabricCanvas.add(path);
+      }
+    });
+
+    // Draw ticks
+    ticks.forEach(tick => {
+      if (tick.points.length >= 2) {
+        let pathStr = `M ${tick.points[0].x} ${tick.points[0].y}`;
+        for (let i = 1; i < tick.points.length; i++) {
+          pathStr += ` L ${tick.points[i].x} ${tick.points[i].y}`;
+        }
+        const path = new Path(pathStr, {
+          stroke: strokeColor,
+          strokeWidth: tick.strokeWidth,
+          fill: '',
+        });
+        fabricCanvas.add(path);
+      }
+    });
+
+    // Draw labels
+    labels.forEach(label => {
+      const text = new IText(label.text, {
+        left: label.x,
+        top: label.y,
+        fill: strokeColor,
+        fontSize: label.fontSize,
+        fontFamily: 'Arial, sans-serif',
+      });
+      fabricCanvas.add(text);
+    });
+
+    fabricCanvas.renderAll();
+    setCursorPosition({ x: originX, y: originY });
+    
+    setTimeout(() => setIsCursorActive(false), 300);
+  }, [fabricCanvas]);
+
+  // NEW: Handle mathematical symbol drawing as smooth freehand paths
+  const handleDrawMathSymbol = useCallback((params: {
+    symbol: 'integral' | 'derivative' | 'partial' | 'sum' | 'product' | 'sqrt' | 'infinity';
+    x: number;
+    y: number;
+    size?: number;
+    color?: string;
+  }) => {
+    if (!fabricCanvas) return;
+
+    const canvasWidth = fabricCanvas.width || 1000;
+    const canvasHeight = fabricCanvas.height || 700;
+
+    setIsCursorVisible(true);
+    setIsCursorActive(true);
+
+    // Normalize coordinates
+    const pos = normalizeCoordinates(params.x, params.y, canvasWidth, canvasHeight);
+    const size = params.size ?? 40;
+
+    const symbolPaths = generateMathSymbolPath(params.symbol, pos.x, pos.y, size);
+
+    symbolPaths.forEach(symbolPath => {
+      if (symbolPath.points.length >= 2) {
+        const pathStr = pointsToSmoothPath(symbolPath.points);
+        const path = new Path(pathStr, {
+          stroke: params.color || '#000000',
+          strokeWidth: symbolPath.strokeWidth || 2,
+          fill: '',
+          strokeLineCap: 'round',
+          strokeLineJoin: 'round',
+        });
+        fabricCanvas.add(path);
+      }
+    });
+
+    fabricCanvas.renderAll();
+    setCursorPosition(pos);
     
     setTimeout(() => setIsCursorActive(false), 300);
   }, [fabricCanvas]);

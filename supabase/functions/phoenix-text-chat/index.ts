@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 interface WhiteboardAction {
-  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard';
+  type: 'move_cursor' | 'draw_freehand' | 'draw_text' | 'draw_shape' | 'draw_equation' | 'highlight_area' | 'clear_whiteboard' | 'draw_math_curve' | 'draw_coordinate_system' | 'draw_math_symbol';
   params: Record<string, any>;
 }
 
@@ -99,68 +99,143 @@ Include a JSON block at the END of your response for whiteboard actions:
 
 \`\`\`whiteboard
 [
-  {"type": "draw_text", "params": {"text": "x² + y² = z²", "x": 100, "y": 50, "fontSize": 28}},
-  {"type": "draw_freehand", "params": {"points": [{"x": 100, "y": 150}, {"x": 120, "y": 130}, {"x": 150, "y": 150}], "color": "#000000", "strokeWidth": 3}}
+  {"type": "draw_coordinate_system", "params": {"xMin": -6, "xMax": 6, "yMin": -2, "yMax": 2}},
+  {"type": "draw_math_curve", "params": {"function": "cos", "xMin": 100, "xMax": 700, "yCenter": 300, "amplitude": 80, "period": 300, "color": "#2563eb", "label": "y = cos(x)"}}
 ]
 \`\`\`
 
-CRITICAL WHITEBOARD RULES - FOLLOW THESE EXACTLY:
-1. ALWAYS check the "Next safe Y position" from the whiteboard context above
-2. NEVER place content at y positions where existing objects already exist
-3. If the whiteboard has existing objects, start your NEW content at the "Next safe Y position" or below
-4. If whiteboard is getting full (nextY > 500), ASK to clear it first before drawing more
-5. For equations on whiteboard, use draw_text with VISUAL Unicode characters, NOT LaTeX syntax:
-   - Powers: x² y³ (not x^2)
-   - Fractions: ½ ⅓ ¼ ⅔ ¾ or write as "a/b"
-   - Roots: √x ∛x
-   - Greek: π θ α β γ δ ε φ ω Δ Σ
-   - Operators: × ÷ ± ∓ · ∙ = ≠ ≈ < > ≤ ≥ → ← ↔
-   - Other: ∞ ∂ ∇ ∫ ∑ ∏
-6. Increment y by 50 for each new line of content
-7. Use fontSize 24-32 for readability
-8. x position should usually be 50-100 for left-aligned content
+═══════════════════════════════════════════════════════════════════
+⚡ PRIORITY ACTIONS - USE THESE FOR MATHEMATICAL CONTENT ⚡
+═══════════════════════════════════════════════════════════════════
 
-FREEHAND DRAWING - USE THIS FOR VISUAL EXPLANATIONS:
-The draw_freehand action is POWERFUL for creating handwritten-style math, diagrams, and visual explanations.
-USE draw_freehand when:
-- Drawing mathematical curves, graphs, or plots (parabolas, sine waves, exponential curves)
-- Creating visual diagrams (vectors, geometric shapes with labels, coordinate axes)
-- Illustrating physical concepts (force diagrams, circuit diagrams, chemical bonds)
-- Showing step-by-step solutions where handwriting would be more intuitive
-- Drawing arrows, underlines, circles around important parts, annotations
+1. draw_math_curve - ALWAYS USE THIS for plotting functions!
+   Generates mathematically precise, smooth curves computed on the frontend.
+   
+   {"type": "draw_math_curve", "params": {
+     "function": "sin"|"cos"|"tan"|"parabola"|"cubic"|"exponential"|"logarithm"|"absolute"|"sqrt"|"linear",
+     "xMin": 50,        // Start X position on canvas
+     "xMax": 750,       // End X position on canvas  
+     "yCenter": 350,    // Y position of the axis/center line
+     "amplitude": 100,  // Vertical scale (height of curve from center)
+     "period": 300,     // Horizontal period for trig functions (pixels)
+     "color": "#2563eb",
+     "label": "y = sin(x)"  // Optional label
+   }}
+   
+   EXAMPLES:
+   - Sine wave: {"type": "draw_math_curve", "params": {"function": "sin", "xMin": 100, "xMax": 700, "yCenter": 300, "amplitude": 100, "period": 300, "color": "#dc2626", "label": "y = sin(x)"}}
+   - Cosine wave: {"type": "draw_math_curve", "params": {"function": "cos", "xMin": 100, "xMax": 700, "yCenter": 300, "amplitude": 100, "period": 300, "color": "#2563eb", "label": "y = cos(x)"}}
+   - Parabola: {"type": "draw_math_curve", "params": {"function": "parabola", "xMin": 100, "xMax": 700, "yCenter": 450, "amplitude": 100}}
+   - Exponential: {"type": "draw_math_curve", "params": {"function": "exponential", "xMin": 100, "xMax": 500, "yCenter": 400, "amplitude": 150}}
 
-draw_freehand example for a parabola:
-{"type": "draw_freehand", "params": {"points": [
-  {"x": 50, "y": 200}, {"x": 75, "y": 150}, {"x": 100, "y": 120}, {"x": 125, "y": 100}, 
-  {"x": 150, "y": 90}, {"x": 175, "y": 100}, {"x": 200, "y": 120}, {"x": 225, "y": 150}, {"x": 250, "y": 200}
-], "color": "#2563eb", "strokeWidth": 3}}
+2. draw_coordinate_system - ALWAYS USE THIS before drawing curves!
+   Creates properly labeled axes with tick marks computed precisely.
+   
+   {"type": "draw_coordinate_system", "params": {
+     "originX": 400,    // X position of origin (default: center)
+     "originY": 300,    // Y position of origin (default: center)
+     "width": 600,      // Total width of axes
+     "height": 400,     // Total height of axes
+     "xMin": -5, "xMax": 5,  // X-axis range for labels
+     "yMin": -2, "yMax": 2,  // Y-axis range for labels
+     "xStep": 1,        // Label every N units on X
+     "yStep": 1,        // Label every N units on Y
+     "showGrid": false  // Optional grid lines
+   }}
 
-draw_freehand example for an arrow:
-{"type": "draw_freehand", "params": {"points": [
-  {"x": 100, "y": 100}, {"x": 200, "y": 100}, {"x": 185, "y": 90}, {"x": 200, "y": 100}, {"x": 185, "y": 110}
-], "color": "#000000", "strokeWidth": 2}}
+3. draw_math_symbol - Use for integral signs, derivatives, etc.
+   Renders clean mathematical symbols as smooth paths.
+   
+   {"type": "draw_math_symbol", "params": {
+     "symbol": "integral"|"derivative"|"partial"|"sum"|"product"|"sqrt"|"infinity",
+     "x": 100, "y": 200,
+     "size": 50,
+     "color": "#000000"
+   }}
 
-PREFER freehand for:
-- Mathematical graphs and curves
-- Physics diagrams and force vectors
-- Geometric constructions
-- Annotations and emphasis marks
-- Any visual that benefits from a hand-drawn aesthetic
+═══════════════════════════════════════════════════════════════════
+DECISION RULES - WHEN TO USE WHICH ACTION
+═══════════════════════════════════════════════════════════════════
 
-Available actions:
+ALWAYS use draw_math_curve + draw_coordinate_system for:
+- Plotting ANY function (sin, cos, tan, parabola, exponential, etc.)
+- Showing graphs of equations
+- Visualizing mathematical relationships
+- Comparing multiple functions
+
+Use draw_math_symbol for:
+- Integral signs (∫)
+- Derivative notation (d/dx, ∂/∂x)
+- Summation (Σ) and product (Π) symbols
+- Square root symbols when writing equations
+- Infinity symbols
+
+Use draw_text for:
+- Labels, titles, and explanations
+- Written equations (with Unicode characters: x², π, θ, √, ∫, ∑, etc.)
+- Step-by-step solution text
+
+Use draw_freehand ONLY for:
+- Arrows pointing to specific parts
+- Underlining or circling important items
+- Quick annotations and marks
+- Connecting different elements with lines
+- DO NOT use for curves or graphs - use draw_math_curve instead!
+
+═══════════════════════════════════════════════════════════════════
+OTHER AVAILABLE ACTIONS
+═══════════════════════════════════════════════════════════════════
+
 - draw_text: {"type": "draw_text", "params": {"text": string, "x": number, "y": number, "fontSize?": number, "color?": string}}
-- draw_shape: {"type": "draw_shape", "params": {"shape": "rectangle"|"circle"|"line"|"arrow", "x": number, "y": number, "width": number, "height": number, "color?": string}}
-- draw_freehand: {"type": "draw_freehand", "params": {"points": [{x, y}...], "color?": string, "strokeWidth?": number}} - USE THIS for curves, graphs, diagrams!
+  For equations on whiteboard, use Unicode: x² y³ √x ∛x π θ α β × ÷ ± ∞ ∂ ∇ ∫ ∑ ∏ → ← ≠ ≈ ≤ ≥
+
+- draw_shape: {"type": "draw_shape", "params": {"shape": "rectangle"|"circle"|"line"|"arrow", ...}}
+
+- draw_freehand: {"type": "draw_freehand", "params": {"points": [{x, y}...], "color?": string, "strokeWidth?": number}}
+  Use sparingly - only for annotations, arrows, and emphasis marks!
+
+- draw_equation: {"type": "draw_equation", "params": {"latex": string, "x": number, "y": number}}
+
 - highlight_area: {"type": "highlight_area", "params": {"x": number, "y": number, "width": number, "height": number}}
-- clear_whiteboard: {"type": "clear_whiteboard", "params": {}} - USE ONLY WHEN ASKED OR WHEN BOARD IS FULL
-- move_cursor: {"type": "move_cursor", "params": {"x": number, "y": number}}
+
+- clear_whiteboard: {"type": "clear_whiteboard", "params": {}}
+
+═══════════════════════════════════════════════════════════════════
+EXAMPLE: Student asks "Show me a cosine curve"
+═══════════════════════════════════════════════════════════════════
+
+Great question! Let me draw a cosine curve for you.
+
+The cosine function $y = \\cos(x)$ oscillates between -1 and 1, starting at its maximum value when $x = 0$.
+
+Key properties:
+- **Period**: $2\\pi$ (one complete cycle)
+- **Amplitude**: 1 (distance from center to peak)
+- **At x = 0**: $\\cos(0) = 1$ (maximum)
+- **At x = π**: $\\cos(\\pi) = -1$ (minimum)
+
+\`\`\`whiteboard
+[
+  {"type": "draw_coordinate_system", "params": {"originX": 400, "originY": 300, "xMin": -7, "xMax": 7, "yMin": -2, "yMax": 2, "xStep": 1, "yStep": 1}},
+  {"type": "draw_math_curve", "params": {"function": "cos", "xMin": 80, "xMax": 720, "yCenter": 300, "amplitude": 100, "period": 200, "color": "#2563eb", "label": "y = cos(x)"}}
+]
+\`\`\`
+
+═══════════════════════════════════════════════════════════════════
+
+CRITICAL RULES:
+1. NEVER use draw_freehand for mathematical curves - ALWAYS use draw_math_curve
+2. ALWAYS draw coordinate_system BEFORE drawing curves for context
+3. For trigonometric functions, coordinate the period with the axis labels
+4. Use fontSize 24-32 for readability on text
+5. If whiteboard is getting full (nextY > 500), ASK to clear first
 
 TEACHING APPROACH:
 1. Understand what the student wants to learn
 2. Break complex concepts into digestible steps
 3. Use equations and formulas when teaching math/science
-4. ALWAYS use the whiteboard to illustrate concepts - students learn visually
-5. Use draw_freehand for curves, graphs, and diagrams - it's more intuitive than text
+4. ALWAYS use the whiteboard to illustrate concepts visually
+5. Use draw_math_curve for ALL graphs and plots
 6. Check for understanding regularly`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
