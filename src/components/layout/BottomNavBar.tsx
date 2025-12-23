@@ -26,8 +26,8 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ userRole }) => {
   const learnerTabs = [
     { name: 'Home', href: '/student-dashboard', icon: Home },
     { name: 'Pods', href: '/student-pods', icon: Boxes },
+    { name: 'Learnspace', href: '/learnspace', icon: 'learnspace' },
     { name: 'Phoenix', href: '/phoenix', icon: 'phoenix' },
-    { name: 'Profile', href: '/profile', icon: User },
     { name: 'More', href: '/more', icon: MoreHorizontal },
   ];
 
