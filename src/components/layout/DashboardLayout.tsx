@@ -105,7 +105,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   const learnerNavItems = [
     { name: 'Dashboard', href: '/student-dashboard', icon: Home, color: 'text-blue-500' },
     { name: 'Pods', href: '/student-pods', icon: Boxes, color: 'text-indigo-500' },
-    { name: 'Learnspace', href: '/learnspace', icon: 'learnspace', color: '' },
     { name: 'Phoenix', href: '/phoenix', icon: 'phoenix', color: '' },
     { name: 'My Resources', href: '/my-resources', icon: Library, color: 'text-amber-500' },
     { name: 'All Resources', href: '/all-resources', icon: FolderOpen, color: 'text-orange-500' },
