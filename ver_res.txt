@@ -1,0 +1,54 @@
+﻿Starting Comprehensive Migration Verification (Fetch Mode)...
+Authenticating...
+Authenticated successfully.
+
+Testing generate-flashcards...
+node : FAILED 
+generate-flashcards 
+(3761ms): 500 - 
+{"error":"Failed to 
+check flashcard 
+limit"}
+At line:1 char:1
++ node scripts/verify
+_migration_comprehens
+ive.js 2>&1 | 
+Out-File -Encod ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (FAILED    
+ generate...ashca    
+rd limit"}:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+
+Testing nexus-assessment-generator...
+SUCCESS nexus-assessment-generator (13619ms)
+
+Testing grade-assessment...
+SUCCESS grade-assessment (8922ms)
+
+Testing teacher-assistant...
+SUCCESS teacher-assistant (7553ms)
+
+Testing phoenix-text-chat...
+SUCCESS phoenix-text-chat (9119ms)
+
+Testing nexus-curriculum-generator (Streaming)...
+SUCCESS nexus-curriculum-generator (7418ms) - Length: 15639
+Preview: data: {"content":"Grade"}\n\ndata: {"content":" "}\n\ndata: {"content":"9"}\n\ndata: {"content":" Math"}\n\n...
+
+Testing nexus-lesson-generator (Streaming)...
+SUCCESS nexus-lesson-generator (4937ms) - Length: 38713
+Preview: data: {"content":"LESS"}\n\ndata: {"content":"ON"}\n\ndata: {"content":" OVER"}\n\ndata: {"content":"VIEW"...
+
+Testing smart-assistant (Streaming)...
+SUCCESS smart-assistant (8050ms) - Length: 3312
+Preview: data: {"choices":[{"delta":{"content":"Of"}}]}\n\ndata: {"choices":[{"delta":{"content":" course"}}]}\n...

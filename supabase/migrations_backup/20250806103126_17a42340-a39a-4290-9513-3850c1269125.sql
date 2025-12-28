@@ -1,7 +1,7 @@
 -- Create comprehensive schema for Classpace
 
 -- Create custom types
-CREATE TYPE user_role AS ENUM ('teacher', 'learner');
+-- Type user_role created in previous migration
 CREATE TYPE pod_member_role AS ENUM ('teacher', 'student');
 CREATE TYPE ai_activity_type AS ENUM ('summary', 'quiz', 'question', 'timeline', 'explanation');
 CREATE TYPE file_type AS ENUM ('pdf', 'docx', 'png', 'jpg', 'jpeg', 'mp4', 'pptx', 'txt');

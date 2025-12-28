@@ -10,6 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Send, Sparkles, User, Loader2, X, Maximize2, Minimize2, Mic, MicOff, Save, Download, History, Trash2, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+import { normalizeMathDelimiters } from '@/utils/phoenixMathUtils';
 
 // Speech Recognition types
 interface SpeechRecognitionEvent extends Event {
@@ -134,7 +138,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      
+
       // Parse messages from JSON
       const conversations = (data || []).map(conv => ({
         ...conv,
@@ -167,7 +171,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
 
     try {
       const title = messages[0]?.content.slice(0, 50) + (messages[0]?.content.length > 50 ? '...' : '');
-      
+
       if (currentConversationId) {
         // Update existing conversation
         const { error } = await supabase
@@ -178,7 +182,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
             updated_at: new Date().toISOString(),
           })
           .eq('id', currentConversationId);
-        
+
         if (error) throw error;
         toast({
           title: "Conversation updated",
@@ -196,7 +200,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
           }])
           .select()
           .single();
-        
+
         if (error) throw error;
         setCurrentConversationId(data.id);
         toast({
@@ -235,9 +239,9 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
         .from('assistant_conversations')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
-      
+
       setSavedConversations(prev => prev.filter(c => c.id !== id));
       if (currentConversationId === id) {
         setCurrentConversationId(null);
@@ -302,7 +306,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
   // Voice recognition setup
   const startListening = useCallback(() => {
     const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
+
     if (!SpeechRecognitionAPI) {
       toast({
         title: "Not supported",
@@ -352,7 +356,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
     recognitionRef.current = recognition;
     recognition.start();
     setIsListening(true);
-    
+
     toast({
       title: "Listening...",
       description: "Speak now. Click the mic button again to stop.",
@@ -530,9 +534,9 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
             <div className="relative">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5 shadow-lg">
                 <div className="w-full h-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                    alt="Classpace" 
+                  <img
+                    src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+                    alt="Classpace"
                     className="w-8 h-8 object-contain"
                   />
                 </div>
@@ -605,7 +609,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
             >
               + New Conversation
             </Button>
-            
+
             {loadingConversations ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
@@ -650,9 +654,9 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
           <div className="h-full flex flex-col items-center justify-center text-center px-4 py-8">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5 shadow-2xl mb-6">
               <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center">
-                <img 
-                  src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                  alt="Classpace" 
+                <img
+                  src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+                  alt="Classpace"
                   className="w-12 h-12 object-contain"
                 />
               </div>
@@ -663,7 +667,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
             <p className="text-gray-600 mb-6 max-w-md">
               I'm your {userRole === 'teacher' ? 'teaching' : 'learning'} assistant with complete access to your Classpace data. Ask me anything!
             </p>
-            
+
             {/* Suggestion chips */}
             <div className="flex flex-wrap gap-2 justify-center max-w-lg">
               {suggestions.slice(0, 4).map((suggestion, index) => (
@@ -690,17 +694,17 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
                 {/* Avatar */}
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                  message.role === 'user' 
-                    ? 'bg-gradient-to-br from-purple-600 to-pink-600' 
+                  message.role === 'user'
+                    ? 'bg-gradient-to-br from-purple-600 to-pink-600'
                     : 'bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5'
                 )}>
                   {message.role === 'user' ? (
                     <User className="w-4 h-4 text-white" />
                   ) : (
                     <div className="w-full h-full rounded-md bg-white flex items-center justify-center">
-                      <img 
-                        src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                        alt="AI" 
+                      <img
+                        src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+                        alt="AI"
                         className="w-5 h-5 object-contain"
                       />
                     </div>
@@ -719,16 +723,19 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
                     message.role === 'user' && 'prose-invert'
                   )}>
                     <ReactMarkdown
+                      remarkPlugins={[remarkMath]}
+                      rehypePlugins={[rehypeKatex]}
                       components={{
-                        p: ({children}) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                        ul: ({children}) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
-                        ol: ({children}) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
-                        li: ({children}) => <li className="mb-0.5">{children}</li>,
-                        strong: ({children}) => <strong className="font-semibold">{children}</strong>,
-                        code: ({children}) => <code className="bg-gray-200/50 px-1 py-0.5 rounded text-sm">{children}</code>,
+                        p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
+                        li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        code: ({ children }) => <code className="bg-gray-200/50 px-1 py-0.5 rounded text-sm font-mono">{children}</code>,
                       }}
                     >
-                      {message.content}
+                      {/* Normalize delimiters before rendering */}
+                      {normalizeMathDelimiters(message.content)}
                     </ReactMarkdown>
                   </div>
                   <p className={cn(
@@ -746,9 +753,9 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0.5 flex-shrink-0">
                   <div className="w-full h-full rounded-md bg-white flex items-center justify-center">
-                    <img 
-                      src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                      alt="AI" 
+                    <img
+                      src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+                      alt="AI"
                       className="w-5 h-5 object-contain"
                     />
                   </div>
@@ -757,15 +764,17 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
                   {streamingContent ? (
                     <div className="prose prose-sm max-w-none text-gray-900">
                       <ReactMarkdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
                         components={{
-                          p: ({children}) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                          ul: ({children}) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
-                          ol: ({children}) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
-                          li: ({children}) => <li className="mb-0.5">{children}</li>,
-                          strong: ({children}) => <strong className="font-semibold">{children}</strong>,
+                          p: ({ children }) => <p className="mb-2 last:mb-0 leading-relaxed">{children}</p>,
+                          ul: ({ children }) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
+                          li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                          strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                         }}
                       >
-                        {streamingContent}
+                        {normalizeMathDelimiters(streamingContent)}
                       </ReactMarkdown>
                       <span className="inline-block w-2 h-4 bg-purple-500 animate-pulse ml-0.5" />
                     </div>
@@ -803,54 +812,54 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ userRole }) => {
 
       {/* Input Area */}
       {!showHistory && (
-      <div className="px-4 md:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-gray-100">
-        <div className="flex gap-2 items-end">
-          <Textarea
-            ref={textareaRef}
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder={isListening ? "Listening... speak now" : `Ask me anything about your ${userRole === 'teacher' ? 'teaching' : 'learning'}...`}
-            className={cn(
-              "flex-1 min-h-[44px] max-h-32 resize-none rounded-xl border-gray-200 bg-gray-50/50 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-400",
-              isListening && "border-red-300 bg-red-50/50 placeholder:text-red-400"
-            )}
-            disabled={isLoading}
-            rows={1}
-          />
-          <Button
-            onClick={toggleVoiceInput}
-            disabled={isLoading}
-            variant="outline"
-            className={cn(
-              "h-11 w-11 rounded-xl transition-all",
-              isListening 
-                ? "bg-red-500 hover:bg-red-600 border-red-500 text-white animate-pulse" 
-                : "border-gray-200 hover:border-purple-400 hover:bg-purple-50"
-            )}
-          >
-            {isListening ? (
-              <MicOff className="w-5 h-5" />
-            ) : (
-              <Mic className="w-5 h-5 text-gray-600" />
-            )}
-          </Button>
-          <Button
-            onClick={() => handleSendMessage()}
-            disabled={!inputMessage.trim() || isLoading}
-            className="h-11 w-11 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all"
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </Button>
+        <div className="px-4 md:px-6 py-4 bg-white/80 backdrop-blur-xl border-t border-gray-100">
+          <div className="flex gap-2 items-end">
+            <Textarea
+              ref={textareaRef}
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={isListening ? "Listening... speak now" : `Ask me anything about your ${userRole === 'teacher' ? 'teaching' : 'learning'}...`}
+              className={cn(
+                "flex-1 min-h-[44px] max-h-32 resize-none rounded-xl border-gray-200 bg-gray-50/50 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-400",
+                isListening && "border-red-300 bg-red-50/50 placeholder:text-red-400"
+              )}
+              disabled={isLoading}
+              rows={1}
+            />
+            <Button
+              onClick={toggleVoiceInput}
+              disabled={isLoading}
+              variant="outline"
+              className={cn(
+                "h-11 w-11 rounded-xl transition-all",
+                isListening
+                  ? "bg-red-500 hover:bg-red-600 border-red-500 text-white animate-pulse"
+                  : "border-gray-200 hover:border-purple-400 hover:bg-purple-50"
+              )}
+            >
+              {isListening ? (
+                <MicOff className="w-5 h-5" />
+              ) : (
+                <Mic className="w-5 h-5 text-gray-600" />
+              )}
+            </Button>
+            <Button
+              onClick={() => handleSendMessage()}
+              disabled={!inputMessage.trim() || isLoading}
+              className="h-11 w-11 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transition-all"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+            </Button>
+          </div>
+          <p className="text-[10px] text-gray-400 mt-2 text-center">
+            Press Enter to send • Shift+Enter for new line • Click mic for voice input
+          </p>
         </div>
-        <p className="text-[10px] text-gray-400 mt-2 text-center">
-          Press Enter to send • Shift+Enter for new line • Click mic for voice input
-        </p>
-      </div>
       )}
     </Card>
   );

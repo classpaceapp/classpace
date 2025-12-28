@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,9 +11,29 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  );
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     const { subject, curriculum, gradeLevel, duration, topic } = await req.json();
-    
+
     if (!subject || !curriculum || !gradeLevel || !duration) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
@@ -25,9 +46,9 @@ serve(async (req) => {
       throw new Error('TAVILY_API_KEY is not configured');
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
     // Perform comprehensive web searches
@@ -40,7 +61,7 @@ serve(async (req) => {
     ];
 
     const searchResults = await Promise.all(
-      searchQueries.map(query => 
+      searchQueries.map(query =>
         fetch('https://api.tavily.com/search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -121,38 +142,39 @@ Structure the lesson plan with these sections:
 Make it detailed, practical, and ready for immediate classroom implementation.`;
 
     const encoder = new TextEncoder();
+
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are an expert educator and curriculum specialist. Create detailed, comprehensive lesson plans with exact teaching scripts and practical resources. Format responses using plain text with clear structure. IMPORTANT: You MAY use Markdown (bold, lists). For ANY math or scientific formulas, you MUST use LaTeX enclosed in $ (inline) or $$ (block). Do NOT use \\( or \\[.' },
+          { role: 'user', content: prompt }
+        ],
+        stream: true
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      throw new Error(`AI API error: ${aiResponse.status}`);
+    }
+
     const stream = new ReadableStream({
       async start(controller) {
+        const reader = aiResponse.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
         try {
-          const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'google/gemini-2.5-flash',
-              messages: [
-                { 
-                  role: 'system', 
-                  content: 'You are an expert educator and curriculum specialist. Create detailed, comprehensive lesson plans with exact teaching scripts and practical resources. Format responses using ONLY plain text with clear structure - NO markdown, NO asterisks, NO special formatting characters. Use simple line breaks and indentation for structure.' 
-                },
-                { role: 'user', content: prompt }
-              ],
-              stream: true,
-            }),
-          });
-
-          if (!aiResponse.ok) {
-            throw new Error(`AI API error: ${aiResponse.status}`);
-          }
-
-          const reader = aiResponse.body?.getReader();
-          if (!reader) throw new Error('No response body');
-
-          const decoder = new TextDecoder();
-          let buffer = '';
-
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -164,12 +186,12 @@ Make it detailed, practical, and ready for immediate classroom implementation.`;
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
-                if (data === '[DONE]') continue;
-                
+                if (data.trim() === '[DONE]') continue;
+
                 try {
                   const parsed = JSON.parse(data);
                   let content = parsed.choices?.[0]?.delta?.content || '';
-                  
+
                   // Clean content
                   content = content
                     .replace(/\*\*/g, '')
@@ -178,7 +200,7 @@ Make it detailed, practical, and ready for immediate classroom implementation.`;
                     .replace(/`{1,3}/g, '')
                     .replace(/_{2}/g, '')
                     .replace(/~/g, '');
-                  
+
                   if (content) {
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                   }

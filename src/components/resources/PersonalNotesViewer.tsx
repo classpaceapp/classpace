@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
+import { normalizeMathDelimiters } from "@/utils/phoenixMathUtils";
 import { MathRenderer } from "@/components/quiz/MathRenderer";
 import jsPDF from "jspdf";
 
@@ -101,10 +105,10 @@ export const PersonalNotesViewer = ({ noteId, onClose }: PersonalNotesViewerProp
 
       // Process content - split by lines and handle markdown
       const lines = note.content.split('\n');
-      
+
       for (const line of lines) {
         const trimmedLine = line.trim();
-        
+
         if (!trimmedLine) {
           yPosition += 5;
           checkPageBreak(5);
@@ -168,7 +172,7 @@ export const PersonalNotesViewer = ({ noteId, onClose }: PersonalNotesViewerProp
           .replace(/\\approx/g, '≈')
           .replace(/\\_/g, '_')
           .replace(/\\(.)/g, '$1');  // Remove remaining backslashes
-        
+
         const wrappedText = pdf.splitTextToSize(readableText, maxWidth);
         pdf.text(wrappedText, margin, yPosition);
         yPosition += wrappedText.length * 6 + 3;
@@ -274,6 +278,8 @@ export const PersonalNotesViewer = ({ noteId, onClose }: PersonalNotesViewerProp
         <div className="prose prose-emerald max-w-none">
           <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/10 dark:to-teal-950/10 rounded-xl p-6 border-2 border-emerald-500/20">
             <ReactMarkdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex]}
               components={{
                 h1: ({ children }) => (
                   <h1 className="text-3xl font-bold text-foreground mb-4 mt-6">{children}</h1>
@@ -287,14 +293,9 @@ export const PersonalNotesViewer = ({ noteId, onClose }: PersonalNotesViewerProp
                 h4: ({ children }) => (
                   <h4 className="text-lg font-semibold text-foreground mb-2 mt-3">{children}</h4>
                 ),
-                p: ({ children }) => {
-                  const content = String(children);
-                  // Check if paragraph contains inline math ($...$) or display math ($$...$$)
-                  if (content.includes('$')) {
-                    return <MathRenderer text={content} />;
-                  }
-                  return <p className="mb-3 text-foreground leading-relaxed">{children}</p>;
-                },
+                p: ({ children }) => (
+                  <p className="mb-3 text-foreground leading-relaxed">{children}</p>
+                ),
                 ul: ({ children }) => (
                   <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>
                 ),
@@ -319,7 +320,7 @@ export const PersonalNotesViewer = ({ noteId, onClose }: PersonalNotesViewerProp
                 ),
               }}
             >
-              {note.content}
+              {normalizeMathDelimiters(note.content)}
             </ReactMarkdown>
           </div>
         </div>

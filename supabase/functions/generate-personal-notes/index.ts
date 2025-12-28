@@ -15,7 +15,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization');
     console.log('Authorization header present:', !!authHeader);
-    
+
     if (!authHeader) {
       console.error('No Authorization header found in request');
       return new Response(
@@ -26,10 +26,10 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
-    
+
     console.log('Creating Supabase client with URL:', supabaseUrl);
     console.log('Supabase key present:', !!supabaseKey);
-    
+
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Supabase configuration missing');
     }
@@ -47,7 +47,7 @@ serve(async (req) => {
     const jwt = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
 
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(jwt);
-    
+
     if (userError) {
       console.error('auth.getUser error:', userError);
       throw new Error('Failed to authenticate user');
@@ -137,10 +137,10 @@ serve(async (req) => {
       });
     }
 
-    // Generate notes using Lovable AI
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    // Generate notes using OpenAI API
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
     const formatInstructions = additionalDetails || 'Use clear paragraphs with headings and subheadings';
@@ -176,22 +176,20 @@ CRITICAL FORMATTING RULES:
 
 Generate the notes in clean markdown format now:`;
 
-    console.log('Calling Lovable AI for note generation...');
+    console.log('Calling Gemini API for note generation...');
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: "gpt-4o-mini",
         messages: [
-          {
-            role: 'user',
-            content: aiPrompt,
-          },
+          { role: "user", content: aiPrompt }
         ],
+        temperature: 0.7
       }),
     });
 
@@ -202,7 +200,7 @@ Generate the notes in clean markdown format now:`;
     }
 
     const aiData = await aiResponse.json();
-    let notesContent = aiData.choices[0].message.content;
+    let notesContent = aiData.choices?.[0]?.message?.content;
 
     console.log('AI generation completed, content length:', notesContent.length);
 

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,18 +11,38 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  );
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
-    const { 
-      assessmentType, 
-      subject, 
+    const {
+      assessmentType,
+      subject,
       title,
-      gradeLevel, 
-      topic, 
+      gradeLevel,
+      topic,
       numQuestions,
       totalMarks,
-      curriculum 
+      curriculum
     } = await req.json();
-    
+
     if (!assessmentType || !subject || !title || !gradeLevel || !topic || !numQuestions || !totalMarks || !curriculum) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
@@ -38,7 +59,7 @@ serve(async (req) => {
 
     // Perform detailed web search using Tavily for curriculum-specific content
     const searchQuery = `${curriculum} ${gradeLevel} ${subject} ${topic} ${assessmentType} academic questions exam problems curriculum standards teaching materials`;
-    
+
     console.log('Search query:', searchQuery);
 
     const tavilyResponse = await fetch('https://api.tavily.com/search', {
@@ -63,16 +84,16 @@ serve(async (req) => {
 
     const tavilyData = await tavilyResponse.json();
     console.log('Tavily research completed, results:', tavilyData.results?.length || 0);
-    
+
     const researchContext = tavilyData.results
       ?.map((r: any) => r.content)
       .join('\n\n')
       .slice(0, 4000);
 
-    // Generate assessment with Lovable AI using curriculum-specific research
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    // Generate assessment with OpenAI API
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
     const prompt = `Using this curriculum-specific educational research:
@@ -99,9 +120,9 @@ CRITICAL REQUIREMENTS:
 6. For mathematical content: Use LaTeX notation ONLY
    - Inline math: $x = 5$
    - Display math: $$E = mc^2$$
-   - Use $\\times$ for multiplication (NOT * or x)
-   - Use $\\frac{a}{b}$ for fractions (NOT 1/2)
-   - Use $\\sqrt{x}$ for square roots
+   - Use \\times for multiplication (NOT * or x)
+   - Use \\frac{a}{b} for fractions (NOT 1/2)
+   - Use \\sqrt{x} for square roots
 7. ABSOLUTELY NO tables - use simple numbered lists instead
 8. NO HTML tags, NO underline tags, NO bold, NO italics - PLAIN TEXT ONLY except for LaTeX math
 9. NO backslashes except in LaTeX math expressions
@@ -132,23 +153,30 @@ MARKING RUBRIC & ANSWER KEY:
 
 CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO excessive backslashes. Use proper capitalization and punctuation for emphasis.`;
 
+    const systemPrompt = 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. CRITICAL RULES: Use ONLY plain text and LaTeX math (wrapped in $ or $$) - absolutely NO markdown symbols (*, **, #, _, `, etc.), NO tables of any kind (\\begin{tabular}, etc.), NO backslashes anywhere except inside LaTeX math delimiters ($ or $$). For blanks in fill-in-the-blank questions, use underscores like _____ or write "(blank)" - NEVER use backslashes. All emphasis should be through proper capitalization and punctuation only. For matching questions, use simple numbered lists, NOT tables.';
+
     console.log('Sending to AI for generation...');
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: "gpt-4o-mini",
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. CRITICAL RULES: Use ONLY plain text and LaTeX math (wrapped in $ or $$) - absolutely NO markdown symbols (*, **, #, _, `, etc.), NO tables of any kind (\\begin{tabular}, etc.), NO backslashes anywhere except inside LaTeX math delimiters ($ or $$). For blanks in fill-in-the-blank questions, use underscores like _____ or write "(blank)" - NEVER use backslashes. All emphasis should be through proper capitalization and punctuation only. For matching questions, use simple numbered lists, NOT tables.' 
-          },
+          {
+            role: 'system', content: `${systemPrompt}
+
+IMPORTANT: You must format ALL mathematical equations, formulas, and scientific notation using standard LaTeX.
+- Use single dollar signs for inline math: $E = mc^2$
+- Use double dollar signs for block math: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+- Do NOT use \\( ... \\) or \\[ ... \\].
+- Ensure all backslashes are properly escaped in the JSON response.` },
           { role: 'user', content: prompt }
         ],
+        temperature: 0.7
       }),
     });
 
@@ -159,31 +187,31 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
     }
 
     const aiData = await aiResponse.json();
-    let assessment = aiData.choices[0]?.message?.content || '';
+    let assessment = aiData.choices?.[0]?.message?.content || '';
 
     console.log('Assessment generated, cleaning response...');
 
     // ULTRA-AGGRESSIVE cleaning - preserve LaTeX math, remove everything else
     console.log('Starting aggressive cleaning...');
-    
+
     // Step 1: Extract and protect LaTeX math expressions
     const mathExpressions: string[] = [];
     let tempAssessment = assessment;
-    
+
     // Protect display math ($$...$$)
     tempAssessment = tempAssessment.replace(/\$\$([^\$]+)\$\$/g, (match, content) => {
       mathExpressions.push(match);
       return `__MATH_${mathExpressions.length - 1}__`;
     });
-    
+
     // Protect inline math ($...$)
     tempAssessment = tempAssessment.replace(/\$([^\$]+)\$/g, (match, content) => {
       mathExpressions.push(match);
       return `__MATH_${mathExpressions.length - 1}__`;
     });
-    
+
     console.log(`Protected ${mathExpressions.length} math expressions`);
-    
+
     // Step 2: Aggressive cleaning on non-math content
     tempAssessment = tempAssessment
       // Remove code blocks
@@ -214,12 +242,12 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
       .replace(/\n{3,}/g, '\n\n')
       .replace(/\s{3,}/g, ' ')
       .trim();
-    
+
     // Step 3: Restore protected math expressions
     mathExpressions.forEach((expr, index) => {
       tempAssessment = tempAssessment.replace(`__MATH_${index}__`, expr);
     });
-    
+
     assessment = tempAssessment;
     console.log('Cleaning completed');
 
@@ -251,24 +279,24 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
 
   } catch (error) {
     console.error('Assessment generation error:', error);
-    
+
     // Provide user-friendly error messages
     let userMessage = 'Failed to generate assessment';
     let errorDetails = error instanceof Error ? error.message : 'Unknown error';
-    
+
     if (errorDetails.includes('Tavily') || errorDetails.includes('search')) {
       userMessage = 'INPUT_TOO_LONG';
       errorDetails = 'The topic or parameters provided are too detailed. Please simplify your input and try again with a shorter, more focused topic description (under 100 words).';
     } else if (errorDetails.includes('429') || errorDetails.includes('rate limit')) {
       userMessage = 'RATE_LIMIT';
       errorDetails = 'Too many requests. Please wait a moment before generating another assessment.';
-    } else if (errorDetails.includes('LOVABLE_API_KEY') || errorDetails.includes('TAVILY_API_KEY')) {
+    } else if (errorDetails.includes('OPENAI_API_KEY') || errorDetails.includes('TAVILY_API_KEY')) {
       userMessage = 'CONFIGURATION_ERROR';
       errorDetails = 'System configuration error. Please contact support.';
     }
-    
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: userMessage,
         details: errorDetails
       }),

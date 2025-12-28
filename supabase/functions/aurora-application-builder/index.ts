@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,21 +19,41 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  );
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     const { cvBase64, cvFilename, linkedinUrl, jobRoleUrl, request }: ApplicationBuilderRequest = await req.json();
 
     console.log("Processing application builder request");
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const TAVILY_API_KEY = Deno.env.get("TAVILY_API_KEY");
 
-    if (!LOVABLE_API_KEY || !TAVILY_API_KEY) {
+    if (!OPENAI_API_KEY || !TAVILY_API_KEY) {
       throw new Error("API keys not configured");
     }
 
     // Step 1: Parse CV using document parsing (simulated - in production use actual parsing)
     console.log("Parsing CV:", cvFilename);
-    
+
     // Step 2: Fetch job role details using Tavily
     console.log("Fetching job role details from:", jobRoleUrl);
     const jobRoleResponse = await fetch("https://api.tavily.com/search", {
@@ -79,9 +100,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    // Step 4: Generate application with Aurora (Lovable AI) with humanization
+    // Step 4: Generate application with Aurora (Gemini) with humanization
     console.log("Generating application with Aurora AI");
-    
+
     const systemPrompt = `You are Aurora, an expert career advisor and application writer. Your role is to help candidates create compelling, human, and authentic application materials.
 
 CRITICAL HUMANIZATION RULES:
@@ -134,32 +155,29 @@ ${request}
 
 Please create the requested application materials following all humanization guidelines. Make it compelling, authentic, and perfectly tailored to this opportunity.`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userPrompt }
         ],
+        temperature: 0.7
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("AI API error:", aiResponse.status, errorText);
-      
+
       if (aiResponse.status === 429) {
         throw new Error("Rate limit exceeded. Please try again in a moment.");
       }
-      if (aiResponse.status === 402) {
-        throw new Error("AI service requires payment. Please contact support.");
-      }
-      
       throw new Error("Failed to generate application");
     }
 
@@ -184,7 +202,7 @@ Please create the requested application materials following all humanization gui
 
     // Build HTML blocks with DOUBLE spacing: wrap bullet groups as lists and others as paragraphs
     const blocks = cleanedText.split(/\n{2,}/);
-    const htmlContent = blocks.map((block) => {
+    const htmlContent = blocks.map((block: string) => {
       const lines = block.split(/\n/);
       const isList = lines.every((l) => /^\s*[-*•]\s+/.test(l));
       if (isList) {

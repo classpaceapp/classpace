@@ -12,6 +12,26 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  );
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     const { jobRoleLink, jobDescription, numQuestions } = await req.json();
 
@@ -68,9 +88,9 @@ serve(async (req) => {
       ?.map((r: any) => `${r.title}\n${r.content}`)
       .join('\n\n') || 'No specific interview questions found.';
 
-    // Use Lovable AI to generate questions
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) throw new Error('LOVABLE_API_KEY not configured');
+    // Use OpenAI API directly
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) throw new Error('OPENAI_API_KEY not configured');
 
     const systemPrompt = `You are Aurora, an expert interview coach specializing in creating realistic interview questions.
 
@@ -94,6 +114,12 @@ CRITICAL REQUIREMENTS:
       - Moderate questions: 90-120 seconds
       - Complex/detailed questions: 150-300 seconds
 
+CRITICAL FORMATTING FOR MATH/CODE:
+1. Use LaTeX for ALL math formulas ($x^2$ for inline, $$x^2$$ for block)
+2. YOU MUST DOUBLE-ESCAPE BACKSLASHES in the JSON string (e.g. "\\frac", "\\sum")
+3. Use markdown code blocks for any coding questions
+4. Ensure clear separation of questions
+
 OUTPUT FORMAT (JSON):
 {
   "questions": [
@@ -116,27 +142,28 @@ ${webContext}
 
 Generate ${numQuestions} realistic interview questions with appropriate time limits.`;
 
-    console.log('Calling Lovable AI...');
+    console.log('Calling Gemini API (Flash Latest)...');
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: "gpt-4o-mini",
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
         ],
+        response_format: { type: "json_object" }
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('Lovable AI error:', errorText);
-      throw new Error(`AI gateway error: ${errorText}`);
+      console.error('Gemini API error:', errorText);
+      throw new Error(`AI API error: ${errorText}`);
     }
 
     const aiData = await aiResponse.json();
@@ -151,7 +178,7 @@ Generate ${numQuestions} realistic interview questions with appropriate time lim
     // Parse JSON response
     let questionsData;
     try {
-      // Try to extract JSON from potential markdown code blocks
+      // Try to extract JSON from potential markdown code blocks (though response_mime_type should prevent this)
       const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         questionsData = JSON.parse(jsonMatch[0]);
@@ -177,11 +204,12 @@ Generate ${numQuestions} realistic interview questions with appropriate time lim
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
+
   } catch (error: any) {
     console.error('Error in aurora-interview-questions:', error);
     return new Response(
       JSON.stringify({ error: error.message || 'Failed to generate interview questions' }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

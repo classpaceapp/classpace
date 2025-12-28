@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +11,26 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  );
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     const { questions, answers, totalMarks, assessmentType } = await req.json();
 
@@ -17,14 +38,12 @@ serve(async (req) => {
       throw new Error('Missing required fields: questions and answers');
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
-    const prompt = `You are an expert educational assessor. Grade the following student assessment carefully and provide detailed feedback.
-
-ASSESSMENT TYPE: ${assessmentType || 'General Assessment'}
+    const prompt = `ASSESSMENT TYPE: ${assessmentType || 'General Assessment'}
 TOTAL MARKS AVAILABLE: ${totalMarks || 'Not specified'}
 
 QUESTIONS:
@@ -53,27 +72,23 @@ Please provide a comprehensive grading in the following JSON format:
 
 Be fair, constructive, and encouraging in your feedback. Consider partial credit where appropriate. If the student's answer shows understanding but lacks completeness, reflect that in the marks.`;
 
+    const systemPrompt = 'You are an expert educational assessor. Grade the student assessment carefully and provide detailed feedback. Always respond with valid JSON only. IMPORTANT: For any math or scientific symbols in your feedback, you MUST use LaTeX formatting enclosed in single dollar signs ($) for inline or double dollar signs ($$) for block equations. Do NOT use \\( ... \\) or \\[ ... \\]. YOU MUST DOUBLE-ESCAPE ALL BACKSLASHES in the JSON string (e.g. use "\\frac" instead of "\frac").';
+
     console.log('Sending grading request to AI...');
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'openai/gpt-5-mini',
+        model: "gpt-4o-mini",
         messages: [
-          {
-            role: 'system',
-            content: 'You are an expert educational assessor. Provide fair, detailed, and constructive grading. Always respond with valid JSON only.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 2000
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -88,8 +103,11 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
 
     let gradingResult;
     try {
-      const content = aiData.choices[0].message.content;
-      // Try to extract JSON from markdown code blocks if present
+      const content = aiData.choices?.[0]?.message?.content;
+
+      if (!content) throw new Error("No content generated");
+
+      // Try to extract JSON from markdown code blocks if present (though Gemini JSON mode usually sends raw JSON)
       const jsonMatch = content.match(/```json\n([\s\S]+?)\n```/) || content.match(/```\n([\s\S]+?)\n```/);
       const jsonString = jsonMatch ? jsonMatch[1] : content;
       gradingResult = JSON.parse(jsonString);
@@ -100,7 +118,7 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
         score: Math.round((totalMarks || 100) * 0.7),
         percentage: 70,
         grade: 'B',
-        feedback: aiData.choices[0].message.content,
+        feedback: 'We encountered an error parsing the grading feedback, but your submission has been recorded.',
         breakdown: [],
         strengths: ['Attempted all questions', 'Showed effort'],
         improvements: ['Review feedback for detailed guidance']
@@ -109,30 +127,30 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
 
     return new Response(
       JSON.stringify(gradingResult),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in grade-assessment function:', error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error.message,
         score: 0,
         percentage: 0,
         grade: 'N/A',
         feedback: 'Unable to grade assessment at this time. Please contact your teacher.'
       }),
-      { 
+      {
         status: 500,
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
   }

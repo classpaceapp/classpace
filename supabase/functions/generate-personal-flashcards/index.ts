@@ -22,7 +22,7 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
-    
+
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) throw new Error("Authentication failed");
@@ -54,14 +54,14 @@ serve(async (req) => {
 
       if (currentCount >= limit) {
         return new Response(
-          JSON.stringify({ 
-            error: "LIMIT_REACHED", 
+          JSON.stringify({
+            error: "LIMIT_REACHED",
             limit,
             message: "You've reached your free plan limit of 1 flashcard set. Upgrade to create more!"
           }),
-          { 
-            status: 403, 
-            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
           }
         );
       }
@@ -96,9 +96,9 @@ serve(async (req) => {
       .join("\n\n")
       .slice(0, 12000);
 
-    // Generate flashcards with Lovable AI
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
+    // Generate flashcards with OpenAI API
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiApiKey) throw new Error("OPENAI_API_KEY not configured");
 
     const systemPrompt = `You are an expert educator creating flashcards for students. Generate exactly ${cardCount} flashcards based on the provided search results.
 
@@ -113,6 +113,7 @@ CRITICAL FORMATTING RULES:
 1. Return ONLY valid JSON with no markdown formatting, no code blocks, no backticks
 2. Each flashcard must have:
    - "hint": A concise question or prompt about the ACTUAL content (front of card)
+   - "content": A clear, detailed answer with technical/educational information (back of card)
    - "content": A clear, detailed answer with technical/educational information (back of card)
 3. For mathematical equations, ALWAYS use LaTeX notation:
    - Inline math: $x = 5$
@@ -158,19 +159,20 @@ ${searchContext}
 
 Generate exactly ${cardCount} flashcards with technical, content-focused questions and comprehensive answers. Use LaTeX for any mathematical expressions.`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
+        "Authorization": `Bearer ${openaiApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -179,8 +181,8 @@ Generate exactly ${cardCount} flashcards with technical, content-focused questio
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.choices[0]?.message?.content;
-    
+    const content = aiData.choices?.[0]?.message?.content;
+
     if (!content) throw new Error("No content generated");
 
     // Parse and clean the response
@@ -188,7 +190,7 @@ Generate exactly ${cardCount} flashcards with technical, content-focused questio
       .replace(/```json\s*/g, "")
       .replace(/```\s*/g, "")
       .trim();
-    
+
     const flashcardsData = JSON.parse(cleanContent);
 
     if (!flashcardsData.flashcards || !Array.isArray(flashcardsData.flashcards)) {
@@ -233,23 +235,23 @@ Generate exactly ${cardCount} flashcards with technical, content-focused questio
     if (cardsError) throw new Error("Failed to insert flashcards");
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         flashcardSet,
-        cards: cleanedFlashcards 
+        cards: cleanedFlashcards
       }),
-      { 
+      {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200 
+        status: 200
       }
     );
   } catch (error) {
     console.error("[GENERATE-PERSONAL-FLASHCARDS]", error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
+      {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500 
+        status: 500
       }
     );
   }

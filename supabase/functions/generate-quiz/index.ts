@@ -13,7 +13,7 @@ serve(async (req) => {
 
   try {
     const { curriculum, yearLevel, subject, topic, subtopic, quizType, podId } = await req.json();
-    
+
     const authHeader = req.headers.get('Authorization')!;
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -29,9 +29,9 @@ serve(async (req) => {
       .rpc('check_quiz_limit', { teacher_id: user.id, pod_id: podId });
 
     if (limitError || !limitCheck) {
-      return new Response(JSON.stringify({ 
+      return new Response(JSON.stringify({
         error: 'quiz_limit_reached',
-        message: 'You have reached the quiz creation limit. Upgrade to Teach+ for unlimited quizzes.' 
+        message: 'You have reached the quiz creation limit. Upgrade to Teach+ for unlimited quizzes.'
       }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ serve(async (req) => {
 
     console.log('Searching for:', searchQuery);
 
-    // Perform web search using Lovable's web search capability
+    // Perform web search using Tavily
     const searchResponse = await fetch('https://api.tavily.com/search', {
       method: 'POST',
       headers: {
@@ -68,11 +68,11 @@ serve(async (req) => {
     }
     console.log('Search results obtained:', searchResults.results?.length || 0);
 
-    // Use Lovable AI to generate quiz from search results
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+    // Use OpenAI API directly
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) throw new Error('OPENAI_API_KEY not configured');
 
-    const contextText = searchResults.results?.map((r: any) => 
+    const contextText = searchResults.results?.map((r: any) =>
       `Source: ${r.url}\n${r.content}`
     ).join('\n\n') || 'No search results found';
 
@@ -93,8 +93,11 @@ REQUIRED question types:
 - Problem-solving questions with specific numerical or analytical challenges
 - Conceptual understanding questions
 
+   - Conceptual understanding questions
+
 CRITICAL MATHEMATICAL FORMATTING:
 - For ALL mathematical expressions, use LaTeX notation
+- YOU MUST DOUBLE-ESCAPE BACKSLASHES in the JSON string (e.g. "\\frac", "\\sqrt", "\\tan")
 - Inline math: $x = 5$
 - Display math: $$E = mc^2$$
 - Use \\times for multiplication, \\frac{a}{b} for fractions, \\sqrt{x} for roots
@@ -147,19 +150,19 @@ Return JSON format:
 
 Use the web search results below to inform your questions and ensure they align with the actual curriculum standards and examination patterns.`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Web search context:\n\n${contextText}\n\nPlease generate the quiz questions in JSON format.` }
         ],
-        response_format: { type: 'json_object' }
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -178,16 +181,16 @@ Use the web search results below to inform your questions and ensure they align 
     }
 
     const aiData = await aiResponse.json();
-    
+
     // Clean the AI response content to remove control characters and markdown code blocks
-    let content = aiData.choices[0].message.content;
-    
+    let content = aiData.choices?.[0]?.message?.content;
+
     // Remove markdown code block formatting (```json and ```)
     content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
+
     // Remove control characters except newlines and tabs
     content = content.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
-    
+
     const generatedQuiz = JSON.parse(content);
 
     console.log('Quiz generated successfully with', generatedQuiz.questions.length, 'questions');

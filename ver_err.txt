@@ -1,0 +1,47 @@
+﻿Starting Comprehensive Migration Verification (Fetch Mode)...
+Authenticating...
+Authenticated successfully.
+node : file:///C:/Use
+rs/aryam/Documents/le
+arn-together-pods/scr
+ipts/verify_migration
+_comprehensive.js:64
+At line:1 char:1
++ node scripts/verify
+_migration_comprehens
+ive.js 2>&1 | 
+Out-File -Encod ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (file://   
+ /C:/User...rehen    
+sive.js:64:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+    await invokeFunct
+ion('generate-flashca
+rds', {
+    ^
+
+ReferenceError: 
+invokeFunction is 
+not defined
+    at runTests (file
+:///C:/Users/aryam/Do
+cuments/learn-togethe
+r-pods/scripts/verify
+_migration_comprehens
+ive.js:64:5)
+    at process.proces
+sTicksAndRejections (
+node:internal/process
+/task_queues:105:5)
+
+Node.js v22.17.0

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,9 +11,29 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+  );
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+  if (userError || !user) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
+      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+
   try {
     const { subject, gradeLevel, duration, learningGoals } = await req.json();
-    
+
     if (!subject || !gradeLevel || !duration) {
       return new Response(
         JSON.stringify({ error: 'Missing required fields' }),
@@ -27,7 +48,7 @@ serve(async (req) => {
 
     // Use Tavily to research current curriculum standards
     const searchQuery = `${subject} curriculum standards grade ${gradeLevel} ${duration} learning objectives teaching plan`;
-    
+
     const tavilyResponse = await fetch('https://api.tavily.com/search', {
       method: 'POST',
       headers: {
@@ -51,10 +72,10 @@ serve(async (req) => {
       .join('\n\n')
       .slice(0, 3000);
 
-    // Now use Lovable AI to generate comprehensive curriculum with streaming
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    // Now use OpenAI API to generate comprehensive curriculum with streaming
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('OPENAI_API_KEY is not configured');
     }
 
     const prompt = `Based on this research about ${subject} curriculum standards:
@@ -76,22 +97,21 @@ Structure the curriculum into 3-5 units, each with:
 
 Make it practical, comprehensive, and ready for classroom implementation.`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const systemPrompt = 'You are an expert curriculum designer. Create detailed, practical curriculum plans that are standards-aligned and ready for classroom implementation. Format responses using plain text with clear structure. IMPORTANT: You MAY use Markdown for structure (bold, etc). For ANY math or science formulas, you MUST use LaTeX enclosed in $ (inline) or $$ (block).';
+
+    const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gpt-4o-mini',
         messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert curriculum designer. Create detailed, practical curriculum plans that are standards-aligned and ready for classroom implementation. Format responses using ONLY plain text with clear structure - NO markdown, NO asterisks, NO special formatting characters. Use simple line breaks and indentation for structure.' 
-          },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        stream: true,
+        stream: true
       }),
     });
 
@@ -111,6 +131,7 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
         }
 
         const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
         let buffer = '';
 
         try {
@@ -125,12 +146,12 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
-                if (data === '[DONE]') continue;
+                if (data.trim() === '[DONE]') continue; // Gemini might not send [DONE] exactly same way, but just in case
 
                 try {
                   const parsed = JSON.parse(data);
                   let content = parsed.choices?.[0]?.delta?.content || '';
-                  
+
                   // Aggressively clean the content as it streams
                   content = content
                     .replace(/\*\*/g, '')
@@ -142,11 +163,13 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
                     .replace(/~/g, '');
 
                   if (content) {
+                    // Send to client in the format they expect (OpenAI style data: { content: ... })
                     const sseData = `data: ${JSON.stringify({ content })}\n\n`;
-                    controller.enqueue(new TextEncoder().encode(sseData));
+                    controller.enqueue(encoder.encode(sseData));
                   }
                 } catch (e) {
-                  console.error('Parse error:', e);
+                  // console.error('Parse error:', e); 
+                  // Sometimes Gemini sends metadata or heartbeat, ignore parse errors
                 }
               }
             }
@@ -154,7 +177,7 @@ Make it practical, comprehensive, and ready for classroom implementation.`;
         } catch (error) {
           console.error('Streaming error:', error);
         } finally {
-          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         }
       },

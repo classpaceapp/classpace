@@ -15,8 +15,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
@@ -112,36 +112,29 @@ serve(async (req) => {
       materials,
     };
 
-    const systemPrompt = `You are Classpace's AI Teaching Assistant. Provide concise, helpful answers. Use the provided context from the teacher's pods (titles, notes, materials) to answer specifically. If a user asks about a specific pod, prefer its related notes and materials. If information is not present in context, say so briefly and suggest actions the user can take in Classpace (e.g., upload materials, create notes). Avoid fabrications.`;
+    const systemPrompt = `You are Classpace's AI Teaching Assistant. Provide concise, helpful answers. Use the provided context from the teacher's pods (titles, notes, materials) to answer specifically. If a user asks about a specific pod, prefer its related notes and materials. If information is not present in context, say so briefly. Avoid fabrications. IMPORTANT: Format ALL math and science using LaTeX enclosed in $ (inline) or $$ (block). Do NOT use \\( or \\[ delimiters.`;
 
-    const gatewayBody = {
-      // model omitted to use default (google/gemini-2.5-flash)
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "system", content: `Context JSON:\n${JSON.stringify(context).slice(0, 120000)}` },
-        ...messages,
-      ],
-    } as any;
-
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(gatewayBody),
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt + `\n\nContext JSON:\n${JSON.stringify(context).slice(0, 120000)}` },
+          ...messages.filter((m: any) => m.role !== 'system')
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
     });
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResp.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required. Please add AI credits." }), {
-          status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -154,7 +147,7 @@ serve(async (req) => {
     }
 
     const data = await aiResp.json();
-    const responseText = data?.choices?.[0]?.message?.content ?? "";
+    const responseText = data.choices?.[0]?.message?.content ?? "";
 
     return new Response(JSON.stringify({ response: responseText }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,4 +1,4 @@
-project_id = "roodcmebqkwmoxrfjdzq"
+project_id = "ihfykcnicjdfbsibgcgn"
 
 [functions.cancel-subscription]
 verify_jwt = true

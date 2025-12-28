@@ -14,8 +14,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
@@ -51,7 +51,7 @@ serve(async (req) => {
 
     const role = (profile?.role as string) || 'learner';
     const userName = `${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`.trim() || 'User';
-    
+
     log("Building context for role", { role, userName });
 
     let context: any = {
@@ -70,14 +70,14 @@ serve(async (req) => {
 
     if (role === 'teacher') {
       // TEACHER: Get ALL their data
-      
+
       // 1. Get all pods they own
       const { data: pods } = await supabaseAdmin
         .from('pods')
         .select('id, title, subject, description, pod_code, is_public, created_at, updated_at')
         .eq('teacher_id', user.id)
         .order('updated_at', { ascending: false });
-      
+
       const podIds = (pods || []).map(p => p.id);
       context.pods = pods || [];
       log("Fetched teacher pods", { count: pods?.length || 0 });
@@ -88,7 +88,7 @@ serve(async (req) => {
           .from('pod_members')
           .select('pod_id, user_id, joined_at')
           .in('pod_id', podIds);
-        
+
         const studentIds = [...new Set((members || []).map(m => m.user_id))];
         let studentProfiles: any[] = [];
         if (studentIds.length > 0) {
@@ -98,7 +98,7 @@ serve(async (req) => {
             .in('id', studentIds);
           studentProfiles = profiles || [];
         }
-        
+
         context.students = (members || []).map(m => {
           const studentProfile = studentProfiles.find(p => p.id === m.user_id);
           return {
@@ -165,7 +165,7 @@ serve(async (req) => {
             .in('quiz_id', quizIds)
             .order('submitted_at', { ascending: false })
             .limit(100);
-          
+
           context.quizResponses = (responses || []).map(r => {
             const quiz = quizzes?.find(q => q.id === r.quiz_id);
             const student = context.students.find((s: any) => s.studentId === r.user_id);
@@ -246,7 +246,7 @@ serve(async (req) => {
         .limit(10);
       context.savedLessons = lessons || [];
 
-      log("Teacher context built", { 
+      log("Teacher context built", {
         pods: context.pods?.length,
         students: context.students?.length,
         quizzes: context.quizzes?.length,
@@ -255,21 +255,21 @@ serve(async (req) => {
 
     } else {
       // STUDENT: Get ALL their data
-      
+
       // 1. Get pods they're members of
       const { data: memberPods } = await supabaseAdmin
         .from('pod_members')
         .select('pod_id, joined_at')
         .eq('user_id', user.id);
-      
+
       const podIds = (memberPods || []).map(m => m.pod_id);
-      
+
       if (podIds.length > 0) {
         const { data: pods } = await supabaseAdmin
           .from('pods')
           .select('id, title, subject, description, teacher_id, created_at')
           .in('id', podIds);
-        
+
         // Get teacher info for each pod
         const teacherIds = [...new Set((pods || []).map(p => p.teacher_id))];
         let teacherProfiles: any[] = [];
@@ -280,7 +280,7 @@ serve(async (req) => {
             .in('id', teacherIds);
           teacherProfiles = profiles || [];
         }
-        
+
         context.pods = (pods || []).map(p => ({
           ...p,
           teacherName: teacherProfiles.find(t => t.id === p.teacher_id)
@@ -412,7 +412,7 @@ serve(async (req) => {
     }
 
     // Build system prompt based on role
-    const systemPrompt = role === 'teacher' 
+    const systemPrompt = role === 'teacher'
       ? `You are Classpace's intelligent Teaching Assistant - an expert AI companion designed specifically for educators. You have COMPLETE access to all of ${userName}'s teaching data on Classpace.
 
 Your capabilities:
@@ -454,37 +454,35 @@ IMPORTANT: Always base your answers on the actual context data provided. Never f
     const contextStr = JSON.stringify(context);
     const truncatedContext = contextStr.length > 100000 ? contextStr.slice(0, 100000) + '...(truncated)' : contextStr;
 
-    const gatewayBody = {
-      model: 'google/gemini-2.5-flash',
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "system", content: `Here is ${userName}'s complete Classpace data:\\n\\n${truncatedContext}` },
-        ...messages,
-      ],
-      stream: true,
-    };
+    const geminiContents = messages
+      .filter((m: any) => m.role !== 'system')
+      .map((m: any) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      }));
 
     log("Calling AI gateway", { messageCount: messages.length });
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResp = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(gatewayBody),
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt + `\n\nHere is ${userName}'s complete Classpace data:\n\n${truncatedContext}\n\nIMPORTANT: Format ALL math/science using LaTeX ($ for inline, $$ for block).` },
+          ...messages.filter((m: any) => m.role !== 'system')
+        ],
+        stream: true
+      }),
     });
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limits exceeded. Please try again in a moment." }), {
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (aiResp.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits needed. Please contact support." }), {
-          status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -496,10 +494,70 @@ IMPORTANT: Always base your answers on the actual context data provided. Never f
       });
     }
 
-    // Stream the response back
-    return new Response(aiResp.body, {
-      headers: { 
-        ...corsHeaders, 
+    // Stream the response back using custom reader to adapt Gemini SSE to client format
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = aiResp.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data.trim() === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  let content = parsed.choices?.[0]?.delta?.content || '';
+
+                  // Clean content if needed (similar to nexus-generators)
+                  content = content
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/#{1,6}\s/g, '')
+                    .replace(/`{1,3}/g, '')
+                    .replace(/_{2}/g, '')
+                    .replace(/~/g, '');
+
+                  if (content) {
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`)); // Mimic OpenAI format for client compatibility if needed?
+                    // Wait, smart-assistant CLIENT likely expects OpenAI format?
+                    // The original code was `return new Response(aiResp.body)` which piped Lovable (OpenAI format).
+                    // So the CLIENT expects: `data: {"choices":[{"delta":{"content":"..."}}]}`.
+                    // I MUST MIMIC THIS FORMAT.
+                  }
+                } catch (e) {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        ...corsHeaders,
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive"
@@ -514,4 +572,3 @@ IMPORTANT: Always base your answers on the actual context data provided. Never f
     });
   }
 });
-

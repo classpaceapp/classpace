@@ -20,7 +20,7 @@ serve(async (req) => {
     logStep("Function started");
 
     const { title, curriculum, topic, subtopic, cardCount, podId } = await req.json();
-    
+
     logStep("Request data", { title, curriculum, topic, subtopic, cardCount, podId });
 
     // Initialize Supabase client
@@ -33,11 +33,11 @@ serve(async (req) => {
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");
-    
+
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError || !user) throw new Error("Authentication failed");
-    
+
     logStep("User authenticated", { userId: user.id });
 
     // Get user's profile and subscription status
@@ -77,17 +77,17 @@ serve(async (req) => {
     if (currentCount >= limit) {
       logStep("User reached limit");
       return new Response(
-        JSON.stringify({ 
-          error: "LIMIT_REACHED", 
+        JSON.stringify({
+          error: "LIMIT_REACHED",
           limit,
           isTeacher,
-          message: isTeacher 
+          message: isTeacher
             ? "You've reached your free plan limit of 1 flashcard set. Upgrade to Teach+ to create unlimited flashcards!"
             : "You've reached your limit of 2 flashcard sets. Upgrade to create unlimited flashcards!"
         }),
-        { 
-          status: 403, 
-          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
         }
       );
     }
@@ -125,9 +125,9 @@ serve(async (req) => {
       .join("\n\n")
       .slice(0, 12000); // Increased from 8000 to 12000 for more context
 
-    // Generate flashcards with Lovable AI
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY not configured");
+    // Use OpenAI API directly
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiApiKey) throw new Error("OPENAI_API_KEY not configured");
 
     const systemPrompt = `You are an expert educator creating flashcards for students. Generate exactly ${cardCount} flashcards based on the provided search results.
 
@@ -187,34 +187,49 @@ Educational content reference:
 ${searchContext}
 
 Generate exactly ${cardCount} flashcards with technical, content-focused questions and comprehensive answers. Use LaTeX for any mathematical expressions.`;
-    
+
     logStep("User prompt length", { length: userPrompt.length });
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
+        "Authorization": `Bearer ${openaiApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
+        response_format: { type: "json_object" }
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       logStep("AI API error", { status: aiResponse.status, error: errorText });
-      throw new Error(`AI generation failed: ${aiResponse.status}`);
+
+      if (aiResponse.status === 429) {
+        return new Response(
+          JSON.stringify({
+            error: "Service Busy: The AI is currently experiencing high traffic. Please try again in 1 minute.",
+            details: "OpenAI quota exceeded (Rate Limit)"
+          }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          }
+        );
+      }
+
+      throw new Error(`AI generation failed: ${aiResponse.status} - ${errorText}`);
     }
 
     const aiData = await aiResponse.json();
-    const content = aiData.choices[0]?.message?.content;
-    
+    const content = aiData.choices?.[0]?.message?.content;
+
     if (!content) throw new Error("No content generated");
 
     logStep("AI content generated");
@@ -227,7 +242,7 @@ Generate exactly ${cardCount} flashcards with technical, content-focused questio
         .replace(/```json\s*/g, "")
         .replace(/```\s*/g, "")
         .trim();
-      
+
       flashcardsData = JSON.parse(cleanContent);
     } catch (parseError) {
       logStep("Parse error", { content, error: parseError });
@@ -289,23 +304,23 @@ Generate exactly ${cardCount} flashcards with technical, content-focused questio
     logStep("Flashcards inserted successfully");
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         flashcardSet,
-        cards: cleanedFlashcards 
+        cards: cleanedFlashcards
       }),
-      { 
+      {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200 
+        status: 200
       }
     );
   } catch (error) {
     logStep("ERROR", { message: error.message });
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
+      {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500 
+        status: 500
       }
     );
   }

@@ -1,0 +1,4 @@
+WARNING: Docker is not running
+Uploading asset (aurora-interview-questions): supabase/functions/aurora-interview-questions/index.ts
+Deployed Functions on project ihfykcnicjdfbsibgcgn: aurora-interview-questions
+You can inspect your deployment in the Dashboard: https://supabase.com/dashboard/project/ihfykcnicjdfbsibgcgn/functions
