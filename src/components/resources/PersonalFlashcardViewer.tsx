@@ -115,7 +115,7 @@ export const PersonalFlashcardViewer = ({ flashcardSetId, onClose }: PersonalFla
         // Golden gradient background for front
         pdf.setFillColor(255, 223, 128);
         pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-        
+
         // Add decorative golden border
         pdf.setDrawColor(218, 165, 32);
         pdf.setLineWidth(2);
@@ -153,7 +153,7 @@ export const PersonalFlashcardViewer = ({ flashcardSetId, onClose }: PersonalFla
         // Golden gradient background for back
         pdf.setFillColor(255, 235, 205);
         pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-        
+
         // Add decorative golden border
         pdf.setDrawColor(218, 165, 32);
         pdf.setLineWidth(2);
@@ -183,7 +183,7 @@ export const PersonalFlashcardViewer = ({ flashcardSetId, onClose }: PersonalFla
         pdf.setFontSize(14);
         pdf.setTextColor(51, 51, 51);
         const contentLines = pdf.splitTextToSize(readableContent, contentWidth - 20);
-        
+
         let yPosition = margin + 50;
         const lineHeight = 7;
         const maxY = pageHeight - margin - 20;
@@ -350,7 +350,7 @@ export const PersonalFlashcardViewer = ({ flashcardSetId, onClose }: PersonalFla
               <ChevronRight className="h-5 w-5 ml-1" />
             </Button>
           </div>
-          
+
           <Button
             onClick={handleDownloadPDF}
             className="w-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
