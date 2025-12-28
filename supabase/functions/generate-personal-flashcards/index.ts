@@ -115,13 +115,15 @@ CRITICAL FORMATTING RULES:
    - "hint": A concise question or prompt about the ACTUAL content (front of card)
    - "content": A clear, detailed answer with technical/educational information (back of card)
    - "content": A clear, detailed answer with technical/educational information (back of card)
-3. For mathematical equations, ALWAYS use LaTeX notation:
+3. For mathematical equations, ALWAYS use LaTeX notation with DOUBLE BACKSLASHES:
    - Inline math: $x = 5$
    - Display math: $$E = mc^2$$
+   - YOU MUST ESCAPE BACKSLASHES in the JSON string: use \\times, \\frac, \\sqrt, \\tan
+   - Example output: "content": "The formula is $\\frac{a}{b}$" (Note the double backslash)
    - Use \\times for multiplication (NOT * or x)
    - Use \\frac{a}{b} for fractions
    - Use \\sqrt{x} for square roots
-   - Example: "For $459.326$ in expanded form: $4 \\times 100 + 5 \\times 10 + 9 \\times 1 + 3 \\times \\frac{1}{10} + 2 \\times \\frac{1}{100} + 6 \\times \\frac{1}{1000}$"
+   - Example: "For $459.326$ in expanded form: $4 \\times 100 + ...$"
 4. Remove ALL unnecessary punctuation like **, *, bullet points, arrows
 5. Make content clear, educational, and academically appropriate
 

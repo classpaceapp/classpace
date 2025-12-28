@@ -10,29 +10,29 @@
  */
 export const normalizeMathDelimiters = (text: string): string => {
   if (!text) return text;
-  
+
   let result = text;
-  
+
   // Convert [ ... ] style display math to $$ ... $$ (must check it's not a markdown link)
   // Pattern: [ followed by math content followed by ] but NOT [text](url) format
   result = result.replace(/\[\s*\\([a-zA-Z]+)/g, '$$\\$1');
   result = result.replace(/\\\][\s]*$/gm, '$$');
   result = result.replace(/\s*\\\]/g, '$$');
-  
+
   // Handle patterns like "[ \frac{...} ]" that aren't caught above
   result = result.replace(/^\[\s*([^[\]]*\\[a-zA-Z]+[^[\]]*)\s*\]$/gm, '$$$$1$$$$');
-  
+
   // Convert \[ ... \] to $$ ... $$
   result = result.replace(/\\\[/g, '$$');
   result = result.replace(/\\\]/g, '$$');
-  
+
   // Convert \( ... \) to $ ... $
   result = result.replace(/\\\(/g, '$');
   result = result.replace(/\\\)/g, '$');
-  
+
   // Fix double $$$$ that might occur from nested replacements
   result = result.replace(/\${4,}/g, '$$');
-  
+
   // Handle ( ... ) with LaTeX inside as inline math (only if it contains LaTeX commands)
   // Be careful not to break regular parentheses
   result = result.replace(/\(\s*(\\[a-zA-Z]+[^)]+)\s*\)/g, (match, inner) => {
@@ -42,7 +42,7 @@ export const normalizeMathDelimiters = (text: string): string => {
     }
     return match;
   });
-  
+
   return result;
 };
 
@@ -52,9 +52,9 @@ export const normalizeMathDelimiters = (text: string): string => {
  */
 export const latexToVisualUnicode = (latex: string): string => {
   if (!latex) return latex;
-  
+
   let result = latex;
-  
+
   // Handle derivative notation first (before generic frac)
   result = result
     // d/dt style derivatives
@@ -69,7 +69,7 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\frac\{\\partial\}\{\\partial\s*z\}/g, '∂/∂z')
     .replace(/\\frac\{\\partial\s*([A-Za-z])\}\{\\partial\s*([A-Za-z])\}/g, '∂$1/∂$2')
     .replace(/\\frac\{d([A-Za-z])\}\{d([A-Za-z])\}/g, 'd$1/d$2');
-  
+
   // Handle \left and \right delimiters (remove them, keep the delimiter)
   result = result
     .replace(/\\left\s*\(/g, '(')
@@ -84,7 +84,7 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\right\s*\\}/g, '}')
     .replace(/\\left/g, '')
     .replace(/\\right/g, '');
-  
+
   // Handle \dot, \ddot, \bar, \hat, \vec, \tilde (accent marks)
   result = result
     .replace(/\\dot\{([A-Za-z])\}/g, '$1̇')
@@ -95,7 +95,7 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\hat\{([A-Za-z])\}/g, '$1̂')
     .replace(/\\vec\{([A-Za-z])\}/g, '$1⃗')
     .replace(/\\tilde\{([A-Za-z])\}/g, '$1̃');
-  
+
   // Common fractions
   result = result
     .replace(/\\frac\{1\}\{2\}/g, '½')
@@ -115,7 +115,7 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\frac\{7\}\{8\}/g, '⅞')
     // Generic fractions: a/b format
     .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
-  
+
   // Superscripts (powers)
   const superscriptMap: Record<string, string> = {
     '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
@@ -123,13 +123,13 @@ export const latexToVisualUnicode = (latex: string): string => {
     '+': '⁺', '-': '⁻', '=': '⁼', '(': '⁽', ')': '⁾',
     'n': 'ⁿ', 'i': 'ⁱ', 'x': 'ˣ', 'y': 'ʸ'
   };
-  
+
   result = result
-    .replace(/\^{([^{}]+)}/g, (_, p) => 
+    .replace(/\^{([^{}]+)}/g, (_, p) =>
       p.split('').map((c: string) => superscriptMap[c] || c).join('')
     )
     .replace(/\^([0-9n+-])/g, (_, p) => superscriptMap[p] || `^${p}`);
-  
+
   // Subscripts
   const subscriptMap: Record<string, string> = {
     '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
@@ -138,13 +138,13 @@ export const latexToVisualUnicode = (latex: string): string => {
     'a': 'ₐ', 'e': 'ₑ', 'i': 'ᵢ', 'n': 'ₙ', 'o': 'ₒ',
     'r': 'ᵣ', 's': 'ₛ', 't': 'ₜ', 'u': 'ᵤ', 'v': 'ᵥ', 'x': 'ₓ'
   };
-  
+
   result = result
-    .replace(/_{([^{}]+)}/g, (_, p) => 
+    .replace(/_{([^{}]+)}/g, (_, p) =>
       p.split('').map((c: string) => subscriptMap[c] || c).join('')
     )
     .replace(/_([0-9aeinorstuv])/g, (_, p) => subscriptMap[p] || `_${p}`);
-  
+
   // Greek letters
   result = result
     // Lowercase
@@ -163,7 +163,7 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\Lambda/g, 'Λ').replace(/\\Xi/g, 'Ξ').replace(/\\Pi/g, 'Π')
     .replace(/\\Sigma/g, 'Σ').replace(/\\Upsilon/g, 'Υ').replace(/\\Phi/g, 'Φ')
     .replace(/\\Psi/g, 'Ψ').replace(/\\Omega/g, 'Ω');
-  
+
   // Math operators and symbols
   result = result
     .replace(/\\sqrt\{([^{}]+)\}/g, '√($1)')
@@ -208,14 +208,14 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\star/g, '⋆').replace(/\\ast/g, '∗')
     .replace(/\\oplus/g, '⊕').replace(/\\otimes/g, '⊗')
     .replace(/\\therefore/g, '∴').replace(/\\because/g, '∵');
-  
+
   // Text commands
   result = result
     .replace(/\\text\{([^{}]+)\}/g, '$1')
     .replace(/\\mathrm\{([^{}]+)\}/g, '$1')
     .replace(/\\mathbf\{([^{}]+)\}/g, '$1')
     .replace(/\\mathit\{([^{}]+)\}/g, '$1');
-  
+
   // Spacing
   result = result
     .replace(/\\quad/g, '  ')
@@ -224,14 +224,14 @@ export const latexToVisualUnicode = (latex: string): string => {
     .replace(/\\;/g, ' ')
     .replace(/\\:/g, ' ')
     .replace(/\\ /g, ' ');
-  
+
   // Clean up remaining backslashes that are LaTeX command remnants
   // But be careful not to remove meaningful escaped characters
-  result = result.replace(/\\([a-zA-Z]+)/g, '$1');
-  
+  // result = result.replace(/\\([a-zA-Z]+)/g, '$1'); // REMOVED: This was breaking LaTeX!
+
   // Clean up extra spaces
   result = result.replace(/\s+/g, ' ').trim();
-  
+
   return result;
 };
 
@@ -239,9 +239,9 @@ export const latexToVisualUnicode = (latex: string): string => {
  * Normalizes coordinates from a standard 1000x700 space to actual canvas dimensions
  */
 export const normalizeCoordinates = (
-  x: number, 
-  y: number, 
-  canvasWidth: number, 
+  x: number,
+  y: number,
+  canvasWidth: number,
   canvasHeight: number,
   sourceWidth: number = 1000,
   sourceHeight: number = 700
@@ -274,14 +274,14 @@ export class WhiteboardLayoutManager {
   private canvasHeight: number;
   private padding: number;
   private margin: number;
-  
+
   constructor(canvasWidth: number, canvasHeight: number, padding: number = 20, margin: number = 40) {
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.padding = padding;
     this.margin = margin;
   }
-  
+
   /**
    * Update occupied regions from current canvas objects
    */
@@ -293,40 +293,40 @@ export class WhiteboardLayoutManager {
       bottom: obj.top + obj.height + this.padding
     }));
   }
-  
+
   /**
    * Check if a position collides with any occupied region
    */
   private collides(box: BoundingBox): boolean {
     for (const region of this.occupiedRegions) {
-      if (!(box.right < region.left || 
-            box.left > region.right || 
-            box.bottom < region.top || 
-            box.top > region.bottom)) {
+      if (!(box.right < region.left ||
+        box.left > region.right ||
+        box.bottom < region.top ||
+        box.top > region.bottom)) {
         return true;
       }
     }
     return false;
   }
-  
+
   /**
    * Check if a box is within canvas bounds
    */
   private isWithinBounds(box: BoundingBox): boolean {
     return box.left >= this.margin &&
-           box.top >= this.margin &&
-           box.right <= this.canvasWidth - this.margin &&
-           box.bottom <= this.canvasHeight - this.margin;
+      box.top >= this.margin &&
+      box.right <= this.canvasWidth - this.margin &&
+      box.bottom <= this.canvasHeight - this.margin;
   }
-  
+
   /**
    * Find the best position for content of given size
    * Returns position that avoids collisions and stays in bounds
    */
   findBestPosition(
-    preferredX: number, 
-    preferredY: number, 
-    width: number, 
+    preferredX: number,
+    preferredY: number,
+    width: number,
     height: number
   ): { x: number; y: number; overflow: boolean } {
     // First try the preferred position
@@ -336,35 +336,35 @@ export class WhiteboardLayoutManager {
       right: preferredX + width,
       bottom: preferredY + height
     };
-    
+
     if (!this.collides(testBox) && this.isWithinBounds(testBox)) {
       return { x: preferredX, y: preferredY, overflow: false };
     }
-    
+
     // Search in a grid pattern from preferred position
     const searchRadius = Math.max(this.canvasWidth, this.canvasHeight);
     const stepSize = 50;
-    
+
     // Try positions in expanding circles from preferred position
     for (let radius = stepSize; radius < searchRadius; radius += stepSize) {
       for (let angle = 0; angle < 360; angle += 30) {
         const rad = (angle * Math.PI) / 180;
         const testX = preferredX + radius * Math.cos(rad);
         const testY = preferredY + radius * Math.sin(rad);
-        
+
         testBox = {
           left: testX,
           top: testY,
           right: testX + width,
           bottom: testY + height
         };
-        
+
         if (!this.collides(testBox) && this.isWithinBounds(testBox)) {
           return { x: testX, y: testY, overflow: false };
         }
       }
     }
-    
+
     // Fallback: scan from top-left to find any available space
     for (let y = this.margin; y < this.canvasHeight - height - this.margin; y += stepSize) {
       for (let x = this.margin; x < this.canvasWidth - width - this.margin; x += stepSize) {
@@ -374,20 +374,20 @@ export class WhiteboardLayoutManager {
           right: x + width,
           bottom: y + height
         };
-        
+
         if (!this.collides(testBox)) {
           return { x, y, overflow: false };
         }
       }
     }
-    
+
     // Last resort: clamp to bounds and accept overlap
     const clampedX = Math.max(this.margin, Math.min(preferredX, this.canvasWidth - width - this.margin));
     const clampedY = Math.max(this.margin, Math.min(preferredY, this.canvasHeight - height - this.margin));
-    
+
     return { x: clampedX, y: clampedY, overflow: true };
   }
-  
+
   /**
    * Register a new occupied region
    */
@@ -399,14 +399,14 @@ export class WhiteboardLayoutManager {
       bottom: y + height + this.padding
     });
   }
-  
+
   /**
    * Clear all occupied regions (for whiteboard clear)
    */
   clear() {
     this.occupiedRegions = [];
   }
-  
+
   /**
    * Get next Y position for sequential content (auto-flow)
    */
@@ -414,11 +414,11 @@ export class WhiteboardLayoutManager {
     if (this.occupiedRegions.length === 0) {
       return { x: this.margin, y: this.margin };
     }
-    
+
     // Find the lowest point of all occupied regions
     const maxBottom = Math.max(...this.occupiedRegions.map(r => r.bottom));
     const nextY = Math.min(maxBottom + this.padding, this.canvasHeight - this.margin - 100);
-    
+
     return { x: this.margin, y: nextY };
   }
 }
