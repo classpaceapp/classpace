@@ -111,49 +111,38 @@ ASSESSMENT DETAILS:
 - Total Marks: ${totalMarks}
 - Assessment Type: ${assessmentType}
 
-CRITICAL REQUIREMENTS:
+CRITICAL OUTPUT FORMAT:
+You MUST return a JSON object with a "questions" field containing an array of exactly ${numQuestions} question objects.
+Structure:
+{
+  "questions": [
+    {
+      "id": 1,
+      "type": "multiple_choice" | "short_answer" | "essay" | "problem_solving",
+      "text": "Question text here (use LaTeX for math)",
+      "marks": 5,
+      "options": ["A", "B", "C", "D"], // Only for multiple_choice, make sure to include the label or just the text
+      "answer_key": "Correct answer explanation"
+    }
+  ]
+}
+
+CRITICAL CONTENT RULES:
 1. ALL questions must be directly related to ${topic} in ${subject}
 2. Questions must align with ${curriculum} curriculum standards for grade ${gradeLevel}
-3. Distribute ${totalMarks} marks appropriately across ${numQuestions} questions
+3. Distribute ${totalMarks} marks appropriately across the questions.
 4. Include varied difficulty levels (30% easy, 50% medium, 20% challenging)
-5. Mix question types: multiple choice, short answer, problem-solving, essay
-6. For mathematical content: Use LaTeX notation ONLY
+5. For mathematical content: Use LaTeX notation ONLY.
    - Inline math: $x = 5$
    - Display math: $$E = mc^2$$
    - Use \\times for multiplication (NOT * or x)
-   - Use \\frac{a}{b} for fractions (NOT 1/2)
-   - Use \\sqrt{x} for square roots
-7. ABSOLUTELY NO tables - use simple numbered lists instead
-8. NO HTML tags, NO underline tags, NO bold, NO italics - PLAIN TEXT ONLY except for LaTeX math
-9. NO backslashes except in LaTeX math expressions
-10. NO meta questions, NO generic questions - ONLY curriculum-specific academic content
-11. Each question must have clear mark allocation
-12. Include detailed marking rubric/answer key at the end
+   - Use \\frac{a}{b} for fractions
+   - You MUST escape backslashes in the JSON string (e.g. "\\\\frac").
+6. ABSOLUTELY NO markdown formatting (no **, ##). Plain text only in the "text" field.
 
-FORMAT:
-${title}
+Make sure the JSON is valid and parsable.`;
 
-Instructions for Students:
-- Time allocation
-- Total marks
-- Exam rules
-
-QUESTIONS:
-
-Question 1 (X marks):
-[Question text with proper mathematical formatting using LaTeX where needed]
-
-Question 2 (X marks):
-[Question text]
-
-... continue for all ${numQuestions} questions
-
-MARKING RUBRIC & ANSWER KEY:
-[Detailed answers and marking criteria for each question]
-
-CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO excessive backslashes. Use proper capitalization and punctuation for emphasis.`;
-
-    const systemPrompt = 'You are an expert educational assessment creator specializing in curriculum-aligned, academically rigorous assessments. Generate assessments with proper LaTeX formatting for mathematical content. CRITICAL RULES: Use ONLY plain text and LaTeX math (wrapped in $ or $$) - absolutely NO markdown symbols (*, **, #, _, `, etc.), NO tables of any kind (\\begin{tabular}, etc.), NO backslashes anywhere except inside LaTeX math delimiters ($ or $$). For blanks in fill-in-the-blank questions, use underscores like _____ or write "(blank)" - NEVER use backslashes. All emphasis should be through proper capitalization and punctuation only. For matching questions, use simple numbered lists, NOT tables.';
+    const systemPrompt = 'You are an expert educational assessment creator. You MUST respond with valid JSON only. Do not wrap the JSON in markdown code blocks. Ensure all LaTeX backslashes are double-escaped so they are valid in a JSON string.';
 
     console.log('Sending to AI for generation...');
 
@@ -166,17 +155,11 @@ CRITICAL: Use ONLY plain text and LaTeX for math. NO markdown, NO tables, NO exc
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          {
-            role: 'system', content: `${systemPrompt}
-
-IMPORTANT: You must format ALL mathematical equations, formulas, and scientific notation using standard LaTeX.
-- Use single dollar signs for inline math: $E = mc^2$
-- Use double dollar signs for block math: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
-- Do NOT use \\( ... \\) or \\[ ... \\].
-- Ensure all backslashes are properly escaped in the JSON response.` },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7
+        temperature: 0.7,
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -187,93 +170,28 @@ IMPORTANT: You must format ALL mathematical equations, formulas, and scientific 
     }
 
     const aiData = await aiResponse.json();
-    let assessment = aiData.choices?.[0]?.message?.content || '';
+    const content = aiData.choices?.[0]?.message?.content || '{}';
 
-    console.log('Assessment generated, cleaning response...');
+    console.log('AI response received, parsing JSON...');
 
-    // ULTRA-AGGRESSIVE cleaning - preserve LaTeX math, remove everything else
-    console.log('Starting aggressive cleaning...');
-
-    // Step 1: Extract and protect LaTeX math expressions
-    const mathExpressions: string[] = [];
-    let tempAssessment = assessment;
-
-    // Protect display math ($$...$$)
-    tempAssessment = tempAssessment.replace(/\$\$([^\$]+)\$\$/g, (match, content) => {
-      mathExpressions.push(match);
-      return `__MATH_${mathExpressions.length - 1}__`;
-    });
-
-    // Protect inline math ($...$)
-    tempAssessment = tempAssessment.replace(/\$([^\$]+)\$/g, (match, content) => {
-      mathExpressions.push(match);
-      return `__MATH_${mathExpressions.length - 1}__`;
-    });
-
-    console.log(`Protected ${mathExpressions.length} math expressions`);
-
-    // Step 2: Aggressive cleaning on non-math content
-    tempAssessment = tempAssessment
-      // Remove code blocks
-      .replace(/```json\s*/g, '')
-      .replace(/```\s*/g, '')
-      // Remove ALL LaTeX table environments
-      .replace(/\\begin\{tabular\}[\s\S]*?\\end\{tabular\}/g, '')
-      .replace(/\\begin\{table\}[\s\S]*?\\end\{table\}/g, '')
-      .replace(/\\begin\{array\}[\s\S]*?\\end\{array\}/g, '')
-      // Remove ALL backslashes now (math is protected)
-      .replace(/\\/g, '')
-      // Remove markdown formatting
-      .replace(/\*\*\*/g, '')
-      .replace(/\*\*/g, '')
-      .replace(/\*/g, '')
-      .replace(/#{1,6}\s/g, '')
-      .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-      .replace(/`([^`]+)`/g, '$1')
-      .replace(/^\s*[-*+]\s+/gm, '')
-      .replace(/^\s*\d+\.\s+/gm, '')
-      .replace(/^\s*>\s+/gm, '')
-      // Remove ALL HTML-like tags
-      .replace(/<\/?[^>]+(>|$)/g, '')
-      // Remove table-related syntax
-      .replace(/\|/g, '')
-      // Final whitespace cleanup
-      .replace(/\r\n/g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .replace(/\s{3,}/g, ' ')
-      .trim();
-
-    // Step 3: Restore protected math expressions
-    mathExpressions.forEach((expr, index) => {
-      tempAssessment = tempAssessment.replace(`__MATH_${index}__`, expr);
-    });
-
-    assessment = tempAssessment;
-    console.log('Cleaning completed');
-
-    // CRITICAL: Strip the answer key section to prevent answer leak in public assessments
-    // Find and remove everything after "MARKING RUBRIC", "ANSWER KEY", or similar headers
-    const answerSectionPatterns = [
-      /MARKING RUBRIC[\s\S]*/i,
-      /ANSWER KEY[\s\S]*/i,
-      /ANSWERS[\s\S]*/i,
-      /MARKING SCHEME[\s\S]*/i,
-      /MARK SCHEME[\s\S]*/i,
-      /SOLUTIONS[\s\S]*/i
-    ];
-
-    for (const pattern of answerSectionPatterns) {
-      if (pattern.test(assessment)) {
-        assessment = assessment.replace(pattern, '').trim();
-        console.log('Removed answer section for security');
-        break;
-      }
+    let generatedData;
+    try {
+      generatedData = JSON.parse(content);
+    } catch (e) {
+      console.error('JSON Parse Error', e);
+      // Fallback or attempt to clean json
+      throw new Error('Failed to generate valid JSON assessment');
     }
 
-    console.log('Assessment cleaned and ready');
+    // validate structure
+    if (!generatedData.questions || !Array.isArray(generatedData.questions)) {
+      throw new Error('Invalid assessment structure generated');
+    }
+
+    console.log(`Generated ${generatedData.questions.length} structured questions.`);
 
     return new Response(
-      JSON.stringify({ assessment }),
+      JSON.stringify({ assessment: generatedData.questions }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

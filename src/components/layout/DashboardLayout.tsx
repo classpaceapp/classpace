@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Menu, 
-  X, 
-  FileText, 
-  HelpCircle, 
-  MessageSquare, 
+import {
+  Menu,
+  X,
+  FileText,
+  HelpCircle,
+  MessageSquare,
   LifeBuoy,
   LogOut,
   User,
@@ -49,7 +49,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
   useEffect(() => {
     if (userRole === 'teacher' && user?.id) {
       fetchUnreadCount();
-      
+
       // Set up realtime subscription for new messages
       const channel = supabase
         .channel('educator-messages-count')
@@ -75,7 +75,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
 
   const fetchUnreadCount = async () => {
     if (!user?.id) return;
-    
+
     const { count, error } = await supabase
       .from('educator_messages')
       .select('*', { count: 'exact', head: true })
@@ -121,7 +121,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
 
   const navigationItems = userRole === 'teacher' ? teacherNavItems : learnerNavItems;
 
-  const userInitials = profile?.first_name && profile?.last_name 
+  const userInitials = profile?.first_name && profile?.last_name
     ? `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`
     : user?.email?.charAt(0).toUpperCase() || 'U';
 
@@ -167,14 +167,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
       </div>
 
       {/* Sidebar - Fixed transparency issue with solid background */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card backdrop-blur-md border-r border-border shadow-2xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-card backdrop-blur-md border-r border-border shadow-2xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         {/* Logo */}
         <div className="flex items-center gap-3 p-6 border-b border-border/50">
-          <img 
-            src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-            alt="Classpace Logo" 
+          <img
+            src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+            alt="Classpace Logo"
             className="w-8 h-8"
           />
           <span className="text-xl font-bold" style={{ color: 'hsl(280, 70%, 40%)' }}>
@@ -186,28 +185,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         <nav className={`p-4 overflow-y-auto max-h-[calc(100vh-200px)] ${userRole === 'learner' ? 'space-y-1' : 'space-y-2'}`}>
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.href;
-            
+
             return (
               <button
                 key={item.name}
                 onClick={() => handleNavigation(item.href)}
-                className={`flex items-center gap-2.5 px-3 rounded-xl transition-all duration-200 w-full text-left ${
-                  userRole === 'learner' ? 'py-2 text-xs' : 'py-3'
-                } ${
-                  isActive 
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25' 
+                className={`flex items-center gap-2.5 px-3 rounded-xl transition-all duration-200 w-full text-left ${userRole === 'learner' ? 'py-2 text-xs' : 'py-3'
+                  } ${isActive
+                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                }`}
+                  }`}
               >
                 {typeof item.icon === 'string' ? (
-                  item.icon === 'learnspace' ? (
-                    <img src={learnspaceLogo} alt="Learnspace" className={userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} />
-                  ) : item.icon === 'phoenix' ? (
+                  item.icon === 'phoenix' ? (
                     <img src={phoenixLogo} alt="Phoenix" className={userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} />
                   ) : null
                 ) : (
-                  React.createElement(item.icon, { 
-                    className: `${userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} ${!isActive && item.color ? item.color : ''}` 
+                  React.createElement(item.icon, {
+                    className: `${userRole === 'learner' ? 'h-3.5 w-3.5 flex-shrink-0' : 'h-5 w-5'} ${!isActive && item.color ? item.color : ''}`
                   })
                 )}
                 <span className="font-medium truncate">{item.name}</span>
@@ -244,12 +239,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
               </p>
             </div>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleSignOut}
-            className={`w-full justify-start text-muted-foreground hover:text-foreground ${
-              userRole === 'learner' ? 'h-8 text-xs gap-1.5 px-2' : 'gap-2'
-            }`}
+            className={`w-full justify-start text-muted-foreground hover:text-foreground ${userRole === 'learner' ? 'h-8 text-xs gap-1.5 px-2' : 'gap-2'
+              }`}
           >
             <LogOut className={userRole === 'learner' ? 'h-3 w-3' : 'h-4 w-4'} />
             Sign Out
@@ -263,42 +257,42 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
         <header className="bg-card/30 backdrop-blur-md border-b border-border/50 px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
             <div className="md:hidden" /> {/* Spacer for mobile menu button */}
-            
+
             <div className="flex items-center gap-4 ml-auto">
-            <div className="flex items-center gap-4 ml-auto">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 focus:outline-none">
-                    <Avatar className="h-8 w-8">
-                      {profile?.avatar_url && (
-                        <AvatarImage src={profile.avatar_url} alt="Profile avatar" />
-                      )}
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                        {userInitials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="hidden md:block text-left">
-                      <p className="text-sm font-medium text-foreground">
-                        {profile?.first_name} {profile?.last_name}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {userRole === 'teacher' ? 'Teacher' : 'Student'}
-                      </p>
-                    </div>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+              <div className="flex items-center gap-4 ml-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="flex items-center gap-2 focus:outline-none">
+                      <Avatar className="h-8 w-8">
+                        {profile?.avatar_url && (
+                          <AvatarImage src={profile.avatar_url} alt="Profile avatar" />
+                        )}
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                          {userInitials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="hidden md:block text-left">
+                        <p className="text-sm font-medium text-foreground">
+                          {profile?.first_name} {profile?.last_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {userRole === 'teacher' ? 'Teacher' : 'Student'}
+                        </p>
+                      </div>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         </header>
@@ -309,7 +303,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, userRole })
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 z-30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />

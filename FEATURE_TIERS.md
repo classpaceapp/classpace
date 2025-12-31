@@ -1,99 +1,66 @@
-# Classpace Feature Tiers
+# Classpace Feature Tiers (Audit: Dec 2025)
 
-## Free Tier
+## 🎓 Student Tiers
+
+### Student Free
 **Price:** $0/month
+- **Pod Access**: Join unlimited pods via code.
+- **AI Assistant**: Limited to **3 Chats** total by default (unless upgraded).
+- **Personal AI Resources**: Limited to **1 set** of Flashcards, Quizzes, or Notes each.
+- **Phoenix AI**: Basic access.
+- **Career Tools**:
+  - Application Builder: Access included.
+  - Role Search: Access included.
+  - Interview Prep: **LOCKED**.
 
-### Core Features (Fully Functional)
-- ✅ **1 Pod Limit** - Create and manage 1 classroom pod
-- ✅ **Basic Pod Management** - Create, view, and join pods with unique codes
-- ✅ **Live Sessions** - Participate in real-time classroom sessions
-- ✅ **Chat Interface** - Message during sessions with teachers and students
-- ✅ **Materials Sharing** - View and access learning materials
-- ✅ **Quizzes** - Take quizzes and view scores
-- ✅ **Projects** - Submit projects and receive feedback
-- ✅ **Profile Management** - Manage your account and preferences
-- ✅ **Email Support** - Access to help center and email support
-
-### Limitations
-- ❌ Limited to 1 pod only
-- ❌ No AI teaching assistant
-- ❌ No advanced analytics
-- ❌ Standard support (email only, 24-48 hr response)
-
----
-
-## Premium Tier
+### Student Premium (Learn+)
 **Price:** $7/month
-
-### All Free Features Plus:
-- ✅ **Unlimited Pods** - Create and manage as many classroom pods as you need
-- ✅ **AI Teaching Assistant** - Get AI-powered insights and assistance (Coming Soon)
-- ✅ **Advanced Analytics** - Track student progress and engagement metrics (Coming Soon)
-- ✅ **Priority Support** - Faster response times and dedicated assistance
-- ✅ **Custom Branding** - Personalize your pods with custom themes (Coming Soon)
-- ✅ **Session Recording** - Record and playback teaching sessions (Coming Soon)
-- ✅ **Automated Grading** - AI-assisted quiz and project grading (Coming Soon)
-- ✅ **Bulk Operations** - Manage multiple students and pods efficiently
-- ✅ **Export Data** - Download student progress reports and analytics
+- **Pod Access**: Unlimited.
+- **AI Assistant**: **Unlimited Chats**.
+- **Personal AI Resources**: **Unlimited** Flashcards, Quizzes, Notes.
+- **Phoenix AI**: Priority access.
+- **Career Tools**:
+  - Application Builder: Access included.
+  - Role Search: Access included.
+  - Interview Prep: **Full Access** to AI Interview Simulator.
 
 ---
 
-## Current Implementation Status
+## 👩‍🏫 Teacher Tiers
 
-### ✅ Fully Implemented
-1. **Authentication System** - Email/password authentication with role-based access
-2. **Pod System** - Create, join, and manage classroom pods
-3. **Session Management** - Live sessions with chat interface
-4. **Materials Management** - Upload and share learning materials
-5. **Quiz System** - Create quizzes with multiple-choice questions
-6. **Project System** - Assign and submit projects
-7. **Subscription System** - Stripe integration for free/premium tiers
-8. **Database & RLS** - Secure data access with Row-Level Security
+### Teacher Free
+**Price:** $0/month
+- **Pod Creation**: Limited to **1 Pod**.
+- **Quiz Creation**: Limited to **2 Quizzes**.
+- **Nexus AI**: **NO ACCESS** (View-only Upgrade Overlay).
+- **Core Tools**: Full access to Whiteboards, Materials, Notes within the single pod.
+- **Students**: Unlimited students in the single pod.
 
-### 🚧 In Progress / Coming Soon
-1. **AI Teaching Assistant** - Powered by Lovable AI models
-2. **Advanced Analytics Dashboard** - Student progress tracking
-3. **Session Recording** - Save and replay sessions
-4. **Custom Branding** - Theme customization
-5. **Automated Grading** - AI-powered grading assistance
-
----
-
-## Technical Implementation
-
-### Free Tier Enforcement
-- Pod limit enforced at database level via RLS policies
-- UI checks subscription tier before allowing pod creation
-- Free users see upgrade prompts when hitting limits
-
-### Premium Tier Benefits
-- Database check for `subscription.tier = 'premium'`
-- Unlocks unlimited pod creation
-- Access to premium-only features
-- Priority support queue
-
-### Backend Architecture
-- **Database:** Supabase with RLS policies
-- **Payments:** Stripe with recurring subscriptions
-- **Edge Functions:** Subscription verification and checkout
-- **Authentication:** Supabase Auth with email/password
+### Teacher Premium (Teach+)
+**Price:** $7/month
+- **Pod Creation**: **Unlimited Pods**.
+- **Quiz Creation**: **Unlimited Quizzes**.
+- **Nexus AI**: **Full Access** to all modules:
+  - Curriculum Architect
+  - Lesson Orchestrator
+  - Assessment Hub (Auto-grading)
+  - Progress Analytics
+  - Time Optimizer
+  - Global Resource Library
+  - Student Profiles
+- **Support**: Priority handling.
 
 ---
 
-## Feature Roadmap
+## 🔒 Technical Enforcement
 
-### Phase 1 (Current)
-- ✅ Core pod and session functionality
-- ✅ Basic subscription system
-- ✅ Quiz and project management
+### Database Limits (SQL)
+- `check_pod_limit`: < 1 for Free Teachers.
+- `check_quiz_limit`: < 2 for Free Teachers.
+- `subscriptions` constraint: `tier IN ('free', 'premium', 'teacher_premium', 'student_premium')`.
 
-### Phase 2 (Next 3 Months)
-- 🚧 AI teaching assistant integration
-- 🚧 Advanced analytics dashboard
-- 🚧 Session recording and playback
-
-### Phase 3 (Future)
-- ⏳ Custom branding and themes
-- ⏳ Automated AI grading
-- ⏳ Mobile app support
-- ⏳ Integration with LMS platforms
+### Frontend Entitlements
+- **Nexus**: `isPremium` check blocks all tabs for Free Teachers.
+- **Learnspace**: `check-subscription` check enforces 3-chat limit.
+- **Resources**: `isPremium` check enforces 1-set limit per type.
+- **Careers**: `isPremium` check enforces Interview Prep access.

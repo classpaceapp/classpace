@@ -51,33 +51,30 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ userRole }) => {
   };
 
   return (
-    <nav 
+    <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-border shadow-2xl"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-around h-16 px-2">
         {tabs.map((tab) => {
           const active = isActive(tab.href);
-          
+
           return (
             <button
               key={tab.name}
               onClick={() => handleNavigation(tab.href, tab.name)}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ${
-                active ? 'text-white' : 'text-muted-foreground hover:text-foreground'
-              }`}
+              className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-200 ${active ? 'text-white' : 'text-muted-foreground hover:text-foreground'
+                }`}
             >
-              <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${
-                active 
-                  ? tab.name === 'Home' ? 'bg-gradient-to-br from-blue-500 to-blue-600 scale-105 shadow-md' 
-                  : tab.name === 'Pods' ? 'bg-gradient-to-br from-purple-500 to-purple-600 scale-105 shadow-md'
-                  : tab.name === 'AI' ? 'bg-gradient-to-br from-pink-500 to-pink-600 scale-105 shadow-md'
-                  : tab.name === 'Learnspace' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600 scale-105 shadow-md'
-                  : tab.name === 'Phoenix' ? 'bg-gradient-to-br from-orange-500 to-orange-600 scale-105 shadow-md'
-                  : tab.name === 'Profile' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 scale-105 shadow-md'
-                  : 'bg-gradient-to-br from-gray-500 to-gray-600 scale-105 shadow-md'
+              <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 ${active
+                  ? tab.name === 'Home' ? 'bg-gradient-to-br from-blue-500 to-blue-600 scale-105 shadow-md'
+                    : tab.name === 'Pods' ? 'bg-gradient-to-br from-purple-500 to-purple-600 scale-105 shadow-md'
+                      : tab.name === 'AI' ? 'bg-gradient-to-br from-pink-500 to-pink-600 scale-105 shadow-md'
+                        : tab.name === 'Phoenix' ? 'bg-gradient-to-br from-orange-500 to-orange-600 scale-105 shadow-md'
+                          : tab.name === 'Profile' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 scale-105 shadow-md'
+                            : 'bg-gradient-to-br from-gray-500 to-gray-600 scale-105 shadow-md'
                   : 'hover:bg-muted'
-              }`}>
+                }`}>
                 {typeof tab.icon === 'string' ? (
                   tab.icon === 'learnspace' ? (
                     <img src={learnspaceLogo} alt="Learnspace" className={`h-4 w-4 transition-all ${active ? 'brightness-125' : ''}`} />
@@ -85,22 +82,21 @@ const BottomNavBar: React.FC<BottomNavBarProps> = ({ userRole }) => {
                     <img src={phoenixLogo} alt="Phoenix" className={`h-4 w-4 transition-all ${active ? 'brightness-125' : ''}`} />
                   ) : null
                 ) : (
-                  React.createElement(tab.icon, { 
-                    className: `h-4 w-4 transition-colors ${active ? 'text-white' : ''}` 
+                  React.createElement(tab.icon, {
+                    className: `h-4 w-4 transition-colors ${active ? 'text-white' : ''}`
                   })
                 )}
               </div>
-              <span className={`text-xs mt-1 transition-all ${
-                active 
-                  ? tab.name === 'Home' ? 'font-semibold text-blue-600' 
-                  : tab.name === 'Pods' ? 'font-semibold text-purple-600'
-                  : tab.name === 'AI' ? 'font-semibold text-pink-600'
-                  : tab.name === 'Learnspace' ? 'font-semibold text-emerald-600'
-                  : tab.name === 'Phoenix' ? 'font-semibold text-orange-600'
-                  : tab.name === 'Profile' ? 'font-semibold text-indigo-600'
-                  : 'font-semibold text-gray-600'
+              <span className={`text-xs mt-1 transition-all ${active
+                  ? tab.name === 'Home' ? 'font-semibold text-blue-600'
+                    : tab.name === 'Pods' ? 'font-semibold text-purple-600'
+                      : tab.name === 'AI' ? 'font-semibold text-pink-600'
+                        : tab.name === 'Learnspace' ? 'font-semibold text-emerald-600'
+                          : tab.name === 'Phoenix' ? 'font-semibold text-orange-600'
+                            : tab.name === 'Profile' ? 'font-semibold text-indigo-600'
+                              : 'font-semibold text-gray-600'
                   : 'font-medium'
-              }`}>
+                }`}>
                 {tab.name}
               </span>
             </button>

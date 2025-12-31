@@ -15,13 +15,13 @@ const Pricing = () => {
     {
       name: "Free",
       price: "Free",
-      description: "Full-featured single pod",
+      description: "Essential classroom tools",
       icon: Star,
       features: [
         "1 Pod (fully functional)",
-        "Materials, quizzes, flashcards",
-        "Notes, whiteboards, meetings",
-        "Live sessions & chat",
+        "Review Nexus Capabilities",
+        "Materials & Whiteboards",
+        "Create up to 2 Quizzes",
         "Unlimited students per pod"
       ],
       buttonText: "Get Started",
@@ -32,21 +32,17 @@ const Pricing = () => {
       name: "Teach +",
       price: "$7",
       period: "/month",
-      description: "Unlimited pods + career tools",
+      description: "Unlimited power & AI tools",
       icon: Zap,
       features: [
         "Unlimited Pods",
-        "Nexus AI Command Center (full access)",
-        "AI Curriculum Architect",
-        "AI Lesson Orchestrator", 
-        "AI Assessment Hub with auto-grading",
+        "Unlimited Quizzes",
+        "Nexus AI Command Center (Full Access)",
+        "AI Curriculum & Lesson Planner",
+        "AI Assessment & Auto-grading",
         "Progress Analytics Dashboard",
         "Global Resource Library",
-        "Student Profile Analytics",
-        "All pod features",
-        "Aurora Application Builder",
-        "Aurora Role Search",
-        "Aurora Interview Prep"
+        "Aurora Careers Toolkit"
       ],
       buttonText: "Upgrade Now",
       popular: true,
@@ -62,10 +58,10 @@ const Pricing = () => {
       icon: Star,
       features: [
         "Join unlimited pods",
-        "Learnspace AI (3 chat limit)",
-        "My Resources (1 each)",
-        "Phoenix AI tutor access",
-        "All pod features"
+        "AI Assistant (3 chats max)",
+        "My Resources (1 set each)",
+        "Phoenix AI tutor (Basic)",
+        "Aurora Role Search"
       ],
       buttonText: "Get Started",
       popular: false,
@@ -78,16 +74,12 @@ const Pricing = () => {
       description: "Unlimited AI resources",
       icon: Zap,
       features: [
-        "Unlimited Learnspace chats",
-        "Unlimited flashcards",
-        "Unlimited quizzes",
+        "Unlimited AI Assistant chats",
+        "Unlimited flashcards & quizzes",
         "Unlimited notes",
-        "Advanced image analysis",
-        "Phoenix AI tutor access",
-        "Access to Global Resource Library",
-        "Aurora Application Builder",
-        "Aurora Role Search",
-        "Aurora Interview Prep"
+        "Phoenix AI tutor (Priority)",
+        "Aurora Interview Prep (Full)",
+        "Global Resource Library Access"
       ],
       buttonText: "Upgrade Now",
       popular: true,
@@ -97,34 +89,30 @@ const Pricing = () => {
 
   const faqs = [
     {
-      question: "What makes Classpace different from using ChatGPT or other AI tools?",
-      answer: "While AI chatbots provide general information, Classpace is purpose-built for education with context-aware features. Phoenix AI remembers your study sessions and provides personalized tutoring. The platform integrates seamlessly with teacher-created courses (Pods), tracking progress across materials and assignments. You get structured learning paths, collaborative tools, and educator support—all in one unified interface, not scattered across multiple apps."
-    },
-    {
-      question: "What's the difference between Learn+ and Teach+ subscriptions?",
-      answer: "Learn+ is for students - it unlocks unlimited Learnspace AI chats, unlimited My Resources (flashcards, quizzes, notes), Phoenix AI tutor, global resource library access, and Aurora Careers Toolkit. Teach+ is for educators - it unlocks unlimited pods, full Nexus AI teaching command center (curriculum planning, lesson generation, auto-grading, analytics, resource library), and Aurora Careers Toolkit. Both provide comprehensive educational ecosystems at $7/month."
+      question: "What limits does the free plan have?",
+      answer: "For Students: You can have up to 3 active AI chats in Learnspace and 1 active set of flashcards, quizzes, or notes at a time. Interview Simulator is locked. For Teachers: You can create 1 Pod and 2 Quizzes. You can view Nexus capabilities but cannot use the AI generation tools."
     },
     {
       question: "What is Nexus and who can access it?",
-      answer: "Nexus is an AI-powered teaching command center exclusively for Teach+ subscribers. It includes: AI Curriculum Architect for course design, AI Lesson Orchestrator for daily planning, AI Assessment Hub with auto-grading, Progress Dashboard for student analytics, Global Resource Library for sharing materials, and Student Profile Analytics. Free plan teachers can view Nexus modules to understand capabilities, but need Teach+ to access the full functionality."
+      answer: "Nexus is an AI-powered teaching command center exclusively for Teach+ subscribers. It includes AI Curriculum Architect, Lesson Orchestrator, Assessment Hub, and Analytics. Free plan teachers can see what Nexus offers via an upgrade overlay but cannot generate content."
+    },
+    {
+      question: "What's the difference between Learn+ and Teach+ subscriptions?",
+      answer: "Learn+ is for students ($7/mo) unlocking unlimited AI learning tools and career prep. Teach+ is for educators ($7/mo) unlocking unlimited pods, quizzes, and the Nexus AI suite."
     },
     {
       question: "Can I cancel my subscription anytime?",
       answer: "Yes. You can cancel your Learn+ or Teach+ subscription anytime through My Plan in your dashboard. You'll continue to have access to premium features until the end of your current billing period."
     },
     {
-      question: "Is there a free plan available?",
-      answer: "Yes! Free plan for students includes: join unlimited pods, Learnspace AI (limited to 3 chats), My Resources (1 flashcard/quiz/note each), Phoenix AI tutor. Free plan for teachers includes: 1 pod with full features (materials, quizzes, flashcards, notes, whiteboards, meetings)."
-    },
-    {
       question: "Do students and teachers need separate subscriptions?",
-      answer: "Yes. Teach+ is specifically for educators managing multiple classrooms and accessing comprehensive teaching tools. Learn+ is for students who want unlimited AI learning resources and career preparation. Each subscription is tailored to different educational needs at the same $7/month price."
+      answer: "Yes. Each subscription is tailored to different educational needs. Students need Learn+ for AI learning tools, while Teachers need Teach+ for classroom management and curriculum AI."
     }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <SEO 
+      <SEO
         title="Pricing - Plans for Teachers & Students"
         description="Simple, transparent pricing for Classpace. Free plans available for teachers and students. Learn+ and Teach+ plans at $7/month for unlimited AI-powered learning."
         canonical="/pricing"
@@ -135,20 +123,20 @@ const Pricing = () => {
       <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
         <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
           <nav className="flex items-center justify-between">
-            <button 
+            <button
               onClick={() => navigate("/")}
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <img 
-                src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                alt="Classpace Logo" 
+              <img
+                src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+                alt="Classpace Logo"
                 className="w-8 h-8 md:w-10 md:h-10"
               />
               <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Classpace
               </span>
             </button>
-            <Button 
+            <Button
               onClick={() => navigate("/dashboard")}
               variant="outline"
               className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
@@ -182,8 +170,8 @@ const Pricing = () => {
             {teacherPlans.map((plan, index) => {
               const IconComponent = plan.icon;
               return (
-                <Card 
-                  key={index} 
+                <Card
+                  key={index}
                   className="relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900"
                 >
                   <CardHeader className="text-center pb-8 pt-12 bg-gradient-to-br from-gray-800 to-gray-900">
@@ -207,8 +195,8 @@ const Pricing = () => {
                         </li>
                       ))}
                     </ul>
-                    
-                    <Button 
+
+                    <Button
                       className="w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
                       onClick={() => navigate("/login")}
                     >
@@ -233,8 +221,8 @@ const Pricing = () => {
             {studentPlans.map((plan, index) => {
               const IconComponent = plan.icon;
               return (
-                <Card 
-                  key={index} 
+                <Card
+                  key={index}
                   className="relative border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-3 rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900"
                 >
                   <CardHeader className="text-center pb-8 pt-12 bg-gradient-to-br from-gray-800 to-gray-900">
@@ -258,8 +246,8 @@ const Pricing = () => {
                         </li>
                       ))}
                     </ul>
-                    
-                    <Button 
+
+                    <Button
                       className="w-full py-6 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
                       onClick={() => navigate("/login")}
                     >
@@ -277,10 +265,10 @@ const Pricing = () => {
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-12 md:mb-16 text-white">
             Frequently Asked Questions
           </h2>
-          
+
           <div className="space-y-6">
             {faqs.map((faq, index) => (
-              <Collapsible 
+              <Collapsible
                 key={index}
                 open={openFaq === index}
                 onOpenChange={() => setOpenFaq(openFaq === index ? null : index)}
@@ -291,10 +279,9 @@ const Pricing = () => {
                       <h3 className="text-xl md:text-2xl font-bold text-white text-left">
                         {faq.question}
                       </h3>
-                      <ChevronDown 
-                        className={`w-6 h-6 text-purple-400 transition-transform duration-200 ${
-                          openFaq === index ? 'transform rotate-180' : ''
-                        }`} 
+                      <ChevronDown
+                        className={`w-6 h-6 text-purple-400 transition-transform duration-200 ${openFaq === index ? 'transform rotate-180' : ''
+                          }`}
                       />
                     </div>
                   </div>
@@ -318,9 +305,9 @@ const Pricing = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             <div className="lg:col-span-1">
               <div className="flex items-center space-x-3 mb-6">
-                <img 
-                  src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png" 
-                  alt="Classpace Logo" 
+                <img
+                  src="/lovable-uploads/11e9e2ba-b257-4f0e-99d6-b342c5021347.png"
+                  alt="Classpace Logo"
                   className="w-10 h-10"
                 />
                 <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -328,21 +315,21 @@ const Pricing = () => {
                 </span>
               </div>
               <p className="text-gray-300 leading-relaxed mb-6">
-                Empowering educators and learners with AI-powered shared workspaces. 
+                Empowering educators and learners with AI-powered shared workspaces.
                 Learn and teach anything.
               </p>
               <div className="flex space-x-4">
-                <a 
-                  href="https://www.instagram.com/classpace.co/" 
-                  target="_blank" 
+                <a
+                  href="https://www.instagram.com/classpace.co/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
                 >
                   <Instagram className="w-5 h-5 text-white" />
                 </a>
-                <a 
-                  href="https://linkedin.com/company/classpace-app" 
-                  target="_blank" 
+                <a
+                  href="https://linkedin.com/company/classpace-app"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-500 transition-colors cursor-pointer"
                 >
@@ -355,7 +342,7 @@ const Pricing = () => {
               <h3 className="text-xl font-semibold mb-6 text-purple-300">Product</h3>
               <ul className="space-y-4">
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/pricing")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -363,7 +350,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/our-journey")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -371,7 +358,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/careers")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -379,7 +366,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/login")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -393,7 +380,7 @@ const Pricing = () => {
               <h3 className="text-xl font-semibold mb-6 text-purple-300">Support</h3>
               <ul className="space-y-4">
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/support")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -401,7 +388,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/refunds")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -409,7 +396,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <a 
+                  <a
                     href="mailto:social@classpace.co"
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -423,7 +410,7 @@ const Pricing = () => {
               <h3 className="text-xl font-semibold mb-6 text-purple-300">Legal</h3>
               <ul className="space-y-4">
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/terms")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -431,7 +418,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/privacy")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >
@@ -439,7 +426,7 @@ const Pricing = () => {
                   </button>
                 </li>
                 <li>
-                  <button 
+                  <button
                     onClick={() => navigate("/investors")}
                     className="font-bold text-lg text-gray-300 hover:text-white transition-colors hover:translate-x-1 transform duration-200"
                   >

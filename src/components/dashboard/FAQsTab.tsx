@@ -93,7 +93,7 @@ export const FAQsTab: React.FC = () => {
         },
         {
           question: "What AI features are available to students?",
-          answer: "Free students get: Phoenix AI tutor access, 3 Learnspace AI chats, and 1 each of flashcards/quizzes/notes in My Resources. Learn+ students ($7/month) get: unlimited Phoenix tutoring, unlimited Learnspace chats, unlimited My Resources generation, advanced image analysis, and Aurora career tools."
+          answer: "Free students get: Phoenix AI tutor access, 3 AI Assistant chats, and 1 each of flashcards/quizzes/notes in My Resources. Learn+ students ($7/month) get: unlimited Phoenix tutoring, unlimited AI Assistant chats, unlimited My Resources generation, advanced image analysis, and Aurora career tools."
         },
         {
           question: "What is Nexus for teachers?",
@@ -115,15 +115,15 @@ export const FAQsTab: React.FC = () => {
       faqs: [
         {
           question: "What are the subscription plans and pricing?",
-          answer: "Students: Free (join unlimited pods, 3 Learnspace chats, 1 resource each, Phoenix access) or Learn+ at $7/month (unlimited AI tutoring, unlimited resources, image analysis, career tools, All Resources library). Teachers: Free (1 fully functional pod, all collaboration tools) or Teach+ at $7/month (unlimited pods, full Nexus AI suite, auto-grading, analytics, career tools)."
+          answer: "Students: Free (join unlimited pods, 3 AI Assistant chats, 1 resource each, Phoenix access) or Learn+ at $7/month (unlimited AI tutoring, unlimited resources, image analysis, career tools, All Resources library). Teachers: Free (1 fully functional pod, all collaboration tools) or Teach+ at $7/month (unlimited pods, full Nexus AI suite, auto-grading, analytics, career tools)."
         },
         {
           question: "What's included in the Free plan?",
-          answer: "Students get: join unlimited Pods, Phoenix AI tutor access, 3 Learnspace AI chats, 1 flashcard set, 1 quiz, 1 note in My Resources. Teachers get: 1 Pod with full features (materials, quizzes, flashcards, notes, whiteboards, meetings, chat, unlimited students)."
+          answer: "Students get: join unlimited Pods, Phoenix AI tutor access, 3 AI Assistant chats, 1 flashcard set, 1 quiz, 1 note in My Resources. Teachers get: 1 Pod with full features (materials, quizzes, flashcards, notes, whiteboards, meetings, chat, unlimited students)."
         },
         {
           question: "What do Learn+ and Teach+ unlock?",
-          answer: "Learn+ ($7/mo): Unlimited Learnspace chats, unlimited flashcards/quizzes/notes, advanced image analysis, All Resources library access, Aurora career tools. Teach+ ($7/mo): Unlimited Pods, full Nexus (curriculum/lesson/assessment AI), auto-grading, analytics, Global Resource Library, Aurora career tools."
+          answer: "Learn+ ($7/mo): Unlimited AI Assistant chats, unlimited flashcards/quizzes/notes, advanced image analysis, All Resources library access, Aurora career tools. Teach+ ($7/mo): Unlimited Pods, full Nexus (curriculum/lesson/assessment AI), auto-grading, analytics, Global Resource Library, Aurora career tools."
         },
         {
           question: "How do I cancel my subscription?",
@@ -277,7 +277,7 @@ export const FAQsTab: React.FC = () => {
             {categories.map((category) => {
               const IconComponent = category.icon;
               const isActive = activeCategory === category.id;
-              
+
               return (
                 <button
                   key={category.id}
@@ -285,11 +285,10 @@ export const FAQsTab: React.FC = () => {
                     setActiveCategory(category.id);
                     setOpenFaq(null);
                   }}
-                  className={`flex items-center gap-2 px-4 py-2.5 md:px-5 md:py-3 rounded-xl md:rounded-2xl font-semibold text-sm md:text-base transition-all duration-300 whitespace-nowrap ${
-                    isActive 
-                      ? `bg-gradient-to-r ${category.bgGradient} text-white shadow-lg scale-105` 
-                      : 'bg-card hover:bg-muted border border-border/50 text-muted-foreground hover:text-foreground'
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2.5 md:px-5 md:py-3 rounded-xl md:rounded-2xl font-semibold text-sm md:text-base transition-all duration-300 whitespace-nowrap ${isActive
+                    ? `bg-gradient-to-r ${category.bgGradient} text-white shadow-lg scale-105`
+                    : 'bg-card hover:bg-muted border border-border/50 text-muted-foreground hover:text-foreground'
+                    }`}
                 >
                   <IconComponent className={`w-4 h-4 md:w-5 md:h-5 ${isActive ? 'text-white' : category.color}`} />
                   {category.name}
@@ -323,29 +322,27 @@ export const FAQsTab: React.FC = () => {
             {/* FAQs List */}
             <div className="space-y-3 md:space-y-4">
               {activeData.faqs.map((faq, index) => (
-                <Collapsible 
+                <Collapsible
                   key={index}
                   open={openFaq === index}
                   onOpenChange={() => setOpenFaq(openFaq === index ? null : index)}
                 >
                   <CollapsibleTrigger asChild>
-                    <div className={`bg-card backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-xl transition-all cursor-pointer border-2 ${
-                      openFaq === index ? activeData.borderColor : 'border-border/30 hover:border-border'
-                    }`}>
+                    <div className={`bg-card backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-xl transition-all cursor-pointer border-2 ${openFaq === index ? activeData.borderColor : 'border-border/30 hover:border-border'
+                      }`}>
                       <div className="flex items-center justify-between gap-3 md:gap-4">
                         <h3 className="font-bold text-foreground text-left text-sm md:text-lg leading-snug">
                           {faq.question}
                         </h3>
-                        <ChevronDown 
-                          className={`w-5 h-5 md:w-6 md:h-6 ${activeData.color} transition-transform flex-shrink-0 ${
-                            openFaq === index ? 'transform rotate-180' : ''
-                          }`} 
+                        <ChevronDown
+                          className={`w-5 h-5 md:w-6 md:h-6 ${activeData.color} transition-transform flex-shrink-0 ${openFaq === index ? 'transform rotate-180' : ''
+                            }`}
                         />
                       </div>
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className={`bg-muted/50 rounded-xl md:rounded-2xl p-4 md:p-6 mt-2 border-2 border-border/20`}
@@ -366,8 +363,8 @@ export const FAQsTab: React.FC = () => {
           <div className="bg-gradient-to-r from-muted/50 to-muted/30 rounded-2xl p-6 md:p-8 border border-border/30">
             <h3 className="text-lg md:text-xl font-bold text-foreground mb-2">Still have questions?</h3>
             <p className="text-muted-foreground mb-4">Our support team is here to help you succeed.</p>
-            <a 
-              href="/support-tab" 
+            <a
+              href="/support-tab"
               className={`inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all`}
             >
               Contact Support

@@ -31,7 +31,7 @@ export const StudentSubscriptionCard = () => {
         try {
           const { data: subData, error: subError } = await supabase.functions.invoke('check-subscription');
           console.log('[SUBSCRIPTION-POLLING]', { subData, subError });
-          
+
           if (!subError && subData?.subscribed && subData?.tier === 'student_premium') {
             if (intervalId) window.clearInterval(intervalId);
             if (timeoutId) window.clearTimeout(timeoutId);
@@ -70,7 +70,7 @@ export const StudentSubscriptionCard = () => {
         try {
           localStorage.setItem('checkout_in_progress', 'true');
           localStorage.setItem('checkout_role', 'student');
-        } catch {}
+        } catch { }
         window.open(data.url, '_blank');
         startPolling();
       }
@@ -89,7 +89,7 @@ export const StudentSubscriptionCard = () => {
     if (!confirm('Cancel your Learn+ subscription? You\'ll keep access until your renewal date.')) {
       return;
     }
-    
+
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('cancel-subscription');
@@ -103,7 +103,7 @@ export const StudentSubscriptionCard = () => {
         title: "Subscription cancelled",
         description: `Access continues until ${new Date((cancelAtIso || data?.cancel_at)).toLocaleDateString()}`,
       });
-      
+
       // Force immediate refresh and again after a short delay to avoid Stripe propagation lag
       await refreshSubscription();
       setTimeout(() => {
@@ -150,128 +150,126 @@ export const StudentSubscriptionCard = () => {
           <Skeleton className="h-48 w-full rounded-2xl" />
         </div>
       ) : (
-        <Card className={`relative overflow-hidden border border-border/60 shadow-2xl transition-all duration-300 backdrop-blur-sm ${
-          isStudentPremium 
-            ? 'bg-gradient-to-br from-amber-100/90 via-yellow-50/90 to-amber-100/90 dark:from-amber-900/40 dark:via-yellow-800/40 dark:to-amber-900/40' 
+        <Card className={`relative overflow-hidden border border-border/60 shadow-2xl transition-all duration-300 backdrop-blur-sm ${isStudentPremium
+            ? 'bg-gradient-to-br from-amber-100/90 via-yellow-50/90 to-amber-100/90 dark:from-amber-900/40 dark:via-yellow-800/40 dark:to-amber-900/40'
             : 'bg-card/70 dark:bg-card/40'
-        }`}>
-          <CardContent className="relative p-8">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/40 to-accent/40 flex items-center justify-center shadow-lg">
-              {isStudentPremium ? <Crown className="w-8 h-8 text-white" /> : <Sparkles className="w-8 h-8 text-white" />}
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 dark:from-purple-400 dark:via-pink-400 dark:to-orange-400 bg-clip-text text-transparent">
-                Learn +
-              </h3>
-              <p className="text-sm text-muted-foreground font-medium">Enhanced Learning</p>
-            </div>
-          </div>
-            {isStudentPremium ? (
-            <Badge className="bg-primary text-primary-foreground border-0 px-4 py-1.5 text-sm font-bold shadow-lg">
-              ✓ Active
-            </Badge>
-          ) : (
-            <div className="text-right bg-gradient-to-br from-purple-500/20 to-pink-500/20 px-5 py-3 rounded-xl border-2 border-purple-500/30 shadow-lg">
-              <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">$7</p>
-              <p className="text-xs text-muted-foreground font-semibold">per month</p>
-            </div>
-          )}
-        </div>
-
-        <ul className="space-y-4 mb-8">
-          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
-              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
-            </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited Learnspace chats</span>
-          </li>
-          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
-              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
-            </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited My Resources</span>
-          </li>
-          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
-              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
-            </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Advanced image analysis</span>
-          </li>
-          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
-              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
-            </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">Aurora Careers Toolkit</span>
-          </li>
-          <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
-              <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
-            </div>
-            <span className="text-sm text-foreground font-medium leading-relaxed">AI Interview Prep</span>
-          </li>
-        </ul>
-
-        {isStudentPremium && !subscription?.cancel_at_period_end ? (
-          <Button 
-            onClick={handleCancelSubscription}
-            disabled={loading}
-            variant="destructive"
-            className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : null}
-            {loading ? 'Cancelling...' : 'Cancel Subscription'}
-          </Button>
-        ) : isStudentPremium && subscription?.cancel_at_period_end ? (
-          <Button 
-            onClick={handleResumeSubscription}
-            disabled={loading}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : (
-              <Crown className="w-5 h-5 mr-2" />
-            )}
-            {loading ? 'Processing...' : 'Re-Upgrade'}
-          </Button>
-        ) : (
-          <Button 
-            onClick={handleSubscribe}
-            disabled={loading}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : (
-              <Sparkles className="w-5 h-5 mr-2" />
-            )}
-            {loading ? 'Processing...' : 'Upgrade to Learn +'}
-          </Button>
-        )}
-        
-        {isStudentPremium && subscription?.subscription_end && (
-          <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${
-            isCancelled 
-              ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 shadow-lg shadow-red-500/20' 
-              : 'bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30'
           }`}>
-            <p className="text-sm font-medium text-foreground">
-              {isCancelled ? (
-                <>Cancels on <span className="font-bold text-red-600 dark:text-red-400">
-                  {new Date(justCancelledAt || subscription.subscription_end).toLocaleDateString()}
-                </span></>
+          <CardContent className="relative p-8">
+            <div className="flex items-start justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/40 to-accent/40 flex items-center justify-center shadow-lg">
+                  {isStudentPremium ? <Crown className="w-8 h-8 text-white" /> : <Sparkles className="w-8 h-8 text-white" />}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 dark:from-purple-400 dark:via-pink-400 dark:to-orange-400 bg-clip-text text-transparent">
+                    Learn +
+                  </h3>
+                  <p className="text-sm text-muted-foreground font-medium">Enhanced Learning</p>
+                </div>
+              </div>
+              {isStudentPremium ? (
+                <Badge className="bg-primary text-primary-foreground border-0 px-4 py-1.5 text-sm font-bold shadow-lg">
+                  ✓ Active
+                </Badge>
               ) : (
-                <>Renews on <span className="font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-                  {new Date(subscription.subscription_end).toLocaleDateString()}
-                </span></>
+                <div className="text-right bg-gradient-to-br from-purple-500/20 to-pink-500/20 px-5 py-3 rounded-xl border-2 border-purple-500/30 shadow-lg">
+                  <p className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">$7</p>
+                  <p className="text-xs text-muted-foreground font-semibold">per month</p>
+                </div>
               )}
-            </p>
-          </div>
-        )}
+            </div>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+                  <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited AI Assistant chats</span>
+              </li>
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+                  <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Unlimited My Resources</span>
+              </li>
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+                  <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Advanced image analysis</span>
+              </li>
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+                  <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">Aurora Careers Toolkit</span>
+              </li>
+              <li className="flex items-start gap-3 bg-muted/20 rounded-xl p-3 border border-border/20">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 border-2 border-purple-500/30">
+                  <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 font-bold" />
+                </div>
+                <span className="text-sm text-foreground font-medium leading-relaxed">AI Interview Prep</span>
+              </li>
+            </ul>
+
+            {isStudentPremium && !subscription?.cancel_at_period_end ? (
+              <Button
+                onClick={handleCancelSubscription}
+                disabled={loading}
+                variant="destructive"
+                className="w-full shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : null}
+                {loading ? 'Cancelling...' : 'Cancel Subscription'}
+              </Button>
+            ) : isStudentPremium && subscription?.cancel_at_period_end ? (
+              <Button
+                onClick={handleResumeSubscription}
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Crown className="w-5 h-5 mr-2" />
+                )}
+                {loading ? 'Processing...' : 'Re-Upgrade'}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl hover:shadow-2xl transition-all py-6 text-base font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-5 h-5 mr-2" />
+                )}
+                {loading ? 'Processing...' : 'Upgrade to Learn +'}
+              </Button>
+            )}
+
+            {isStudentPremium && subscription?.subscription_end && (
+              <div className={`text-center py-3 px-4 rounded-xl border-2 mt-4 ${isCancelled
+                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/40 shadow-lg shadow-red-500/20'
+                  : 'bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-500/30'
+                }`}>
+                <p className="text-sm font-medium text-foreground">
+                  {isCancelled ? (
+                    <>Cancels on <span className="font-bold text-red-600 dark:text-red-400">
+                      {new Date(justCancelledAt || subscription.subscription_end).toLocaleDateString()}
+                    </span></>
+                  ) : (
+                    <>Renews on <span className="font-bold bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
+                      {new Date(subscription.subscription_end).toLocaleDateString()}
+                    </span></>
+                  )}
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

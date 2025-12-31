@@ -21,18 +21,9 @@ serve(async (req) => {
   if (!authHeader) {
     return new Response(JSON.stringify({ error: 'No authorization header' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
-  const token = authHeader.replace('Bearer ', '');
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-
-  if (userError || !user) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized', details: userError?.message }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
 
   try {
-    const { questions, answers, totalMarks, assessmentType } = await req.json();
+    const { questions, answers, totalMarks, assessmentType, curriculum } = await req.json();
 
     if (!questions || !answers) {
       throw new Error('Missing required fields: questions and answers');
@@ -43,14 +34,47 @@ serve(async (req) => {
       throw new Error('OPENAI_API_KEY not configured');
     }
 
+    // Prepare content for prompt based on structure
+    let questionsContent = "";
+    let answersContent = "";
+
+    // Parse Questions
+    if (Array.isArray(questions)) {
+      questionsContent = questions.map((q: any, idx: number) =>
+        `Q${idx + 1} (ID: ${q.id || idx}): ${q.text} [${q.marks} marks] ${q.type ? `(${q.type})` : ''} ${q.options ? `\nOptions: ${q.options.join(', ')}` : ''}`
+      ).join('\n\n');
+    } else {
+      questionsContent = String(questions);
+    }
+
+    // Parse Answers
+    if (typeof answers === 'object' && answers !== null && !answers.response) {
+      // Structured object: { "questionId": "answer" }
+      if (Array.isArray(questions)) {
+        answersContent = questions.map((q: any, idx: number) => {
+          const ans = answers[q.id || idx.toString()] || answers[idx.toString()] || "No answer provided";
+          return `Q${idx + 1} Answer: ${ans}`;
+        }).join('\n\n');
+      } else {
+        answersContent = JSON.stringify(answers, null, 2);
+      }
+    } else if (typeof answers === 'object' && answers.response) {
+      // Legacy structured: { response: "string" }
+      answersContent = answers.response;
+    } else {
+      // Legacy string
+      answersContent = String(answers);
+    }
+
     const prompt = `ASSESSMENT TYPE: ${assessmentType || 'General Assessment'}
+CURRICULUM: ${curriculum || 'Standard'}
 TOTAL MARKS AVAILABLE: ${totalMarks || 'Not specified'}
 
 QUESTIONS:
-${questions}
+${questionsContent}
 
 STUDENT'S ANSWERS:
-${answers}
+${answersContent}
 
 Please provide a comprehensive grading in the following JSON format:
 {
@@ -60,17 +84,19 @@ Please provide a comprehensive grading in the following JSON format:
   "feedback": "[overall constructive feedback paragraph]",
   "breakdown": [
     {
-      "question_number": 1,
+      "question_number": [integer, corresponding to Q1, Q2 etc.],
       "marks_available": [marks for this question],
       "marks_awarded": [marks given],
       "feedback": "[specific feedback for this question]"
     }
   ],
   "strengths": ["strength 1", "strength 2", "strength 3"],
-  "improvements": ["area 1", "area 2", "area 3"]
+  "improvements": ["area 1", "area 2", "area 3"],
+  "curriculum_analysis": "[Optional: specific analysis of how well the student met ${curriculum} standards]"
 }
 
-Be fair, constructive, and encouraging in your feedback. Consider partial credit where appropriate. If the student's answer shows understanding but lacks completeness, reflect that in the marks.`;
+Be fair, constructive, and encouraging in your feedback. Consider partial credit where appropriate. If the student's answer shows understanding but lacks completeness, reflect that in the marks.
+${curriculum ? `CRITICAL INSTRUCTION: Since the curriculum is "${curriculum}", you MUST evaluate the student's answers specifically against the standards, terminology, and expectations of this curriculum.` : ''}`;
 
     const systemPrompt = 'You are an expert educational assessor. Grade the student assessment carefully and provide detailed feedback. Always respond with valid JSON only. IMPORTANT: For any math or scientific symbols in your feedback, you MUST use LaTeX formatting enclosed in single dollar signs ($) for inline or double dollar signs ($$) for block equations. Do NOT use \\( ... \\) or \\[ ... \\]. YOU MUST DOUBLE-ESCAPE ALL BACKSLASHES in the JSON string (e.g. use "\\frac" instead of "\frac").';
 
@@ -93,9 +119,9 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
     });
 
     if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('AI API error:', errorText);
-      throw new Error(`AI API request failed: ${aiResponse.status}`);
+      const text = await aiResponse.text();
+      console.error('AI Error:', text);
+      throw new Error(`AI API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
@@ -104,24 +130,19 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
     let gradingResult;
     try {
       const content = aiData.choices?.[0]?.message?.content;
-
       if (!content) throw new Error("No content generated");
-
-      // Try to extract JSON from markdown code blocks if present (though Gemini JSON mode usually sends raw JSON)
-      const jsonMatch = content.match(/```json\n([\s\S]+?)\n```/) || content.match(/```\n([\s\S]+?)\n```/);
-      const jsonString = jsonMatch ? jsonMatch[1] : content;
-      gradingResult = JSON.parse(jsonString);
+      gradingResult = JSON.parse(content);
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
-      // Fallback: create a basic grading result
+      // Fallback
       gradingResult = {
-        score: Math.round((totalMarks || 100) * 0.7),
-        percentage: 70,
-        grade: 'B',
-        feedback: 'We encountered an error parsing the grading feedback, but your submission has been recorded.',
+        score: 0,
+        percentage: 0,
+        grade: 'N/A',
+        feedback: 'We encountered an error processing the grading results. Please ask your teacher for manual review.',
         breakdown: [],
-        strengths: ['Attempted all questions', 'Showed effort'],
-        improvements: ['Review feedback for detailed guidance']
+        strengths: [],
+        improvements: []
       };
     }
 
@@ -142,8 +163,9 @@ Be fair, constructive, and encouraging in your feedback. Consider partial credit
         error: error.message,
         score: 0,
         percentage: 0,
-        grade: 'N/A',
-        feedback: 'Unable to grade assessment at this time. Please contact your teacher.'
+        grade: 'E',
+        feedback: 'System error during grading.',
+        breakdown: []
       }),
       {
         status: 500,

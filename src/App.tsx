@@ -29,7 +29,6 @@ import Refunds from "./pages/Refunds";
 import OurJourney from "./pages/OurJourney";
 import Documentation from "./pages/Documentation";
 import AIChat from "./pages/AIChat";
-import Learnspace from "./pages/Learnspace";
 import Phoenix from "./pages/Phoenix";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
@@ -75,195 +74,190 @@ const App = () => (
             <ScrollToTop />
             <SubscriptionReturnHandler />
             <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route 
-              path="/dashboard" 
-              element={
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute requireRole="teacher">
+                    <TeacherDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/student-dashboard"
+                element={
+                  <ProtectedRoute requireRole="learner">
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pod/:id"
+                element={
+                  <ProtectedRoute requireRole="teacher">
+                    <PodView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/student/pod/:id"
+                element={
+                  <ProtectedRoute requireRole="learner">
+                    <StudentPodView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/discover-pods"
+                element={
+                  <ProtectedRoute requireRole="learner">
+                    <PublicPodsDiscovery />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teacher-pods"
+                element={
+                  <ProtectedRoute requireRole="teacher">
+                    <TeacherPodsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/student-pods"
+                element={
+                  <ProtectedRoute requireRole="learner">
+                    <StudentPodsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/session/:sessionId"
+                element={
+                  <ProtectedRoute>
+                    <SessionView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/whiteboard/:id"
+                element={
+                  <ProtectedRoute>
+                    <WhiteboardView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/refunds" element={<Refunds />} />
+              <Route path="/our-journey" element={<OurJourney />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/investors" element={<Investors />} />
+              <Route
+                path="/excalidraw/:whiteboardId"
+                element={
+                  <ProtectedRoute>
+                    <ExcalidrawWhiteboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/documentation" element={
+                <ProtectedRoute>
+                  <Documentation />
+                </ProtectedRoute>
+              } />
+              <Route path="/ai-chat" element={
+                <ProtectedRoute>
+                  <AIChat />
+                </ProtectedRoute>
+              } />
+              <Route path="/phoenix" element={
+                <ProtectedRoute requireRole="learner">
+                  <Phoenix />
+                </ProtectedRoute>
+              } />
+              <Route path="/my-resources" element={
+                <ProtectedRoute requireRole="learner">
+                  <MyResources />
+                </ProtectedRoute>
+              } />
+              <Route path="/all-resources" element={
+                <ProtectedRoute requireRole="learner">
+                  <AllResources />
+                </ProtectedRoute>
+              } />
+              <Route path="/student-careers" element={
+                <ProtectedRoute>
+                  <StudentCareers />
+                </ProtectedRoute>
+              } />
+              <Route path="/teacher-nexus" element={
                 <ProtectedRoute requireRole="teacher">
-                  <TeacherDashboard />
+                  <TeacherNexus />
                 </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/student-dashboard" 
-              element={
-                <ProtectedRoute requireRole="learner">
-                  <StudentDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/pod/:id" 
-              element={
-                <ProtectedRoute requireRole="teacher">
-                  <PodView />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/student/pod/:id" 
-              element={
-                <ProtectedRoute requireRole="learner">
-                  <StudentPodView />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/discover-pods" 
-              element={
-                <ProtectedRoute requireRole="learner">
-                  <PublicPodsDiscovery />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/teacher-pods" 
-              element={
-                <ProtectedRoute requireRole="teacher">
-                  <TeacherPodsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/student-pods" 
-              element={
-                <ProtectedRoute requireRole="learner">
-                  <StudentPodsPage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
+              } />
+              <Route path="/support" element={<Support />} />
+              <Route path="/faqs" element={
                 <ProtectedRoute>
-                  <Profile />
+                  <FAQs />
                 </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/session/:sessionId" 
-              element={
+              } />
+              <Route path="/support-tab" element={
                 <ProtectedRoute>
-                  <SessionView />
+                  <SupportPage />
                 </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/whiteboard/:id" 
-              element={
+              } />
+              <Route path="/my-plan" element={
                 <ProtectedRoute>
-                  <WhiteboardView />
+                  <MyPlan />
                 </ProtectedRoute>
-              } 
-            />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/refunds" element={<Refunds />} />
-            <Route path="/our-journey" element={<OurJourney />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/investors" element={<Investors />} />
-            <Route 
-              path="/excalidraw/:whiteboardId" 
-              element={
+              } />
+              <Route path="/educators" element={
                 <ProtectedRoute>
-                  <ExcalidrawWhiteboard />
+                  <Educators />
                 </ProtectedRoute>
-              } 
-            />
-            <Route path="/documentation" element={
-              <ProtectedRoute>
-                <Documentation />
-              </ProtectedRoute>
-            } />
-            <Route path="/ai-chat" element={
-              <ProtectedRoute>
-                <AIChat />
-              </ProtectedRoute>
-            } />
-            <Route path="/learnspace" element={
-              <ProtectedRoute requireRole="learner">
-                <Learnspace />
-              </ProtectedRoute>
-            } />
-            <Route path="/phoenix" element={
-              <ProtectedRoute requireRole="learner">
-                <Phoenix />
-              </ProtectedRoute>
-            } />
-            <Route path="/my-resources" element={
-              <ProtectedRoute requireRole="learner">
-                <MyResources />
-              </ProtectedRoute>
-            } />
-            <Route path="/all-resources" element={
-              <ProtectedRoute requireRole="learner">
-                <AllResources />
-              </ProtectedRoute>
-            } />
-            <Route path="/student-careers" element={
-              <ProtectedRoute>
-                <StudentCareers />
-              </ProtectedRoute>
-            } />
-            <Route path="/teacher-nexus" element={
-              <ProtectedRoute requireRole="teacher">
-                <TeacherNexus />
-              </ProtectedRoute>
-            } />
-            <Route path="/support" element={<Support />} />
-            <Route path="/faqs" element={
-              <ProtectedRoute>
-                <FAQs />
-              </ProtectedRoute>
-            } />
-            <Route path="/support-tab" element={
-              <ProtectedRoute>
-                <SupportPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/my-plan" element={
-              <ProtectedRoute>
-                <MyPlan />
-              </ProtectedRoute>
-            } />
-            <Route path="/educators" element={
-              <ProtectedRoute>
-                <Educators />
-              </ProtectedRoute>
-            } />
-            <Route path="/educator/:userId" element={
-              <ProtectedRoute>
-                <EducatorProfile />
-              </ProtectedRoute>
-            } />
-            <Route path="/more" element={
-              <ProtectedRoute>
-                <More />
-              </ProtectedRoute>
-            } />
-            <Route path="/messages" element={
-              <ProtectedRoute>
-                <Messages />
-              </ProtectedRoute>
-            } />
-            <Route path="/assessment/:code" element={<PublicAssessment />} />
-            <Route 
-              path="/quiz/:quizId" 
-              element={
+              } />
+              <Route path="/educator/:userId" element={
                 <ProtectedRoute>
-                  <QuizView />
+                  <EducatorProfile />
                 </ProtectedRoute>
-              } 
-            />
-            <Route path="/marketingdashboard" element={<MarketingDashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+              } />
+              <Route path="/more" element={
+                <ProtectedRoute>
+                  <More />
+                </ProtectedRoute>
+              } />
+              <Route path="/messages" element={
+                <ProtectedRoute>
+                  <Messages />
+                </ProtectedRoute>
+              } />
+              <Route path="/assessment/:code" element={<PublicAssessment />} />
+              <Route
+                path="/quiz/:quizId"
+                element={
+                  <ProtectedRoute>
+                    <QuizView />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/marketingdashboard" element={<MarketingDashboard />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   </HelmetProvider>
 );
 
