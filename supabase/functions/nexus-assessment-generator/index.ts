@@ -58,7 +58,9 @@ serve(async (req) => {
     console.log('Starting assessment generation with Tavily research...');
 
     // Perform detailed web search using Tavily for curriculum-specific content
-    const searchQuery = `${curriculum} ${gradeLevel} ${subject} ${topic} ${assessmentType} academic questions exam problems curriculum standards teaching materials`;
+    // Truncate topic for search query to avoid hitting Tavily's 400 char limit
+    const searchTopic = topic.length > 200 ? topic.substring(0, 200) + '...' : topic;
+    const searchQuery = `${curriculum} ${gradeLevel} ${subject} ${searchTopic} ${assessmentType} academic questions exam problems curriculum standards teaching materials`;
 
     console.log('Search query:', searchQuery);
 

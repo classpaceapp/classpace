@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import 'katex/dist/katex.min.css';
 import { MathRenderer } from '@/components/quiz/MathRenderer';
 
-const MAX_TOPIC_LENGTH = 200;
+const MAX_TOPIC_LENGTH = 1000;
 
 const AssessmentHub: React.FC = () => {
   const { user } = useAuth();

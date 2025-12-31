@@ -95,8 +95,14 @@ Please provide a comprehensive grading in the following JSON format:
   "curriculum_analysis": "[Optional: specific analysis of how well the student met ${curriculum} standards]"
 }
 
-Be fair, constructive, and encouraging in your feedback. Consider partial credit where appropriate. If the student's answer shows understanding but lacks completeness, reflect that in the marks.
-${curriculum ? `CRITICAL INSTRUCTION: Since the curriculum is "${curriculum}", you MUST evaluate the student's answers specifically against the standards, terminology, and expectations of this curriculum.` : ''}`;
+STRICT GRADING RUBRIC:
+1. EVIDENCE-BASED MARKING: Grades must be assigned STRICTLY based on the accuracy and completeness of the answer.
+2. INCORRECT ANSWERS: If an answer is factually incorrect (especially for Multiple Choice, classifications, or definitions), you MUST award 0 marks. Do NOT give "effort" points for incorrect answers.
+3. PARTIAL CREDIT: Only award partial credit if the answer contains PARTIALLY CORRECT technical information. Vague or generic answers that do not address the specific question must receive 0 marks.
+4. CONSISTENCY: Your feedback MUST align with the marks. If you say an answer is "incorrect", the marks MUST be 0.
+5. ${curriculum ? `CURRICULUM ALIGNMENT: Since the curriculum is "${curriculum}", you MUST evaluate the student's answers specifically against the standards, key terminology, and expectations of this curriculum.` : ''}
+
+Evaluate each question individually and sum the marks for the total score.`;
 
     const systemPrompt = 'You are an expert educational assessor. Grade the student assessment carefully and provide detailed feedback. Always respond with valid JSON only. IMPORTANT: For any math or scientific symbols in your feedback, you MUST use LaTeX formatting enclosed in single dollar signs ($) for inline or double dollar signs ($$) for block equations. Do NOT use \\( ... \\) or \\[ ... \\]. YOU MUST DOUBLE-ESCAPE ALL BACKSLASHES in the JSON string (e.g. use "\\frac" instead of "\frac").';
 

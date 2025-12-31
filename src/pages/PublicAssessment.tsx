@@ -101,58 +101,64 @@ const PublicAssessment: React.FC = () => {
     const answerPayload = isStructured ? answers : { response: legacyAnswer };
 
     try {
-      const { error } = await supabase
+      // 1. Attempt AI Grading first
+      setGrading(true);
+      let finalGradingData = null;
+      let gradingErrorOccurred = false;
+
+      try {
+        const { data: gradingData, error: gradingError } = await supabase.functions.invoke('grade-assessment', {
+          body: {
+            questions: assessment.questions,
+            answers: answerPayload,
+            totalMarks: assessment.total_marks,
+            assessmentType: assessment.assessment_type,
+            curriculum: assessment.curriculum
+          }
+        });
+
+        if (gradingError) {
+          console.error('Grading error response:', gradingError);
+          gradingErrorOccurred = true;
+        } else {
+          finalGradingData = gradingData;
+          setGradingResult(gradingData);
+        }
+      } catch (err) {
+        console.error('Grading exception:', err);
+        gradingErrorOccurred = true;
+      }
+
+      // 2. Insert Submission (with grading details if available)
+      // We do NOT use .select() here to avoid RLS issues with anonymous users not being able to read their own rows immediately
+      const { error: insertError } = await supabase
         .from('assessment_responses')
         .insert({
           assessment_id: assessment.id,
           user_id: user?.id || null,
           student_name: studentName.trim() || 'Anonymous',
-          answers: answerPayload
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Now get AI grading
-      setGrading(true);
-      const { data: gradingData, error: gradingError } = await supabase.functions.invoke('grade-assessment', {
-        body: {
-          questions: assessment.questions,
           answers: answerPayload,
-          totalMarks: assessment.total_marks,
-          assessmentType: assessment.assessment_type,
-          curriculum: assessment.curriculum
-        }
-      });
+          score: finalGradingData?.score || null,
+          grading_details: finalGradingData || {}
+        });
 
-      if (gradingError) {
-        console.error('Grading error:', gradingError);
+      if (insertError) throw insertError;
+
+      if (gradingErrorOccurred) {
         toast({
           title: "Grading Issue",
           description: "Your answers were saved, but AI grading is temporarily unavailable.",
           variant: "default"
         });
       } else {
-        setGradingResult(gradingData);
-        // Save grading details to database
-        if (data?.id) {
-          await supabase.from('assessment_responses').update({
-            score: gradingData.score,
-            grading_details: gradingData
-          }).eq('id', data.id);
-        }
-      }
-
-      setSubmitted(true);
-      setGrading(false);
-
-      if (!gradingError) {
         toast({
           title: "Submitted Successfully!",
           description: "Your responses have been recorded and graded"
         });
       }
+
+      setSubmitted(true);
+      setGrading(false);
     } catch (error) {
       console.error('Submission error:', error);
       toast({
@@ -161,8 +167,9 @@ const PublicAssessment: React.FC = () => {
         variant: "destructive"
       });
       setGrading(false);
-    } finally {
       setSubmitting(false);
+    } finally {
+      // Keep submitting state true if successful to prevent flicker, but verify logic
     }
   };
 
